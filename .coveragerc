@@ -1,0 +1,6 @@
+[run]
+omit =
+    /usr/*
+    /opt/*
+    ./tests/*
+    ./venv/*
