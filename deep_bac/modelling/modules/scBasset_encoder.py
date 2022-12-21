@@ -18,6 +18,7 @@ class scBassetEncoder(nn.Module):
     ):
         super().__init__()
 
+        seq_depth = 7
         self.stem = ConvLayer(
             in_channels=input_dim,
             out_channels=n_filters_init,
@@ -49,9 +50,10 @@ class scBassetEncoder(nn.Module):
             kernel_size=1,
             dropout=dropout,
             batch_norm=batch_norm,
+            pool_size=2,
         )
         self.bottleneck = DenseLayer(
-            in_features=n_filters_pre_bottleneck,
+            in_features=n_filters_pre_bottleneck * seq_depth,
             out_features=n_bottleneck_layer,
             use_bias=True,
             batch_norm=False,
@@ -61,6 +63,9 @@ class scBassetEncoder(nn.Module):
 
     def forward(self, x: torch.Tensor):
         x = self.stem(x)
+        x = self.tower(x)
         x = self.pre_bottleneck(x)
+        # flatten the input
+        x = x.view(x.shape[0], -1)
         x = self.bottleneck(x)
         return x
