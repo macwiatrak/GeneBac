@@ -23,6 +23,8 @@ class scBassetEncoder(nn.Module):
             out_channels=n_filters_init,
             kernel_size=17,
             pool_size=3,
+            dropout=dropout,
+            batch_norm=batch_norm,
         )
 
         tower_layers = []
@@ -34,6 +36,8 @@ class scBassetEncoder(nn.Module):
                     out_channels=int(curr_n_filters * filters_mult),
                     kernel_size=5,
                     pool_size=2,
+                    dropout=dropout,
+                    batch_norm=batch_norm,
                 )
             )
             curr_n_filters = int(curr_n_filters*filters_mult)
@@ -43,6 +47,8 @@ class scBassetEncoder(nn.Module):
             in_channels=curr_n_filters,
             out_channels=n_filters_pre_bottleneck,
             kernel_size=1,
+            dropout=dropout,
+            batch_norm=batch_norm,
         )
         self.bottleneck = DenseLayer(
             in_features=n_filters_pre_bottleneck,
