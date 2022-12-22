@@ -1,5 +1,6 @@
 from typing import Callable
 
+import numpy as np
 import torch
 from torch import nn
 
@@ -58,3 +59,33 @@ class DenseLayer(nn.Module):
         x = self.dropout(x)
         x = self.activation_fn(x)
         return x
+
+
+def _round(x):
+    return int(np.round(x))
+
+
+def make_conv_tower(
+        n_repeat_blocks_tower: int,
+        in_channels: int,
+        filters_mult: float,
+        kernel_size: int,
+        pool_size: int,
+        dropout: float,
+        batch_norm: bool,
+) -> nn.Sequential:
+    tower_layers = []
+    curr_n_filters = in_channels
+    for i in range(n_repeat_blocks_tower):
+        tower_layers.append(
+            ConvLayer(
+                in_channels=_round(curr_n_filters),
+                out_channels=_round(curr_n_filters * filters_mult),
+                kernel_size=kernel_size,
+                pool_size=pool_size,
+                dropout=dropout,
+                batch_norm=batch_norm,
+            )
+        )
+        curr_n_filters *= filters_mult
+    return nn.Sequential(*tower_layers)

@@ -14,7 +14,7 @@ def test_scBasset_encoder():
     n_bottleneck_layer = 32
 
     x = torch.rand(batch_size, in_channels, seq_length)
-    scBasset_encoder = scBassetEncoder(
+    model = scBassetEncoder(
         input_dim=in_channels,
         n_filters_init=n_filters_init,
         n_repeat_blocks_tower=n_repeat_blocks_tower,
@@ -23,5 +23,5 @@ def test_scBasset_encoder():
         n_bottleneck_layer=n_bottleneck_layer,
         batch_norm=True,
     )
-    out = scBasset_encoder(x)
+    out = model(x)
     assert out.shape == (batch_size, n_bottleneck_layer)

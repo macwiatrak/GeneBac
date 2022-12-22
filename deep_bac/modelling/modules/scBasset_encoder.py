@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from deep_bac.modelling.modules.layers import ConvLayer, DenseLayer
+from deep_bac.modelling.modules.layers import ConvLayer, DenseLayer, _round
 
 
 class scBassetEncoder(nn.Module):
@@ -34,14 +34,14 @@ class scBassetEncoder(nn.Module):
             tower_layers.append(
                 ConvLayer(
                     in_channels=curr_n_filters,
-                    out_channels=int(curr_n_filters * filters_mult),
+                    out_channels=_round(curr_n_filters * filters_mult),
                     kernel_size=5,
                     pool_size=2,
                     dropout=dropout,
                     batch_norm=batch_norm,
                 )
             )
-            curr_n_filters = int(curr_n_filters*filters_mult)
+            curr_n_filters = _round(curr_n_filters * filters_mult)
         self.tower = nn.Sequential(*tower_layers)
 
         self.pre_bottleneck = ConvLayer(
