@@ -20,7 +20,7 @@ class StochasticShift(nn.Module):
         shifts = torch.randint(
             low=-self.shift_max,
             high=self.shift_max + 1,
-            size=seq_1hot.shape[0],  # first dim is the batch dim
+            size=(seq_1hot.shape[0], ),  # first dim is the batch dim
         )
         return torch.stack([
             shift_seq(seq, shift, pad=self.pad) for seq, shift in zip(seq_1hot, shifts)
@@ -38,22 +38,22 @@ def shift_seq(
     shift: signed shift value (tf.int32 or int)
     pad_value: value to fill the padding (primitive or scalar tf.Tensor)
     """
-    if len(seq.shape) != 3:
-        raise ValueError("input sequence should be rank 3")
+    # if len(seq.shape) != 3:
+    #     raise ValueError("input sequence should be rank 3")
 
     if shift == 0:
         return seq
 
-    pad = pad * torch.ones_like(seq[:, 0: shift.abs(), :])
+    pad = pad * torch.ones_like((seq[:, :shift.abs()]))
 
     def _shift_right(_seq):
         # shift is positive
-        sliced_seq = _seq[:, :-shift:, :]
+        sliced_seq = _seq[:, :-shift]
         return torch.cat([pad, sliced_seq], axis=1)
 
     def _shift_left(_seq):
         # shift is negative
-        sliced_seq = _seq[:, -shift:, :]
+        sliced_seq = _seq[:, -shift:]
         return torch.cat([sliced_seq, pad], axis=1)
 
     if shift > 0:
