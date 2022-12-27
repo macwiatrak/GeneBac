@@ -85,3 +85,7 @@ class StochasticReverseComplement(nn.Module):
         rc_seq = torch.flip(seq, dims=[1, 2])
         is_rc = probs < self.prob
         return torch.where(is_rc, rc_seq, seq), is_rc
+
+
+def count_parameters(model: nn.Module) -> int:
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
