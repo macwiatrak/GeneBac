@@ -18,7 +18,6 @@ class BacterialGenomeDataset(Dataset):
             selected_genes: List = None,
             pad_value: float = 0.25,
     ):
-        # TODO: preprocess the bac_genes_df_file_path
         self.genes_df = pd.read_parquet(bac_genes_df_file_path)
         # get unique ids
         self.unique_ids = list(sorted(self.genes_df.index.levels[0]))
