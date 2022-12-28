@@ -21,8 +21,11 @@ class BacterialGenomeDataset(Dataset):
     ):
         # TODO: preprocess the bac_genes_df_file_path
         self.genes_df = pd.read_parquet(bac_genes_df_file_path)
-        # TODO: preprocess the phenotypes_df
-        self.phenotype_df = pd.read_csv(phenotype_dataframe_file_path) if phenotype_dataframe_file_path else None
+
+        self.id_to_labels = None
+        if phenotype_dataframe_file_path is not None:
+            self.phenotypes_df = pd.read_parquet(phenotype_dataframe_file_path)
+            self.id_to_labels = dict(zip(self.phenotypes_df['UNIQUEID'], self.phenotypes_df['LOG2MIC']))
 
         self.reference_gene_seqs_dict = reference_gene_seqs_dict
         self.max_gene_length = max_gene_length
@@ -49,8 +52,8 @@ class BacterialGenomeDataset(Dataset):
         variants_in_gene = torch.tensor(variants_in_gene)
 
         labels = None
-        if self.phenotype_df is not None:
-            labels = torch.tensor(self.phenotype_df.iloc[idx]['LOG2MIC'], dtype=torch.long)
+        if self.id_to_labels is not None:
+            labels = torch.tensor(self.id_to_labels[self.genes_df.iloc[idx]['UNIQUEID']], dtype=torch.float32)
 
         return BacGenesInputSample(
             genes_tensor=genes_tensor,
