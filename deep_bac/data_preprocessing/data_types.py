@@ -11,4 +11,4 @@ class BacGenesInputSample:
     genes_tensor: torch.Tensor
     variants_in_gene: Optional[torch.Tensor] = None
     labels: Optional[torch.Tensor] = None
-    sequence_id: Optional[str] = None
+    unique_id: Optional[str] = None

@@ -1,6 +1,5 @@
 from typing import Dict, List
 
-import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
@@ -21,6 +20,8 @@ class BacterialGenomeDataset(Dataset):
     ):
         # TODO: preprocess the bac_genes_df_file_path
         self.genes_df = pd.read_parquet(bac_genes_df_file_path)
+        # get unique ids
+        self.unique_ids = list(sorted(self.genes_df.index.levels[0]))
 
         self.id_to_labels = None
         if phenotype_dataframe_file_path is not None:
@@ -35,12 +36,16 @@ class BacterialGenomeDataset(Dataset):
         self.gene_to_id = {gene: i for i, gene in enumerate(reference_gene_seqs_dict.keys()) if gene in selected_genes}
 
     def __getitem__(self, idx):
-        genes = self.genes_df.iloc[idx].Gene
+        unq_id = self.unique_ids[idx]
+        unq_id_subset = self.genes_df.df.xs(unq_id, level='UNIQUEID')
+        unq_id_genes = unq_id_subset['gene'].tolist()
+
         genes_tensor = []
         variants_in_gene = []
         for gene in self.gene_to_id.keys():
-            if gene in genes:
-                seq = self.genes_df.iloc[idx][gene]
+            if gene in unq_id_genes['gene']:
+                idx = unq_id_genes.index(gene)
+                seq = unq_id_subset.iloc[idx]['prom_gene_seq_w_variants']
                 variants_in_gene.append(1)
             else:
                 seq = self.reference_gene_seqs_dict[gene]
@@ -59,11 +64,11 @@ class BacterialGenomeDataset(Dataset):
             genes_tensor=genes_tensor,
             variants_in_gene=variants_in_gene,
             labels=labels if labels else None,
-            sequence_id=self.genes_df.iloc[idx]['UNIQUEID'],
+            unique_id=unq_id,
         )
 
     def __len__(self):
-        return len(self.genes_df)
+        return len(self.unique_ids)
 
 
 def seq_to_one_hot(seq: str) -> torch.Tensor:
