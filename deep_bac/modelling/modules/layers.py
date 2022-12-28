@@ -1,8 +1,12 @@
+import math
 from typing import Callable
 
 import numpy as np
 import torch
+
+from einops.layers.torch import Rearrange
 from torch import nn
+import torch.nn.functional as F
 
 
 class ConvLayer(nn.Module):
@@ -13,7 +17,7 @@ class ConvLayer(nn.Module):
             kernel_size: int,
             pool_size: int = None,
             batch_norm: bool = True,
-            dropout: float = 0.2,
+            dropout: float = 0.,
             activation_fn: Callable = nn.GELU()
     ):
         super().__init__()
@@ -89,3 +93,49 @@ def make_conv_tower(
         )
         curr_n_filters *= filters_mult
     return nn.Sequential(*tower_layers)
+
+
+class Residual(nn.Module):
+    def __init__(self, fn):
+        super().__init__()
+        self.fn = fn
+
+    def forward(self, x, **kwargs):
+        return self.fn(x, **kwargs) + x
+
+
+class AttentionPool(nn.Module):
+    def __init__(self, dim: int, pool_size: int = 2):
+        super().__init__()
+        self.pool_size = pool_size
+        self.pool_fn = Rearrange('b d (n p) -> b d n p', p = pool_size)
+        self.to_attn_logits = nn.Conv2d(dim, dim, 1, bias = False)
+
+    def forward(self, x: torch.Tensor):
+        b, _, n = x.shape
+        remainder = n % self.pool_size
+        needs_padding = remainder > 0
+
+        if needs_padding:
+            x = F.pad(x, (0, remainder), value = 0)
+            mask = torch.zeros((b, 1, n), dtype = torch.bool, device = x.device)
+            mask = F.pad(mask, (0, remainder), value = True)
+
+        x = self.pool_fn(x)
+        logits = self.to_attn_logits(x)
+
+        if needs_padding:
+            mask_value = -torch.finfo(logits.dtype).max
+            logits = logits.masked_fill(self.pool_fn(mask), mask_value)
+
+        attn = logits.softmax(dim = -1)
+
+        return (x * attn).sum(dim = -1)
+
+
+def exponential_linspace_int(start: int, end: int, num: int, divisible_by: int = 1):
+    def _round(x):
+        return int(round(x / divisible_by) * divisible_by)
+
+    base = math.exp(math.log(end / start) / (num - 1))
+    return [_round(start * base**i) for i in range(num)]
