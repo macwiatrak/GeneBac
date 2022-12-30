@@ -107,3 +107,41 @@ def get_gene_data_dict(ref_genome: str, genome_assembly: pd.DataFrame, prom_seq_
     )
 
     return convert_gene_data_df_to_dict(gene_data_df)
+
+
+def shift_seq(
+        seq: torch.Tensor,
+        shift: int,
+        pad: float = 0.
+):
+    """Shift a sequence left or right by shift_amount.
+    adapted from https://github.com/calico/scBasset/blob/main/scbasset/basenji_utils.py
+    Args:
+    seq: [batch_size, seq_length, seq_depth] sequence
+    shift: signed shift value (torch.tensor)
+    pad: value to fill the padding (float)
+    """
+
+    # if no shift return the sequence
+    if shift == 0:
+        return seq
+
+    # create the padding
+    pad = pad * torch.ones_like((seq[:, :abs(shift)]))
+
+    def _shift_right(_seq):
+        # shift is positive
+        sliced_seq = _seq[:, :-shift]
+        # cat to the left along the sequence axis
+        return torch.cat([pad, sliced_seq], axis=1)
+
+    def _shift_left(_seq):
+        # shift is negative
+        sliced_seq = _seq[:, -shift:]
+        # cat to the right along the sequence axis
+        return torch.cat([sliced_seq, pad], axis=1)
+
+    if shift > 0:  # if shift is positive shift_right
+        return _shift_right(seq)
+    # if shift is negative shift_left
+    return _shift_left(seq)
