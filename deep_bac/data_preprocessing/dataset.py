@@ -1,9 +1,12 @@
+import json
+import os
 import random
 from typing import Dict, List
 
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
+from tqdm import tqdm
 
 from deep_bac.data_preprocessing.data_types import BacGenesInputSample
 from deep_bac.data_preprocessing.utils import shift_seq, seq_to_one_hot, pad_one_hot_seq
@@ -45,7 +48,6 @@ class BacterialGenomeDataset(Dataset):
             'gene': list(self.gene_to_id.keys()),
             'seq': [reference_gene_seqs_dict[gene] for gene in self.gene_to_id.keys()],
         })
-        print("Dataset initialized")
 
     def __getitem__(self, idx):
         unq_id = self.unique_ids[idx]
@@ -95,3 +97,30 @@ class BacterialGenomeDataset(Dataset):
 
     def __len__(self):
         return len(self.unique_ids)
+
+
+def main():
+    input_dir = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
+    with open(os.path.join(input_dir, 'reference_gene_seqs.json'), 'r') as f:
+        reference_gene_seqs_dict = json.load(f)
+
+    gene_variance_df = pd.read_csv(
+        os.path.join(input_dir, 'unnormalised_variance_per_gene.csv'))
+    selected_genes = gene_variance_df['Gene'].tolist()[:1000]
+
+    max_gene_length = 2048
+    dataset = BacterialGenomeDataset(
+        bac_genes_df_file_path=os.path.join(input_dir, "processed-genome-per-strain", "agg_variants.parquet"),
+        reference_gene_seqs_dict=reference_gene_seqs_dict,
+        phenotype_dataframe_file_path=os.path.join(input_dir, "phenotype_labels.parquet"),
+        max_gene_length=max_gene_length,
+        selected_genes=selected_genes,
+    )
+
+    for item in tqdm(range(dataset.__len__())):
+        _ = dataset.__getitem__(item)
+    print("Done!")
+
+
+if __name__ == '__main__':
+    main()
