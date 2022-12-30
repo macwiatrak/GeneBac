@@ -17,7 +17,7 @@ def test_dataset():
         bac_genes_df_file_path="test_data/sample_agg_variants.parquet",
         reference_gene_seqs_dict={gene: "atcgt" * 100 for gene in selected_genes},
         phenotype_dataframe_file_path="test_data/phenotype_labels.parquet",
-        max_gene_length=1000,
+        max_gene_length=max_gene_length,
         selected_genes=selected_genes,
     )
     data = [dataset[i] for i in range(dataset.__len__())]
