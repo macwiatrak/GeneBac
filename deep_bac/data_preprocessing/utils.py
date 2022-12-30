@@ -117,7 +117,7 @@ def shift_seq(
     """Shift a sequence left or right by shift_amount.
     adapted from https://github.com/calico/scBasset/blob/main/scbasset/basenji_utils.py
     Args:
-    seq: [batch_size, seq_length, seq_depth] sequence
+    seq: [batch_size, seq_depth, seq_length] sequence
     shift: signed shift value (torch.tensor)
     pad: value to fill the padding (float)
     """
@@ -127,19 +127,19 @@ def shift_seq(
         return seq
 
     # create the padding
-    pad = pad * torch.ones_like((seq[:, :abs(shift)]))
+    pad = pad * torch.ones_like((seq[:abs(shift), :]))
 
     def _shift_right(_seq):
         # shift is positive
-        sliced_seq = _seq[:, :-shift]
+        sliced_seq = _seq[:-shift, :]
         # cat to the left along the sequence axis
-        return torch.cat([pad, sliced_seq], axis=1)
+        return torch.cat([pad, sliced_seq], axis=0)
 
     def _shift_left(_seq):
         # shift is negative
-        sliced_seq = _seq[:, -shift:]
+        sliced_seq = _seq[-shift:, :]
         # cat to the right along the sequence axis
-        return torch.cat([sliced_seq, pad], axis=1)
+        return torch.cat([sliced_seq, pad], axis=0)
 
     if shift > 0:  # if shift is positive shift_right
         return _shift_right(seq)

@@ -18,29 +18,29 @@ def test_stochastic_shift():
 
 def test_shift_seq():
     seq_length = 128
-    seq = torch.ones(4, seq_length)
+    seq = torch.ones(seq_length, 4)
     shift = 3
     out = shift_seq(seq, shift, pad=0.)
-    assert out.shape == (4, seq_length)
-    assert out[:, :shift].sum() == 0.
+    assert out.shape == (seq_length, 4)
+    assert out[:shift, :].sum() == 0.
 
     seq_length = 128
-    seq = torch.ones(4, seq_length)
+    seq = torch.ones(seq_length, 4)
     shift = 2
     out = shift_seq(seq, shift, pad=0.)
-    assert out.shape == (4, seq_length)
-    assert out[:, :shift].sum() == 0.
+    assert out.shape == (seq_length, 4)
+    assert out[:shift, :].sum() == 0.
 
     seq_length = 128
-    seq = torch.ones(4, seq_length)
+    seq = torch.ones(seq_length, 4)
     shift = 0
     out = shift_seq(seq, shift, pad=0.)
-    assert out.shape == (4, seq_length)
-    assert out[:, :shift].sum() == 0.
+    assert out.shape == (seq_length, 4)
+    assert out[:shift, :].sum() == 0.
 
     seq_length = 128
-    seq = torch.ones(4, seq_length)
+    seq = torch.ones(seq_length, 4)
     shift = -3
     out = shift_seq(seq, shift, pad=0.)
-    assert out.shape == (4, seq_length)
-    assert out[:, shift:].sum() == 0.
+    assert out.shape == (seq_length, 4)
+    assert out[shift:, :].sum() == 0.

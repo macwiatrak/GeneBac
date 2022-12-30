@@ -25,10 +25,10 @@ class BacterialGenomeDataset(Dataset):
         # get unique ids
         self.unique_ids = list(sorted(self.genes_df.index.levels[0]))
 
-        self.id_to_labels = None
+        self.id_to_labels_df = None
         if phenotype_dataframe_file_path is not None:
-            self.phenotypes_df = pd.read_parquet(phenotype_dataframe_file_path)
-            self.id_to_labels = dict(zip(self.phenotypes_df['UNIQUEID'], self.phenotypes_df['LOG2MIC']))
+            # keep it a sa dataframe, not dict due to pytorch memory leakage issue
+            self.id_to_labels_df = pd.read_parquet(phenotype_dataframe_file_path, columns=['LOG2MIC_LABELS'])
 
         self.max_gene_length = max_gene_length
         self.shift_max = shift_max
@@ -45,16 +45,17 @@ class BacterialGenomeDataset(Dataset):
             'gene': list(self.gene_to_id.keys()),
             'seq': [reference_gene_seqs_dict[gene] for gene in self.gene_to_id.keys()],
         })
+        print("Dataset initialized")
 
     def __getitem__(self, idx):
         unq_id = self.unique_ids[idx]
-        unq_id_subset = self.genes_df.df.xs(unq_id, level='UNIQUEID')
+        unq_id_subset = self.genes_df.xs(unq_id, level='UNIQUEID')
         unq_id_genes = unq_id_subset['gene'].tolist()
 
         genes_tensor = []
         variants_in_gene = []
         for idx, gene in enumerate(self.gene_to_id.keys()):
-            if gene in unq_id_genes['gene']:
+            if gene in unq_id_genes:
                 idx = unq_id_genes.index(gene)
                 seq = unq_id_subset.iloc[idx]['prom_gene_seq_w_variants']
                 variants_in_gene.append(1)
@@ -69,23 +70,26 @@ class BacterialGenomeDataset(Dataset):
                 # because of symmetricity in the one hot encoding of ACGT
                 one_hot_seq = torch.flip(one_hot_seq, [0, 1])
             # randomly shift the DNA sequence
-            random_shift = random.randint(-self.shift_max, self.shift_max + 1)  # get random shift
+            random_shift = random.randint(-self.shift_max, self.shift_max)  # get random shift
             one_hot_seq = shift_seq(one_hot_seq, random_shift, self.pad_value)  # shift seq
             # pad one hot seq
             padded_one_hot_seq = pad_one_hot_seq(one_hot_seq, self.max_gene_length, self.pad_value)
-            genes_tensor.append(padded_one_hot_seq)
+            # transpose the one hot seq to make it channels first
+            genes_tensor.append(padded_one_hot_seq.T)
 
         genes_tensor = torch.stack(genes_tensor)
-        variants_in_gene = torch.tensor(variants_in_gene)
+        variants_in_gene = torch.tensor(variants_in_gene, dtype=torch.long)
 
         labels = None
-        if self.id_to_labels is not None:
-            labels = torch.tensor(self.id_to_labels[self.genes_df.iloc[idx]['UNIQUEID']], dtype=torch.float32)
+        if self.id_to_labels_df is not None:
+            labels = torch.tensor(
+                self.id_to_labels_df.loc[unq_id]['LOG2MIC_LABELS'],
+                dtype=torch.float32)
 
         return BacGenesInputSample(
             genes_tensor=genes_tensor,
             variants_in_gene=variants_in_gene,
-            labels=labels if labels else None,
+            labels=labels,
             unique_id=unq_id,
         )
 
