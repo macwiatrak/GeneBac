@@ -145,3 +145,16 @@ def shift_seq(
         return _shift_right(seq)
     # if shift is negative shift_left
     return _shift_left(seq)
+
+
+def seq_to_one_hot(seq: str) -> torch.Tensor:
+    seq_chrs = torch.tensor(list(map(ord, list(seq))), dtype=torch.long)
+    return ONE_HOT_EMBED[seq_chrs]
+
+
+def pad_one_hot_seq(one_hot_seq: torch.Tensor, max_length: int, pad_value: float = 0.25) -> torch.Tensor:
+    seq_length, n_nucleotides = one_hot_seq.shape
+    if seq_length == max_length:
+        return one_hot_seq
+    to_pad = max_length - seq_length
+    return torch.cat([one_hot_seq, torch.full((to_pad, n_nucleotides), pad_value)], dim=0)

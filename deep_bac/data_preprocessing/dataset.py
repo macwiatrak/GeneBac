@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import Dataset
 
 from deep_bac.data_preprocessing.data_types import BacGenesInputSample
-from deep_bac.data_preprocessing.utils import ONE_HOT_EMBED, shift_seq
+from deep_bac.data_preprocessing.utils import shift_seq, seq_to_one_hot, pad_one_hot_seq
 
 
 class BacterialGenomeDataset(Dataset):
@@ -38,7 +38,9 @@ class BacterialGenomeDataset(Dataset):
         self.selected_genes = selected_genes if selected_genes is not None else list(reference_gene_seqs_dict.keys())
         self.gene_to_id = {gene: i for i, gene in enumerate(reference_gene_seqs_dict.keys()) if gene in selected_genes}
 
-        # convert reference gene seqs to a dataframe to avoid memory leak as it's a big dataframe
+        # convert reference gene seqs to a dataframe to avoid memory leak
+        # due to a pytorch issue with native python data structures
+        # as it's a big dictionary
         self.reference_gene_seqs_df = pd.DataFrame({
             'gene': list(self.gene_to_id.keys()),
             'seq': [reference_gene_seqs_dict[gene] for gene in self.gene_to_id.keys()],
@@ -89,16 +91,3 @@ class BacterialGenomeDataset(Dataset):
 
     def __len__(self):
         return len(self.unique_ids)
-
-
-def seq_to_one_hot(seq: str) -> torch.Tensor:
-    seq_chrs = torch.tensor(list(map(ord, list(seq))), dtype=torch.long)
-    return ONE_HOT_EMBED[seq_chrs]
-
-
-def pad_one_hot_seq(one_hot_seq: torch.Tensor, max_length: int, pad_value: float = 0.25) -> torch.Tensor:
-    seq_length, n_nucleotides = one_hot_seq.shape
-    if seq_length == max_length:
-        return one_hot_seq
-    to_pad = max_length - seq_length
-    return torch.cat([one_hot_seq, torch.full((to_pad, n_nucleotides), pad_value)], dim=0)
