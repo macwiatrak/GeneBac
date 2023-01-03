@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 from einops.layers.torch import Rearrange
 from torch import nn
 
@@ -8,20 +9,18 @@ from deep_bac.modelling.modules.layers import ConvLayer, DenseLayer
 class ConvTransformerEncoder(nn.Module):
     def __init__(
             self,
-            seq_len: int = 2048,
-            input_channels: int = 4,
             n_bottleneck_layer: int = 128,
-            batch_norm: bool = True,
-            dropout: float = 0.,
             n_filters: int = 256,
             kernel_size: int = 24,
             pool_size: int = 8,
+            batch_norm: bool = True,
+            dropout: float = 0.,
             n_transformer_layers: int = 1,
             n_transformer_heads: int = 8,
     ):
         super().__init__()
         self.conv_layer = ConvLayer(
-            in_channels=input_channels,
+            in_channels=4,
             out_channels=n_filters,
             kernel_size=kernel_size,
             pool_size=pool_size,
@@ -47,6 +46,7 @@ class ConvTransformerEncoder(nn.Module):
         x = self.conv_layer(x)
         x = self.rearrange_fn(x)
         x = self.transformer(x)
+        x = F.dropout(x)
         # concatenate the max and mean pooling
         x = torch.cat([x.max(dim=1)[0], x.mean(dim=1)], dim=1)
         x = self.dense_layer(x)

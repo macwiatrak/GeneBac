@@ -83,8 +83,8 @@ def main():
         pad_value=0.25,
         reverse_complement_prob=0.5,
         shuffle=True,
-        num_workers=8,
-        pin_memory=True,
+        num_workers=os.cpu_count(),
+        pin_memory=False,
     )
 
     for _ in tqdm(dl):
