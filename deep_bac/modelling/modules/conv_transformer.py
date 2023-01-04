@@ -19,6 +19,8 @@ class ConvTransformerEncoder(nn.Module):
             n_transformer_heads: int = 8,
     ):
         super().__init__()
+        self.n_botlleneck_layer = n_bottleneck_layer
+
         self.conv_layer = ConvLayer(
             in_channels=4,
             out_channels=n_filters,
@@ -43,11 +45,15 @@ class ConvTransformerEncoder(nn.Module):
         )
 
     def forward(self, x: torch.Tensor):
+        # TODO: Fix reshaping as input will be [batch_size, n_genes, n_channels, seq_length]
+        batch_size, n_genes, n_channels, seq_length = x.shape
+        x = x.view(batch_size * n_genes, n_channels, seq_length)
         x = self.conv_layer(x)
         x = self.rearrange_fn(x)
         x = self.transformer(x)
         x = F.dropout(x)
         # concatenate the max and mean pooling
-        x = torch.cat([x.max(dim=1)[0], x.mean(dim=1)], dim=1)
+        x = torch.cat([x.max(dim=-1)[0], x.mean(dim=-1)], dim=-1)
         x = self.dense_layer(x)
+        x = x.view(batch_size, n_genes, self.n_botlleneck_layer)
         return x
