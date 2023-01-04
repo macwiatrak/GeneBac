@@ -20,6 +20,7 @@ def test_dataset():
         phenotype_dataframe_file_path="../test_data/phenotype_labels_with_binary_labels.parquet",
         max_gene_length=max_gene_length,
         selected_genes=selected_genes,
+        regression=True,
     )
     data = [dataset[i] for i in range(dataset.__len__())]
     assert len(data) == 6

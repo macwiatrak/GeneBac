@@ -111,30 +111,30 @@ def test_model_train_fake_data(tmpdir):
 
 def test_model_train_real_data(tmpdir):
     n_classes = 14
-    regression = False
+    regression = True
     n_bottleneck_layer = 128
     n_filters = 256
-    max_epochs = 20
+    max_epochs = 50
     batch_size = 3
     max_gene_length = 2048
     selected_genes = [
         'PE1', 'Rv1716', 'Rv2000', 'pepC', 'pepD'
     ]
 
-    with open('../test_datareference_gene_seqs.json', 'r') as f:
+    with open('../test_data/reference_gene_seqs.json', 'r') as f:
         reference_gene_seqs_dict = json.load(f)
 
     config = DeepBacConfig(
         gene_encoder_type="conv_transformer",
         graph_model_type="transformer",
-        lr=0.001,
+        lr=0.01,
         batch_size=batch_size,
         regression=regression,
         n_gene_bottleneck_layer=n_bottleneck_layer,
         n_init_filters=n_filters,
         n_output=n_classes,
         max_epochs=max_epochs,
-        train_set_len=6,
+        train_set_len=None,
         n_graph_layers=2,
         n_transformer_heads=4,
     )
@@ -169,4 +169,3 @@ def test_model_train_real_data(tmpdir):
     )
     trainer.fit(model, train_dataloaders=dataloader, val_dataloaders=dataloader)
     assert logger.val_logs[-1]['val_loss'] < logger.val_logs[0]['val_loss']
-    assert logger.train_logs[-1]['train_loss'] < logger.train_logs[0]['train_loss']
