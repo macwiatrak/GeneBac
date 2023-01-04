@@ -13,6 +13,7 @@ from deep_bac.utils import get_config
 def run(
         config: DeepBacConfig,
         input_df_file_path: str,
+        output_dir: str,
         reference_gene_seqs_dict_path: str,
         phenotype_df_file_path: str,
         train_val_test_split_indices_file_path: str,
@@ -39,7 +40,7 @@ def run(
         num_workers=num_workers,
     )
     config.train_set_len = len(data.train_dataloader) * config.batch_size
-    trainer = get_trainer(config)
+    trainer = get_trainer(config, output_dir)
     model = DeepBac(config)
 
     results = None
@@ -59,6 +60,7 @@ def main(args):
     _ = run(
         config=config,
         input_df_file_path=args.input_df_file_path,
+        output_dir=args.output_dir,
         reference_gene_seqs_dict_path=args.reference_gene_seqs_dict_path,
         phenotype_df_file_path=args.phenotype_df_file_path,
         train_val_test_split_indices_file_path=args.train_val_test_split_indices_file_path,

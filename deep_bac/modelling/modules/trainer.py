@@ -4,9 +4,10 @@ from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 from deep_bac.modelling.data_types import DeepBacConfig
 
 
-def get_trainer(config: DeepBacConfig) -> Trainer:
+def get_trainer(config: DeepBacConfig, output_dir: str) -> Trainer:
     """Get the trainer"""
     return Trainer(
+        default_root_dir=output_dir,
         gpus=-1,
         max_epochs=config.max_epochs,
         gradient_clip_val=config.gradient_clip_val,
