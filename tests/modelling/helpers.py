@@ -23,8 +23,12 @@ class TestBacterialGenomeDataset(Dataset):
         self.data = F.one_hot(
             torch.randint(0, 4, (n_samples, n_genes, seq_length)),
             num_classes=4).transpose(-2, -1).type(torch.float32)
-        self.labels = torch.log(torch.randn(n_samples, n_classes)) if regression else \
-            torch.empty(n_samples, n_classes).random_(2)
+
+        if regression:
+            self.labels = torch.log2(
+                torch.normal(torch.zeros(n_samples, n_classes), 1.5 * torch.ones(n_samples, n_classes)).abs())
+        else:
+            self.labels = torch.empty(n_samples, n_classes).random_(2)
 
     def __len__(self):
         return len(self.data)

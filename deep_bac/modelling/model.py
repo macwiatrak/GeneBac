@@ -19,8 +19,9 @@ class DeepBac(pl.LightningModule):
         self.gene_encoder = get_gene_encoder(config)
         self.graph_model = get_graph_model(config)
 
+        self.regression = config.regression
         # get loss depending on whether we predict LOG2MIC or binary MIC
-        self.loss_fn = nn.MSELoss(reduction="none") if config.regression else nn.BCEWithLogitsLoss(reduction="none")
+        self.loss_fn = nn.MSELoss(reduction="none") if self.regression else nn.BCEWithLogitsLoss(reduction="none")
 
     def forward(self, batch_genes_tensor: torch.Tensor) -> torch.Tensor:
         # encode each gene
@@ -63,8 +64,6 @@ class DeepBac(pl.LightningModule):
             agg_stats,
             prog_bar=True,
             logger=True,
-            on_step=False,
-            on_epoch=True,
             sync_dist=True,
         )
         return agg_stats
@@ -76,8 +75,6 @@ class DeepBac(pl.LightningModule):
         self.log(
             "val_loss",
             stats["loss"],
-            on_step=True,
-            on_epoch=True,
             prog_bar=True,
             logger=True,
         )

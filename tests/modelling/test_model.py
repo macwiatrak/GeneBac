@@ -4,6 +4,7 @@ import pytorch_lightning as pl
 from deep_bac.data_preprocessing.data_types import BatchBacGenesInputSample
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model import DeepBac
+from deep_bac.modelling.modules.utils import count_parameters
 from tests.modelling.helpers import get_test_dataloader, BasicLogger
 
 
@@ -62,7 +63,7 @@ def test_model_train(tmpdir):
     regression = False
     n_bottleneck_layer = 128
     n_filters = 256
-    max_epochs = 100
+    max_epochs = 20
     batch_size = 10
 
     config = DeepBacConfig(
@@ -76,6 +77,8 @@ def test_model_train(tmpdir):
         n_output=n_classes,
         max_epochs=max_epochs,
         train_set_len=n_samples,
+        n_graph_layers=2,
+        n_transformer_heads=4,
     )
 
     dataloader = get_test_dataloader(
@@ -87,12 +90,17 @@ def test_model_train(tmpdir):
     )
 
     model = DeepBac(config)
+    n_params = count_parameters(model)
+    print("Number of trainable model parameters: ", n_params)
 
+    logger = BasicLogger()
     trainer = pl.Trainer(
         default_root_dir=tmpdir,
         max_epochs=max_epochs,
         enable_checkpointing=True,
         gradient_clip_val=1.0,
-        logger=BasicLogger(),
+        logger=logger,
     )
     trainer.fit(model, train_dataloaders=dataloader, val_dataloaders=dataloader)
+    assert logger.val_logs[-1]['val_loss'] < logger.val_logs[0]['val_loss']
+    assert logger.train_logs[-1]['train_loss'] < logger.train_logs[0]['train_loss']
