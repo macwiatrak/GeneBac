@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import pandas as pd
 import torch
@@ -66,6 +66,84 @@ def get_dataloader(
         collate_fn=_collate_samples,
     )
     return dataloader
+
+
+def get_data(
+    input_df_file_path: str,
+    reference_gene_seqs_dict_path: str,
+    phenotype_df_file_path: str,
+    train_val_test_split_indices_file_path: str,
+    selected_genes_file_path: Optional[str] = None,
+    batch_size: int = 8,
+    max_gene_length: int = 2048,
+    shift_max: int = 3,
+    pad_value: float = 0.25,
+    reverse_complement_prob: float = 0.5,
+    num_workers: int = 8,
+):
+    with open(reference_gene_seqs_dict_path, 'r') as f:
+        reference_gene_seqs_dict = json.load(f)
+
+    if selected_genes_file_path is not None:
+        selected_genes = pd.read_csv(selected_genes_file_path)['Gene'].tolist()
+    else:
+        selected_genes = None
+
+    with open(train_val_test_split_indices_file_path, 'r') as f:
+        train_val_test_split_indices = json.load(f)
+    train_indices = train_val_test_split_indices['train']
+    val_indices = train_val_test_split_indices['val']
+    test_indices = train_val_test_split_indices['test']
+
+    train_dataloader = get_dataloader(
+        batch_size=batch_size,
+        indices=train_indices,
+        bac_genes_df_file_path=input_df_file_path,
+        reference_gene_seqs_dict=reference_gene_seqs_dict,
+        phenotype_dataframe_file_path=phenotype_df_file_path,
+        max_gene_length=max_gene_length,
+        selected_genes=selected_genes,
+        shift_max=shift_max,
+        pad_value=pad_value,
+        reverse_complement_prob=reverse_complement_prob,
+        shuffle=True,
+        num_workers=num_workers,
+        pin_memory=False,
+    )
+
+    val_dataloader = get_dataloader(
+        batch_size=batch_size,
+        indices=val_indices,
+        bac_genes_df_file_path=input_df_file_path,
+        reference_gene_seqs_dict=reference_gene_seqs_dict,
+        phenotype_dataframe_file_path=phenotype_df_file_path,
+        max_gene_length=max_gene_length,
+        selected_genes=selected_genes,
+        shift_max=shift_max,
+        pad_value=pad_value,
+        reverse_complement_prob=reverse_complement_prob,
+        shuffle=True,
+        num_workers=num_workers,
+        pin_memory=False,
+    )
+
+    test_dataloader = get_dataloader(
+        batch_size=batch_size,
+        indices=test_indices,
+        bac_genes_df_file_path=input_df_file_path,
+        reference_gene_seqs_dict=reference_gene_seqs_dict,
+        phenotype_dataframe_file_path=phenotype_df_file_path,
+        max_gene_length=max_gene_length,
+        selected_genes=selected_genes,
+        shift_max=shift_max,
+        pad_value=pad_value,
+        reverse_complement_prob=reverse_complement_prob,
+        shuffle=True,
+        num_workers=num_workers,
+        pin_memory=False,
+    )
+
+    return train_dataloader, val_dataloader, test_dataloader
 
 
 def main():

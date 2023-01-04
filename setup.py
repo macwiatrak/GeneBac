@@ -7,6 +7,7 @@ setup(
         "gene_set_discovery": ["py.typed", "**/*.json", "**/*.yaml"],
     },
     install_requires=[
+        "typed-argument-parser~=1.7.2"
         # "dataclasses~=0.6",
         # "dataclasses-json~=0.5.7",
         # "numpy~=1.23.4",
