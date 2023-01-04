@@ -55,7 +55,7 @@ class ConvTransformerEncoder(nn.Module):
         x = self.transformer(x)
         x = F.dropout(x)
         # concatenate the max and mean pooling
-        x = torch.cat([x.max(dim=-1)[0], x.mean(dim=-1)], dim=-1)
+        x = torch.cat([x.max(dim=1)[0], x.mean(dim=1)], dim=1)
         x = self.dense_layer(x)
         # reshape to out: (batch_size, n_genes, n_bottleneck_layer)
         out = x.view(batch_size, n_genes, self.n_botlleneck_layer)

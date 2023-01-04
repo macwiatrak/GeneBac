@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 
-class GraphTransformerModel(nn.Module):
+class GraphTransformer(nn.Module):
     def __init__(
             self,
             dim: int,

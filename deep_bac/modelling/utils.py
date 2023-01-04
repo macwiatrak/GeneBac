@@ -2,7 +2,7 @@ import torch
 
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
-from deep_bac.modelling.modules.graph_transformer import GraphTransformerModel
+from deep_bac.modelling.modules.graph_transformer import GraphTransformer
 
 
 def remove_ignore_index(loss: torch.Tensor, labels: torch.Tensor, ignore_index: int = -100) -> torch.Tensor:
@@ -26,7 +26,7 @@ def get_gene_encoder(config: DeepBacConfig):
 def get_graph_model(config: DeepBacConfig):
     """Get the graph model"""
     if config.graph_model_type == "transformer":
-        return GraphTransformerModel(
+        return GraphTransformer(
             dim=config.n_gene_bottleneck_layer,
             n_output=config.n_output,
             n_layers=config.n_graph_layers,
