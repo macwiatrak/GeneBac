@@ -13,11 +13,15 @@ from deep_bac.data_preprocessing.dataset import BacterialGenomeDataset
 
 def _collate_samples(data: List[BacGenesInputSample]) -> BatchBacGenesInputSample:
     genes_tensor = torch.stack([sample.genes_tensor for sample in data])
-    variants_in_gene = torch.stack([sample.variants_in_gene for sample in data])
+    variants_in_gene = [sample.variants_in_gene for sample in data]
+
+    if None not in variants_in_gene:
+        variants_in_gene = torch.stack(variants_in_gene)
 
     labels = [sample.labels for sample in data]
     if None not in labels:
-        labels = torch.stack([sample.labels for sample in data])
+        labels = torch.stack(labels)
+
     unique_ids = [sample.unique_id for sample in data]
     return BatchBacGenesInputSample(
         genes_tensor=genes_tensor,

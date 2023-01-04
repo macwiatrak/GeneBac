@@ -110,7 +110,7 @@ class DeepBac(pl.LightningModule):
     def configure_optimizers(self):
         opt = torch.optim.Adam(
             [p for p in self.parameters() if p.requires_grad],
-            lr=self.config.learning_rate,
+            lr=self.config.lr,
         )
         if (
                 self.config.train_set_len is None
@@ -131,7 +131,7 @@ class DeepBac(pl.LightningModule):
     def get_scheduler(self, optimizer: torch.optim.Optimizer):
         num_train_steps = (
                 int(self.config.train_set_len / self.config.batch_size)
-                * self.config.num_train_epochs
+                * self.config.max_epochs
         )
         num_warmup_steps = int(num_train_steps * self.config.warmup_proportion)
         scheduler = get_linear_schedule_with_warmup(
