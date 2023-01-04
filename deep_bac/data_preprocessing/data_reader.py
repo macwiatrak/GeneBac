@@ -82,7 +82,7 @@ def main():
         batch_size=32,
         bac_genes_df_file_path=os.path.join(input_dir, "processed-genome-per-strain", "agg_variants.parquet"),
         reference_gene_seqs_dict=reference_gene_seqs_dict,
-        phenotype_dataframe_file_path=os.path.join(input_dir, "phenotype_labels.parquet"),
+        phenotype_dataframe_file_path=os.path.join(input_dir, "phenotype_labels_with_binary_labels.parquet"),
         max_gene_length=max_gene_length,
         selected_genes=selected_genes,
         shift_max=3,
