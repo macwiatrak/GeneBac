@@ -55,7 +55,7 @@ def test_model_steps():
     assert out['loss'] > 0.
 
 
-def test_model_train(tmpdir):
+def test_model_train_fake_data(tmpdir):
     n_samples = 100
     n_genes = 5
     n_classes = 4
