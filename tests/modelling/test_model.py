@@ -1,6 +1,9 @@
+import json
+
 import torch
 import pytorch_lightning as pl
 
+from deep_bac.data_preprocessing.data_reader import get_dataloader
 from deep_bac.data_preprocessing.data_types import BatchBacGenesInputSample
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model import DeepBac
@@ -87,6 +90,69 @@ def test_model_train_fake_data(tmpdir):
         n_classes=n_classes,
         seq_length=seq_length,
         regression=regression,
+    )
+
+    model = DeepBac(config)
+    n_params = count_parameters(model)
+    print("Number of trainable model parameters: ", n_params)
+
+    logger = BasicLogger()
+    trainer = pl.Trainer(
+        default_root_dir=tmpdir,
+        max_epochs=max_epochs,
+        enable_checkpointing=True,
+        gradient_clip_val=1.0,
+        logger=logger,
+    )
+    trainer.fit(model, train_dataloaders=dataloader, val_dataloaders=dataloader)
+    assert logger.val_logs[-1]['val_loss'] < logger.val_logs[0]['val_loss']
+    assert logger.train_logs[-1]['train_loss'] < logger.train_logs[0]['train_loss']
+
+
+def test_model_train_real_data(tmpdir):
+    n_classes = 14
+    regression = False
+    n_bottleneck_layer = 128
+    n_filters = 256
+    max_epochs = 20
+    batch_size = 3
+    max_gene_length = 2048
+    selected_genes = [
+        'PE1', 'Rv1716', 'Rv2000', 'pepC', 'pepD'
+    ]
+
+    with open('../test_datareference_gene_seqs.json', 'r') as f:
+        reference_gene_seqs_dict = json.load(f)
+
+    config = DeepBacConfig(
+        gene_encoder_type="conv_transformer",
+        graph_model_type="transformer",
+        lr=0.001,
+        batch_size=batch_size,
+        regression=regression,
+        n_gene_bottleneck_layer=n_bottleneck_layer,
+        n_init_filters=n_filters,
+        n_output=n_classes,
+        max_epochs=max_epochs,
+        train_set_len=6,
+        n_graph_layers=2,
+        n_transformer_heads=4,
+    )
+
+    dataloader = get_dataloader(
+        batch_size=batch_size,
+        bac_genes_df_file_path="../test_data/sample_agg_variants.parquet",
+        reference_gene_seqs_dict=reference_gene_seqs_dict,
+        phenotype_dataframe_file_path="../test_data/phenotype_labels_with_binary_labels.parquet",
+        max_gene_length=max_gene_length,
+        selected_genes=selected_genes,
+        regression=regression,
+        shift_max=0,
+        pad_value=0.25,
+        reverse_complement_prob=0.0,
+        shuffle=False,
+        num_workers=0,
+        pin_memory=False,
     )
 
     model = DeepBac(config)

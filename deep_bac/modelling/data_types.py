@@ -16,7 +16,7 @@ class DeepBacConfig:
     n_init_filters: int = 256
     n_transformer_heads: int = 8
     n_graph_layers: int = 4
-    n_output: int = 3
+    n_output: int = 14  # nr of drugs in the cryptic dataset
     max_epochs: int = 100
     train_set_len: Optional[int] = None
     warmup_proportion: float = 0.1

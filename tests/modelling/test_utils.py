@@ -8,3 +8,8 @@ def test_remove_ignore_index():
     labels = torch.tensor([1, 2, 3, -100])
     loss = remove_ignore_index(loss, labels)
     assert torch.allclose(loss, torch.tensor([1.0, 2.0, 3.0]))
+
+    loss = torch.tensor([[1.0, 2.0, 3.0, 4.0], [1.0, 2.0, 3.0, 4.0]])
+    labels = torch.tensor([[1, 2, 3, -100], [1, -100, -100, 4]])
+    loss = remove_ignore_index(loss, labels)
+    assert torch.allclose(loss, torch.tensor([1.0, 2.0, 3.0, 1.0, 4.0]))
