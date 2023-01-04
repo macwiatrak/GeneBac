@@ -19,10 +19,13 @@ class DeepBac(pl.LightningModule):
         self.gene_encoder = get_gene_encoder(config)
         self.graph_model = get_graph_model(config)
 
+        # get loss depending on whether we predict LOG2MIC or binary MIC
         self.loss_fn = nn.MSELoss(reduction="none") if config.regression else nn.BCEWithLogitsLoss(reduction="none")
 
     def forward(self, batch_genes_tensor: torch.Tensor) -> torch.Tensor:
+        # encode each gene
         gene_encodings = self.gene_encoder(batch_genes_tensor)
+        # pass the genes through the graph encoder
         logits = self.graph_model(gene_encodings)
         return logits
 
