@@ -15,7 +15,7 @@ def test_dataset():
     reference_gene_seqs_dict = {gene: "atcgt" * 100 for gene in selected_genes}
 
     dataset = BacterialGenomeDataset(
-        unique_ids=[],
+        unique_ids=None,
         bac_genes_df_file_path="../test_data/sample_agg_variants.parquet",
         reference_gene_seqs_dict=reference_gene_seqs_dict,
         phenotype_dataframe_file_path="../test_data/phenotype_labels_with_binary_labels.parquet",
