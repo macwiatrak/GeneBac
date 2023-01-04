@@ -35,6 +35,7 @@ def get_dataloader(
     batch_size: int,
     bac_genes_df_file_path: str,
     reference_gene_seqs_dict: Dict[str, str],
+    unique_ids: List[str] = None,
     phenotype_dataframe_file_path: str = None,
     max_gene_length: int = 2048,
     selected_genes: List = None,
@@ -47,6 +48,7 @@ def get_dataloader(
     pin_memory: bool = True,
 ) -> DataLoader:
     dataset = BacterialGenomeDataset(
+        unique_ids=unique_ids,
         bac_genes_df_file_path=bac_genes_df_file_path,
         reference_gene_seqs_dict=reference_gene_seqs_dict,
         phenotype_dataframe_file_path=phenotype_dataframe_file_path,
@@ -91,13 +93,13 @@ def get_data(
 
     with open(train_val_test_split_indices_file_path, 'r') as f:
         train_val_test_split_indices = json.load(f)
-    train_indices = train_val_test_split_indices['train']
-    val_indices = train_val_test_split_indices['val']
-    test_indices = train_val_test_split_indices['test']
+    train_unique_ids = train_val_test_split_indices['train']
+    val_unique_ids = train_val_test_split_indices['val']
+    test_unique_ids = train_val_test_split_indices['test']
 
     train_dataloader = get_dataloader(
         batch_size=batch_size,
-        indices=train_indices,
+        unique_ids=train_unique_ids,
         bac_genes_df_file_path=input_df_file_path,
         reference_gene_seqs_dict=reference_gene_seqs_dict,
         phenotype_dataframe_file_path=phenotype_df_file_path,
@@ -113,7 +115,7 @@ def get_data(
 
     val_dataloader = get_dataloader(
         batch_size=batch_size,
-        indices=val_indices,
+        unique_ids=val_unique_ids,
         bac_genes_df_file_path=input_df_file_path,
         reference_gene_seqs_dict=reference_gene_seqs_dict,
         phenotype_dataframe_file_path=phenotype_df_file_path,
@@ -129,7 +131,7 @@ def get_data(
 
     test_dataloader = get_dataloader(
         batch_size=batch_size,
-        indices=test_indices,
+        unique_ids=test_unique_ids,
         bac_genes_df_file_path=input_df_file_path,
         reference_gene_seqs_dict=reference_gene_seqs_dict,
         phenotype_dataframe_file_path=phenotype_df_file_path,
@@ -158,6 +160,7 @@ def main():
     max_gene_length = 2048
     dl = get_dataloader(
         batch_size=32,
+        unique_ids=None,
         bac_genes_df_file_path=os.path.join(input_dir, "processed-genome-per-strain", "agg_variants.parquet"),
         reference_gene_seqs_dict=reference_gene_seqs_dict,
         phenotype_dataframe_file_path=os.path.join(input_dir, "phenotype_labels_with_binary_labels.parquet"),

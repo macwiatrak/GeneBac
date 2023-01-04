@@ -14,6 +14,7 @@ class BacterialGenomeDataset(Dataset):
             self,
             bac_genes_df_file_path: str,
             reference_gene_seqs_dict: Dict[str, str],
+            unique_ids: List[str] = None,
             phenotype_dataframe_file_path: str = None,
             max_gene_length: int = 2048,
             selected_genes: List = None,
@@ -24,7 +25,9 @@ class BacterialGenomeDataset(Dataset):
     ):
         self.genes_df = pd.read_parquet(bac_genes_df_file_path)
         # get unique ids
-        self.unique_ids = list(sorted(self.genes_df.index.levels[0]))
+        self.unique_ids = unique_ids
+        if not self.unique_ids:
+            self.unique_ids = list(sorted(self.genes_df.index.levels[0]))
 
         self.id_to_labels_df = None
         self.label_column = 'LOG2MIC_LABELS' if regression else 'BINARY_LABELS'
