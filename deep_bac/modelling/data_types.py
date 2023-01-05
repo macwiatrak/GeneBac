@@ -20,4 +20,4 @@ class DeepBacConfig:
     max_epochs: int = 100
     train_set_len: Optional[int] = None
     warmup_proportion: float = 0.1
-
+    random_state: int = 42

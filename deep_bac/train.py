@@ -7,7 +7,6 @@ from deep_bac.data_preprocessing.data_reader import get_data
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model import DeepBac
 from deep_bac.modelling.modules.trainer import get_trainer
-from deep_bac.utils import get_config
 
 
 def run(
@@ -56,7 +55,7 @@ def run(
 
 def main(args):
     seed_everything(args.random_state)
-    config = get_config(args)
+    config = DeepBacConfig.from_dict(args.as_dict())
     _ = run(
         config=config,
         input_df_file_path=args.input_df_file_path,

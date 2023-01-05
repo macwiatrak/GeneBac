@@ -6,6 +6,7 @@ from tap import Tap
 class TrainArgumentParser(Tap):
     def __init__(self):
         super().__init__(underscores_to_dashes=True)
+    # file paths for loading data
     input_df_file_path: str
     output_dir: str
     reference_gene_seqs_dict_path: str
@@ -23,13 +24,16 @@ class TrainArgumentParser(Tap):
     n_transformer_heads: int = 8
     n_graph_layers: int = 4
     n_output: int = 14  # nr of drugs in the cryptic dataset
+    # data loader arguments
     max_gene_length: int = 2048
     shift_max: int = 3
     pad_value: float = 0.25
     reverse_complement_prob: float = 0.5
     num_workers: int = 8
+    # trainer arguments
     num_epochs: int = 100
     test: bool = False
     ckpt_path: str = None
     random_state: int = 42
     warmup_proportion: float = 0.1
+    accelerator: Literal["cpu", "dp", "ddp"] = "cpu"
