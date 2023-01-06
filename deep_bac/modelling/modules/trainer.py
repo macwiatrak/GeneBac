@@ -1,5 +1,6 @@
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+from pytorch_lightning.loggers import TensorBoardLogger
 
 from deep_bac.modelling.data_types import DeepBacConfig
 
@@ -24,4 +25,6 @@ def get_trainer(config: DeepBacConfig, output_dir: str) -> Trainer:
                 save_last=True,
             ),
         ],
+        logger=TensorBoardLogger(output_dir),
+        accumulate_grad_batches=config.accumulate_grad_batches,
     )

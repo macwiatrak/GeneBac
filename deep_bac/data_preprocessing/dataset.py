@@ -30,7 +30,7 @@ class BacterialGenomeDataset(Dataset):
             self.unique_ids = list(sorted(self.genes_df.index.levels[0]))
 
         self.id_to_labels_df = None
-        self.label_column = 'LOG2MIC_LABELS' if regression else 'BINARY_LABELS'
+        self.label_column = 'LOGMIC_LABELS' if regression else 'BINARY_LABELS'
         if phenotype_dataframe_file_path is not None:
             # keep it a sa dataframe, not dict due to pytorch memory leakage issue
             self.id_to_labels_df = pd.read_parquet(phenotype_dataframe_file_path, columns=[self.label_column])

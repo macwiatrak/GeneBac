@@ -1,14 +1,18 @@
 import json
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from deep_bac.data_preprocessing.data_types import BacGenesInputSample, BatchBacGenesInputSample
+from deep_bac.data_preprocessing.data_types import BacGenesInputSample, BatchBacGenesInputSample, DataReaderOutput
 from deep_bac.data_preprocessing.dataset import BacterialGenomeDataset
+
+
+VARIANCE_PER_GENE_FILE_PATH = "/Users/maciejwiatrak/Desktop/bacterial_genomics/" \
+                              "cryptic/unnormalised_variance_per_gene.csv"
 
 
 def _collate_samples(data: List[BacGenesInputSample]) -> BatchBacGenesInputSample:
@@ -75,21 +79,19 @@ def get_data(
     reference_gene_seqs_dict_path: str,
     phenotype_df_file_path: str,
     train_val_test_split_indices_file_path: str,
-    selected_genes_file_path: Optional[str] = None,
+    n_highly_variable_genes: int = 500,
     batch_size: int = 8,
     max_gene_length: int = 2048,
     shift_max: int = 3,
     pad_value: float = 0.25,
     reverse_complement_prob: float = 0.5,
     num_workers: int = 8,
+    test: bool = False,
 ):
     with open(reference_gene_seqs_dict_path, 'r') as f:
         reference_gene_seqs_dict = json.load(f)
 
-    if selected_genes_file_path is not None:
-        selected_genes = pd.read_csv(selected_genes_file_path)['Gene'].tolist()
-    else:
-        selected_genes = None
+    selected_genes = pd.read_csv(VARIANCE_PER_GENE_FILE_PATH)['Gene'].tolist()[:n_highly_variable_genes]
 
     with open(train_val_test_split_indices_file_path, 'r') as f:
         train_val_test_split_indices = json.load(f)
@@ -110,7 +112,7 @@ def get_data(
         reverse_complement_prob=reverse_complement_prob,
         shuffle=True,
         num_workers=num_workers,
-        pin_memory=False,
+        pin_memory=True,
     )
 
     val_dataloader = get_dataloader(
@@ -124,11 +126,16 @@ def get_data(
         shift_max=shift_max,
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
-        shuffle=True,
+        shuffle=False,
         num_workers=num_workers,
-        pin_memory=False,
+        pin_memory=True,
     )
-
+    if not test:
+        return DataReaderOutput(
+            train_dataloader=train_dataloader,
+            val_dataloader=val_dataloader,
+            train_set_len=len(train_unique_ids),
+        )
     test_dataloader = get_dataloader(
         batch_size=batch_size,
         unique_ids=test_unique_ids,
@@ -140,12 +147,17 @@ def get_data(
         shift_max=shift_max,
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
-        shuffle=True,
+        shuffle=False,
         num_workers=num_workers,
-        pin_memory=False,
+        pin_memory=True,
     )
 
-    return train_dataloader, val_dataloader, test_dataloader
+    return DataReaderOutput(
+        train_dataloader=train_dataloader,
+        val_dataloader=val_dataloader,
+        test_dataloader=test_dataloader,
+        train_set_len=len(train_unique_ids),
+    )
 
 
 def main():

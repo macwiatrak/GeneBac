@@ -19,7 +19,7 @@ class TestBacterialGenomeDataset(Dataset):
             seq_length: int = 1024,
             regression: bool = False,
     ):
-        # (n_samples, n_genes, seq_length, n_nucletoides)
+        # (n_samples, n_genes, n_nucletoides, seq_length)
         self.data = F.one_hot(
             torch.randint(0, 4, (n_samples, n_genes, seq_length)),
             num_classes=4).transpose(-2, -1).type(torch.float32)

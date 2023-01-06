@@ -30,7 +30,7 @@ def test_dataset():
 
     item = data[0]
     assert item.variants_in_gene.tolist() == [1, 1, 1, 1, 1]
-    assert int(item.labels.mean().item()) == -29
+    assert int(item.labels.mean().item()) == -28
     assert item.unique_id == 'site.01.subj.DR0011.lab.DR0011.iso.1'
 
     assert all([torch.all(item.genes_tensor.sum(dim=1) == 1.).item() for item in data])

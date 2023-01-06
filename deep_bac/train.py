@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 from pytorch_lightning.utilities.seed import seed_everything
@@ -9,6 +10,9 @@ from deep_bac.modelling.model import DeepBac
 from deep_bac.modelling.modules.trainer import get_trainer
 
 
+logging.basicConfig(level=logging.INFO)
+
+
 def run(
         config: DeepBacConfig,
         input_df_file_path: str,
@@ -16,7 +20,7 @@ def run(
         reference_gene_seqs_dict_path: str,
         phenotype_df_file_path: str,
         train_val_test_split_indices_file_path: str,
-        selected_genes_file_path: Optional[str] = None,
+        n_highly_variable_genes: int = 500,
         max_gene_length: int = 2048,
         shift_max: int = 3,
         pad_value: float = 0.25,
@@ -31,14 +35,16 @@ def run(
         phenotype_df_file_path=phenotype_df_file_path,
         train_val_test_split_indices_file_path=train_val_test_split_indices_file_path,
         max_gene_length=max_gene_length,
-        selected_genes_file_path=selected_genes_file_path,
+        n_highly_variable_genes=n_highly_variable_genes,
         batch_size=config.batch_size,
         shift_max=shift_max,
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
         num_workers=num_workers,
     )
-    config.train_set_len = len(data.train_dataloader) * config.batch_size
+    logging.info("Finished loading data")
+
+    config.train_set_len = data.train_set_len
     trainer = get_trainer(config, output_dir)
     model = DeepBac(config)
 
@@ -63,7 +69,7 @@ def main(args):
         reference_gene_seqs_dict_path=args.reference_gene_seqs_dict_path,
         phenotype_df_file_path=args.phenotype_df_file_path,
         train_val_test_split_indices_file_path=args.train_val_test_split_indices_file_path,
-        selected_genes_file_path=args.selected_genes_file_path,
+        n_highly_variable_genes=args.n_highly_variable_genes,
         max_gene_length=args.max_gene_length,
         shift_max=args.shift_max,
         pad_value=args.pad_value,

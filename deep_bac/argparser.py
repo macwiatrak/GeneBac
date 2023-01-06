@@ -1,20 +1,23 @@
+import os
 from typing import Literal
 
 from tap import Tap
+
+INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
 
 
 class TrainArgumentParser(Tap):
     def __init__(self):
         super().__init__(underscores_to_dashes=True)
     # file paths for loading data
-    input_df_file_path: str
-    output_dir: str
-    reference_gene_seqs_dict_path: str
-    phenotype_df_file_path: str
-    train_val_test_split_indices_file_path: str
-    selected_genes_file_path: str
+    input_df_file_path: str = os.path.join(INPUT_DIR, "processed-genome-per-strain", "agg_variants.parquet")
+    output_dir: str = "/tmp/cryptic-model-output/"
+    reference_gene_seqs_dict_path: str = os.path.join(INPUT_DIR, 'reference_gene_seqs.json')
+    phenotype_df_file_path: str = os.path.join(INPUT_DIR, "phenotype_labels_with_binary_labels.parquet")
+    train_val_test_split_indices_file_path: str = os.path.join(INPUT_DIR, "train_val_test_split_unq_ids.json")
+    n_highly_variable_genes: int = 500
     # model arguments
-    batch_size: int = 8
+    batch_size: int = 4
     gene_encoder_type: Literal["conv_transformer"] = "conv_transformer"
     graph_model_type: Literal["transformer"] = "transformer"
     regression: bool = False
@@ -36,4 +39,6 @@ class TrainArgumentParser(Tap):
     ckpt_path: str = None
     random_state: int = 42
     warmup_proportion: float = 0.1
+    gradient_clip_val: float = 1.0
+    accumulate_grad_batches: int = 1
     accelerator: Literal["cpu", "dp", "ddp"] = "cpu"
