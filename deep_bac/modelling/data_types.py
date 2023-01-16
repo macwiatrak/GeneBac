@@ -11,8 +11,8 @@ class DeepBacConfig:
     graph_model_type: Literal["transformer"] = "transformer"
     regression: bool = False
     lr: float = 0.001
-    batch_size: int = 8
-    n_gene_bottleneck_layer: int = 256
+    batch_size: int = 4
+    n_gene_bottleneck_layer: int = 128
     n_init_filters: int = 256
     n_transformer_heads: int = 4
     n_graph_layers: int = 2
@@ -21,3 +21,7 @@ class DeepBacConfig:
     train_set_len: Optional[int] = None
     warmup_proportion: float = 0.1
     random_state: int = 42
+    gradient_clip_val: float = 1.0
+    early_stopping_patience: int = 10
+    accumulate_grad_batches: int = 1
+    accelerator: Literal["cpu", "mps", "dp", "ddp"] = "cpu"
