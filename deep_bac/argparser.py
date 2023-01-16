@@ -8,6 +8,7 @@ INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data/"
 class TrainArgumentParser(Tap):
     def __init__(self):
         super().__init__(underscores_to_dashes=True)
+
     # file paths for loading data
     input_dir: str = INPUT_DIR
     output_dir: str = "/tmp/cryptic-model-output/"
@@ -28,7 +29,7 @@ class TrainArgumentParser(Tap):
     shift_max: int = 3
     pad_value: float = 0.25
     reverse_complement_prob: float = 0.5
-    num_workers: int = 8
+    num_workers: int = None
     # trainer arguments
     max_epochs: int = 100
     early_stopping_patience: int = 10

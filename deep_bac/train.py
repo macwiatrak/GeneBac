@@ -15,31 +15,41 @@ logging.basicConfig(level=logging.INFO)
 
 
 def run(
-        config: DeepBacConfig,
-        input_dir: str,
-        output_dir: str,
-        n_highly_variable_genes: int = 500,
-        max_gene_length: int = 2048,
-        shift_max: int = 3,
-        pad_value: float = 0.25,
-        reverse_complement_prob: float = 0.5,
-        num_workers: int = 8,
-        test: bool = False,
-        ckpt_path: Optional[str] = None,
+    config: DeepBacConfig,
+    input_dir: str,
+    output_dir: str,
+    n_highly_variable_genes: int = 500,
+    max_gene_length: int = 2048,
+    shift_max: int = 3,
+    pad_value: float = 0.25,
+    reverse_complement_prob: float = 0.5,
+    num_workers: int = None,
+    test: bool = False,
+    ckpt_path: Optional[str] = None,
 ):
     data = get_data(
-        input_df_file_path=os.path.join(input_dir, "processed_agg_variants.parquet"),
-        reference_gene_seqs_dict_path=os.path.join(input_dir, 'reference_gene_seqs.json'),
-        phenotype_df_file_path=os.path.join(input_dir, "phenotype_labels_with_binary_labels.parquet"),
-        train_val_test_split_indices_file_path=os.path.join(input_dir, "train_val_test_split_unq_ids.json"),
-        variance_per_gene_file_path=os.path.join(input_dir, "unnormalised_variance_per_gene.csv"),
+        input_df_file_path=os.path.join(
+            input_dir, "processed_agg_variants.parquet"
+        ),
+        reference_gene_seqs_dict_path=os.path.join(
+            input_dir, "reference_gene_seqs.json"
+        ),
+        phenotype_df_file_path=os.path.join(
+            input_dir, "phenotype_labels_with_binary_labels.parquet"
+        ),
+        train_val_test_split_indices_file_path=os.path.join(
+            input_dir, "train_val_test_split_unq_ids.json"
+        ),
+        variance_per_gene_file_path=os.path.join(
+            input_dir, "unnormalised_variance_per_gene.csv"
+        ),
         max_gene_length=max_gene_length,
         n_highly_variable_genes=n_highly_variable_genes,
         batch_size=config.batch_size,
         shift_max=shift_max,
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
-        num_workers=num_workers,
+        num_workers=num_workers if num_workers is not None else os.cpu_count(),
     )
     logging.info("Finished loading data")
 
