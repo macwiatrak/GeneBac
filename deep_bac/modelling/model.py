@@ -7,6 +7,7 @@ from transformers import get_linear_schedule_with_warmup
 
 from deep_bac.data_preprocessing.data_types import BatchBacGenesInputSample
 from deep_bac.modelling.data_types import DeepBacConfig
+from deep_bac.modelling.metrics import compute_agg_stats
 from deep_bac.modelling.utils import remove_ignore_index, get_gene_encoder, get_graph_model
 
 
@@ -51,15 +52,15 @@ class DeepBac(pl.LightningModule):
         loss = remove_ignore_index(loss, batch.labels).mean()
         return dict(
             loss=loss,
+            logits=logits,
+            labels=batch.labels,
         )
 
     def eval_epoch_end(
             self, outputs: List[Dict[str, torch.tensor]], data_split: str
     ) -> Dict[str, float]:
-        # agg_stats = compute_agg_stats(outputs)
-        # agg_stats = {f"{data_split}_{k}": v for k, v in agg_stats.items()}
-        mean_loss = torch.stack([x["loss"] for x in outputs]).mean()
-        agg_stats = {f"{data_split}_loss": mean_loss}
+        agg_stats = compute_agg_stats(outputs, regression=self.regression)
+        agg_stats = {f"{data_split}_{k}": v for k, v in agg_stats.items()}
         self.log_dict(
             agg_stats,
             prog_bar=True,

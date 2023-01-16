@@ -17,6 +17,7 @@ setup(
         "jupyterlab==3.5.1",
         "matplotlib==3.6.2",
         "numpy~=1.23.5",
+        "pandas~=1.5.2",
         "pyarrow==10.0.1",
         "pyfastx~=0.8.4",
         "pytorch-lightning~=1.8.6",
