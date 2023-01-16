@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Optional
 
 from pytorch_lightning.utilities.seed import seed_everything
@@ -15,11 +16,8 @@ logging.basicConfig(level=logging.INFO)
 
 def run(
         config: DeepBacConfig,
-        input_df_file_path: str,
+        input_dir: str,
         output_dir: str,
-        reference_gene_seqs_dict_path: str,
-        phenotype_df_file_path: str,
-        train_val_test_split_indices_file_path: str,
         n_highly_variable_genes: int = 500,
         max_gene_length: int = 2048,
         shift_max: int = 3,
@@ -30,10 +28,11 @@ def run(
         ckpt_path: Optional[str] = None,
 ):
     data = get_data(
-        input_df_file_path=input_df_file_path,
-        reference_gene_seqs_dict_path=reference_gene_seqs_dict_path,
-        phenotype_df_file_path=phenotype_df_file_path,
-        train_val_test_split_indices_file_path=train_val_test_split_indices_file_path,
+        input_df_file_path=os.path.join(input_dir, "processed_agg_variants.parquet"),
+        reference_gene_seqs_dict_path=os.path.join(input_dir, 'reference_gene_seqs.json'),
+        phenotype_df_file_path=os.path.join(input_dir, "phenotype_labels_with_binary_labels.parquet"),
+        train_val_test_split_indices_file_path=os.path.join(input_dir, "train_val_test_split_unq_ids.json"),
+        variance_per_gene_file_path=os.path.join(input_dir, "unnormalised_variance_per_gene.csv"),
         max_gene_length=max_gene_length,
         n_highly_variable_genes=n_highly_variable_genes,
         batch_size=config.batch_size,
@@ -64,11 +63,8 @@ def main(args):
     config = DeepBacConfig.from_dict(args.as_dict())
     _ = run(
         config=config,
-        input_df_file_path=args.input_df_file_path,
+        input_dir=args.input_dir,
         output_dir=args.output_dir,
-        reference_gene_seqs_dict_path=args.reference_gene_seqs_dict_path,
-        phenotype_df_file_path=args.phenotype_df_file_path,
-        train_val_test_split_indices_file_path=args.train_val_test_split_indices_file_path,
         n_highly_variable_genes=args.n_highly_variable_genes,
         max_gene_length=args.max_gene_length,
         shift_max=args.shift_max,

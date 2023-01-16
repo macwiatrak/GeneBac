@@ -24,4 +24,3 @@ class DeepBacConfig:
     gradient_clip_val: float = 1.0
     early_stopping_patience: int = 10
     accumulate_grad_batches: int = 1
-    accelerator: Literal["cpu", "mps", "dp", "ddp"] = "cpu"

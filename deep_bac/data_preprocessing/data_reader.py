@@ -79,6 +79,7 @@ def get_data(
     reference_gene_seqs_dict_path: str,
     phenotype_df_file_path: str,
     train_val_test_split_indices_file_path: str,
+    variance_per_gene_file_path: str,
     n_highly_variable_genes: int = 500,
     batch_size: int = 8,
     max_gene_length: int = 2048,
@@ -91,7 +92,7 @@ def get_data(
     with open(reference_gene_seqs_dict_path, 'r') as f:
         reference_gene_seqs_dict = json.load(f)
 
-    selected_genes = pd.read_csv(VARIANCE_PER_GENE_FILE_PATH)['Gene'].tolist()[:n_highly_variable_genes]
+    selected_genes = pd.read_csv(variance_per_gene_file_path)['Gene'].tolist()[:n_highly_variable_genes]
 
     with open(train_val_test_split_indices_file_path, 'r') as f:
         train_val_test_split_indices = json.load(f)

@@ -7,15 +7,20 @@ from deep_bac.modelling.data_types import DeepBacConfig
 
 
 def get_trainer(config: DeepBacConfig, output_dir: str) -> Trainer:
-    if torch.cuda.is_available() or config.accelerator == "mps":
-        gpus = -1
+    if torch.cuda.is_available():
+        devices = torch.cuda.device_count()
+        accelerator = "gpu"
+        strategy = "ddp" if devices > 1 else None
     else:
-        gpus = None
+        devices = None
+        accelerator = "cpu"
+        strategy = None
     """Get the trainer"""
     return Trainer(
         default_root_dir=output_dir,
-        gpus=gpus,
-        accelerator=config.accelerator,
+        devices=devices,
+        accelerator=accelerator,
+        strategy=strategy,
         max_epochs=config.max_epochs,
         gradient_clip_val=config.gradient_clip_val,
         callbacks=[
