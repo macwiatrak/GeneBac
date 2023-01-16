@@ -17,7 +17,7 @@ class TrainArgumentParser(Tap):
     train_val_test_split_indices_file_path: str = os.path.join(INPUT_DIR, "train_val_test_split_unq_ids.json")
     n_highly_variable_genes: int = 500
     # model arguments
-    batch_size: int = 4
+    batch_size: int = 1
     gene_encoder_type: Literal["conv_transformer"] = "conv_transformer"
     graph_model_type: Literal["transformer"] = "transformer"
     regression: bool = False

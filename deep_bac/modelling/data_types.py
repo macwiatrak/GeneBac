@@ -11,7 +11,7 @@ class DeepBacConfig:
     graph_model_type: Literal["transformer"] = "transformer"
     regression: bool = False
     lr: float = 0.001
-    batch_size: int = 4
+    batch_size: int = 1
     n_gene_bottleneck_layer: int = 128
     n_init_filters: int = 256
     n_transformer_heads: int = 4
