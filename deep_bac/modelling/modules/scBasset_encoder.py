@@ -8,11 +8,11 @@ class scBassetEncoder(nn.Module):
     def __init__(
             self,
             input_dim: int = 4,
-            n_filters_init: int = 288,
-            n_repeat_blocks_tower: int = 6,
+            n_filters_init: int = 256,
+            n_repeat_blocks_tower: int = 5,
             filters_mult: float = 1.122,
-            n_filters_pre_bottleneck: int = 256,
-            n_bottleneck_layer: int = 32,
+            n_filters_pre_bottleneck: int = 227,
+            n_bottleneck_layer: int = 64,
             batch_norm: bool = True,
             dropout: float = 0.2,
     ):
@@ -50,7 +50,7 @@ class scBassetEncoder(nn.Module):
             kernel_size=1,
             dropout=dropout,
             batch_norm=batch_norm,
-            pool_size=2,
+            pool_size=3,  # change from 2
         )
         self.bottleneck = DenseLayer(
             in_features=n_filters_pre_bottleneck * seq_depth,

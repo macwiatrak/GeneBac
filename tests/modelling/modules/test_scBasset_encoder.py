@@ -5,13 +5,13 @@ from deep_bac.modelling.modules.scBasset_encoder import scBassetEncoder
 
 def test_scBasset_encoder():
     batch_size = 1
-    seq_length = 1344
+    seq_length = 2048
     in_channels = 4
-    n_filters_init = 288
+    n_filters_init = 256
     n_repeat_blocks_tower = 5
     filters_mult = 1.122
-    n_filters_pre_bottleneck = 256
-    n_bottleneck_layer = 32
+    n_filters_pre_bottleneck = 227
+    n_bottleneck_layer = 64
 
     x = torch.rand(batch_size, in_channels, seq_length)
     model = scBassetEncoder(
