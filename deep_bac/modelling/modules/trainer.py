@@ -29,12 +29,12 @@ def get_trainer(config: DeepBacConfig, output_dir: str) -> Trainer:
                 patience=config.early_stopping_patience,
                 mode="min",
             ),
-            ModelCheckpoint(
-                monitor="val_loss",
-                mode="min",
-                save_top_k=1,
-                save_last=True,
-            ),
+            # ModelCheckpoint(
+            #     monitor="val_loss",
+            #     mode="min",
+            #     save_top_k=1,
+            #     save_last=True,
+            # ),
         ],
         logger=TensorBoardLogger(output_dir),
         accumulate_grad_batches=config.accumulate_grad_batches,
