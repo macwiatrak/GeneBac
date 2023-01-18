@@ -5,7 +5,7 @@ from typing import Optional
 from pytorch_lightning.utilities.seed import seed_everything
 
 from deep_bac.argparser import TrainArgumentParser
-from deep_bac.data_preprocessing.data_reader import get_data
+from deep_bac.data_preprocessing.data_reader import get_gene_reg_data
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model import DeepBac
 from deep_bac.modelling.modules.trainer import get_trainer
@@ -27,7 +27,7 @@ def run(
     test: bool = False,
     ckpt_path: Optional[str] = None,
 ):
-    data = get_data(
+    data = get_gene_reg_data(
         input_df_file_path=os.path.join(
             input_dir, "processed_agg_variants.parquet"
         ),
@@ -45,6 +45,7 @@ def run(
         ),
         max_gene_length=max_gene_length,
         n_highly_variable_genes=n_highly_variable_genes,
+        regression=config.regression,
         batch_size=config.batch_size,
         shift_max=shift_max,
         pad_value=pad_value,

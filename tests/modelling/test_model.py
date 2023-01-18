@@ -3,7 +3,7 @@ import json
 import torch
 import pytorch_lightning as pl
 
-from deep_bac.data_preprocessing.data_reader import get_dataloader
+from deep_bac.data_preprocessing.data_reader import get_gene_reg_dataloader
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model import DeepBac
@@ -139,7 +139,7 @@ def test_model_train_real_data(tmpdir):
         n_transformer_heads=4,
     )
 
-    dataloader = get_dataloader(
+    dataloader = get_gene_reg_dataloader(
         batch_size=batch_size,
         bac_genes_df_file_path="../test_data/sample_agg_variants.parquet",
         reference_gene_seqs_dict=reference_gene_seqs_dict,
