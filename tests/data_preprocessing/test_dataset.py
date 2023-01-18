@@ -1,12 +1,13 @@
 import torch
 
-from deep_bac.data_preprocessing.dataset import BacterialGenomeDataset
+from deep_bac.data_preprocessing.dataset import (
+    BacGenomeGeneRegDataset,
+    BacGenomeGeneExprDataset,
+)
 
 
-def test_dataset():
-    selected_genes = [
-        'PE1', 'Rv1716', 'Rv2000', 'pepC', 'pepD'
-    ]
+def test_bac_genome_gene_reg_dataset():
+    selected_genes = ["PE1", "Rv1716", "Rv2000", "pepC", "pepD"]
 
     dataset_len = 6
     n_genes = len(selected_genes)
@@ -14,7 +15,7 @@ def test_dataset():
     max_gene_length = 1000
     reference_gene_seqs_dict = {gene: "atcgt" * 100 for gene in selected_genes}
 
-    dataset = BacterialGenomeDataset(
+    dataset = BacGenomeGeneRegDataset(
         unique_ids=None,
         bac_genes_df_file_path="../test_data/sample_agg_variants.parquet",
         reference_gene_seqs_dict=reference_gene_seqs_dict,
@@ -25,12 +26,44 @@ def test_dataset():
     )
     data = [dataset[i] for i in range(dataset.__len__())]
     assert len(data) == 6
-    assert torch.stack([item.genes_tensor for item in data]).shape == torch.Size(
-        [dataset_len, n_genes, n_nucleotides, max_gene_length])
+    assert torch.stack(
+        [item.genes_tensor for item in data]
+    ).shape == torch.Size(
+        [dataset_len, n_genes, n_nucleotides, max_gene_length]
+    )
 
     item = data[0]
     assert item.variants_in_gene.tolist() == [1, 1, 1, 1, 1]
     assert int(item.labels.mean().item()) == -28
-    assert item.unique_id == 'site.01.subj.DR0011.lab.DR0011.iso.1'
+    assert item.unique_id == "site.01.subj.DR0011.lab.DR0011.iso.1"
 
-    assert all([torch.all(item.genes_tensor.sum(dim=1) == 1.).item() for item in data])
+    assert all(
+        [torch.all(item.genes_tensor.sum(dim=1) == 1.0).item() for item in data]
+    )
+
+
+def test_bac_genome_gene_expr_dataset():
+    dataset_len = 1000
+    n_nucleotides = 4
+    max_gene_length = 2048
+
+    dataset = BacGenomeGeneExprDataset(
+        bac_genes_df_file_path="../test_data/sample_genes_with_variants_and_expression.parquet",
+        max_gene_length=max_gene_length,
+        shift_max=3,
+        pad_value=0.25,
+        reverse_complement_prob=0.5,
+    )
+    data = [dataset[i] for i in range(dataset.__len__())]
+    assert len(data) == dataset_len
+    # assert torch.stack([item.genes_tensor for item in data]).shape == torch.Size(
+    #     [dataset_len, n_genes, n_nucleotides, max_gene_length])
+
+    item = data[0]
+    assert item.variants_in_gene.tolist() == [1, 1, 1, 1, 1]
+    assert int(item.labels.mean().item()) == -28
+    assert item.unique_id == "site.01.subj.DR0011.lab.DR0011.iso.1"
+
+    assert all(
+        [torch.all(item.genes_tensor.sum(dim=1) == 1.0).item() for item in data]
+    )

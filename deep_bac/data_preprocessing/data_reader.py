@@ -7,16 +7,22 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from deep_bac.data_preprocessing.data_types import BacGenesInputSample, BatchBacGenesInputSample, DataReaderOutput
-from deep_bac.data_preprocessing.dataset import BacterialGenomeDataset
+from deep_bac.data_preprocessing.data_types import (
+    BacInputSample,
+    BatchBacInputSample,
+    DataReaderOutput,
+)
+from deep_bac.data_preprocessing.dataset import BacGenomeGeneRegDataset
 
 
-VARIANCE_PER_GENE_FILE_PATH = "/Users/maciejwiatrak/Desktop/bacterial_genomics/" \
-                              "cryptic/unnormalised_variance_per_gene.csv"
+VARIANCE_PER_GENE_FILE_PATH = (
+    "/Users/maciejwiatrak/Desktop/bacterial_genomics/"
+    "cryptic/unnormalised_variance_per_gene.csv"
+)
 
 
-def _collate_samples(data: List[BacGenesInputSample]) -> BatchBacGenesInputSample:
-    genes_tensor = torch.stack([sample.genes_tensor for sample in data])
+def _collate_samples(data: List[BacInputSample]) -> BatchBacInputSample:
+    genes_tensor = torch.stack([sample.input_tensor for sample in data])
     variants_in_gene = [sample.variants_in_gene for sample in data]
 
     if None not in variants_in_gene:
@@ -26,12 +32,12 @@ def _collate_samples(data: List[BacGenesInputSample]) -> BatchBacGenesInputSampl
     if None not in labels:
         labels = torch.stack(labels)
 
-    unique_ids = [sample.unique_id for sample in data]
-    return BatchBacGenesInputSample(
-        genes_tensor=genes_tensor,
+    unique_ids = [sample.strain_id for sample in data]
+    return BatchBacInputSample(
+        input_tensor=genes_tensor,
         variants_in_gene=variants_in_gene,
         labels=labels,
-        unique_ids=unique_ids,
+        strain_ids=unique_ids,
     )
 
 
@@ -51,7 +57,7 @@ def get_dataloader(
     num_workers: int = 4,
     pin_memory: bool = True,
 ) -> DataLoader:
-    dataset = BacterialGenomeDataset(
+    dataset = BacGenomeGeneRegDataset(
         unique_ids=unique_ids,
         bac_genes_df_file_path=bac_genes_df_file_path,
         reference_gene_seqs_dict=reference_gene_seqs_dict,
@@ -89,16 +95,18 @@ def get_data(
     num_workers: int = 8,
     test: bool = False,
 ):
-    with open(reference_gene_seqs_dict_path, 'r') as f:
+    with open(reference_gene_seqs_dict_path, "r") as f:
         reference_gene_seqs_dict = json.load(f)
 
-    selected_genes = pd.read_csv(variance_per_gene_file_path)['Gene'].tolist()[:n_highly_variable_genes]
+    selected_genes = pd.read_csv(variance_per_gene_file_path)["Gene"].tolist()[
+        :n_highly_variable_genes
+    ]
 
-    with open(train_val_test_split_indices_file_path, 'r') as f:
+    with open(train_val_test_split_indices_file_path, "r") as f:
         train_val_test_split_indices = json.load(f)
-    train_unique_ids = train_val_test_split_indices['train']
-    val_unique_ids = train_val_test_split_indices['val']
-    test_unique_ids = train_val_test_split_indices['test']
+    train_unique_ids = train_val_test_split_indices["train"]
+    val_unique_ids = train_val_test_split_indices["val"]
+    test_unique_ids = train_val_test_split_indices["test"]
 
     train_dataloader = get_dataloader(
         batch_size=batch_size,
@@ -163,20 +171,25 @@ def get_data(
 
 def main():
     input_dir = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
-    with open(os.path.join(input_dir, 'reference_gene_seqs.json'), 'r') as f:
+    with open(os.path.join(input_dir, "reference_gene_seqs.json"), "r") as f:
         reference_gene_seqs_dict = json.load(f)
 
     gene_variance_df = pd.read_csv(
-        os.path.join(input_dir, 'unnormalised_variance_per_gene.csv'))
-    selected_genes = gene_variance_df['Gene'].tolist()[:1000]
+        os.path.join(input_dir, "unnormalised_variance_per_gene.csv")
+    )
+    selected_genes = gene_variance_df["Gene"].tolist()[:1000]
 
     max_gene_length = 2048
     dl = get_dataloader(
         batch_size=32,
         unique_ids=None,
-        bac_genes_df_file_path=os.path.join(input_dir, "processed-genome-per-strain", "agg_variants.parquet"),
+        bac_genes_df_file_path=os.path.join(
+            input_dir, "processed-genome-per-strain", "agg_variants.parquet"
+        ),
         reference_gene_seqs_dict=reference_gene_seqs_dict,
-        phenotype_dataframe_file_path=os.path.join(input_dir, "phenotype_labels_with_binary_labels.parquet"),
+        phenotype_dataframe_file_path=os.path.join(
+            input_dir, "phenotype_labels_with_binary_labels.parquet"
+        ),
         max_gene_length=max_gene_length,
         selected_genes=selected_genes,
         shift_max=3,
@@ -192,5 +205,5 @@ def main():
     print("Done!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

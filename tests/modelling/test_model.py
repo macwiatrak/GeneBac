@@ -4,7 +4,7 @@ import torch
 import pytorch_lightning as pl
 
 from deep_bac.data_preprocessing.data_reader import get_dataloader
-from deep_bac.data_preprocessing.data_types import BatchBacGenesInputSample
+from deep_bac.data_preprocessing.data_types import BatchBacInputSample
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model import DeepBac
 from deep_bac.modelling.modules.utils import count_parameters
@@ -40,22 +40,22 @@ def test_model_steps():
 
     # test training step
     out = model.training_step(
-        batch=BatchBacGenesInputSample(
-            genes_tensor=x,
+        batch=BatchBacInputSample(
+            input_tensor=x,
             labels=labels,
         ),
         batch_idx=0,
     )
-    assert out > 0.
+    assert out > 0.0
 
     # test eval step
     out = model.eval_step(
-        batch=BatchBacGenesInputSample(
-            genes_tensor=x,
+        batch=BatchBacInputSample(
+            input_tensor=x,
             labels=labels,
         ),
     )
-    assert out['loss'] > 0.
+    assert out["loss"] > 0.0
 
 
 def test_model_train_fake_data(tmpdir):
@@ -105,8 +105,10 @@ def test_model_train_fake_data(tmpdir):
         logger=logger,
     )
     trainer.fit(model, train_dataloaders=dataloader, val_dataloaders=dataloader)
-    assert logger.val_logs[-1]['val_loss'] < logger.val_logs[0]['val_loss']
-    assert logger.train_logs[-1]['train_loss'] < logger.train_logs[0]['train_loss']
+    assert logger.val_logs[-1]["val_loss"] < logger.val_logs[0]["val_loss"]
+    assert (
+        logger.train_logs[-1]["train_loss"] < logger.train_logs[0]["train_loss"]
+    )
 
 
 def test_model_train_real_data(tmpdir):
@@ -117,11 +119,9 @@ def test_model_train_real_data(tmpdir):
     max_epochs = 50
     batch_size = 3
     max_gene_length = 2048
-    selected_genes = [
-        'PE1', 'Rv1716', 'Rv2000', 'pepC', 'pepD'
-    ]
+    selected_genes = ["PE1", "Rv1716", "Rv2000", "pepC", "pepD"]
 
-    with open('../test_data/reference_gene_seqs.json', 'r') as f:
+    with open("../test_data/reference_gene_seqs.json", "r") as f:
         reference_gene_seqs_dict = json.load(f)
 
     config = DeepBacConfig(
@@ -168,4 +168,4 @@ def test_model_train_real_data(tmpdir):
         logger=logger,
     )
     trainer.fit(model, train_dataloaders=dataloader, val_dataloaders=dataloader)
-    assert logger.val_logs[-1]['val_loss'] < logger.val_logs[0]['val_loss']
+    assert logger.val_logs[-1]["val_loss"] < logger.val_logs[0]["val_loss"]

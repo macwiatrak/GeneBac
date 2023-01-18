@@ -7,26 +7,35 @@ from pytorch_lightning.loggers import LightningLoggerBase
 from torch.utils.data import Dataset
 
 from deep_bac.data_preprocessing.data_reader import _collate_samples
-from deep_bac.data_preprocessing.data_types import BacGenesInputSample
+from deep_bac.data_preprocessing.data_types import BacInputSample
 
 
 class TestBacterialGenomeDataset(Dataset):
     def __init__(
-            self,
-            n_samples: int = 100,
-            n_genes: int = 5,
-            n_classes: int = 4,
-            seq_length: int = 1024,
-            regression: bool = False,
+        self,
+        n_samples: int = 100,
+        n_genes: int = 5,
+        n_classes: int = 4,
+        seq_length: int = 1024,
+        regression: bool = False,
     ):
         # (n_samples, n_genes, n_nucletoides, seq_length)
-        self.data = F.one_hot(
-            torch.randint(0, 4, (n_samples, n_genes, seq_length)),
-            num_classes=4).transpose(-2, -1).type(torch.float32)
+        self.data = (
+            F.one_hot(
+                torch.randint(0, 4, (n_samples, n_genes, seq_length)),
+                num_classes=4,
+            )
+            .transpose(-2, -1)
+            .type(torch.float32)
+        )
 
         if regression:
             self.labels = torch.log2(
-                torch.normal(torch.zeros(n_samples, n_classes), 1.5 * torch.ones(n_samples, n_classes)).abs())
+                torch.normal(
+                    torch.zeros(n_samples, n_classes),
+                    1.5 * torch.ones(n_samples, n_classes),
+                ).abs()
+            )
         else:
             self.labels = torch.empty(n_samples, n_classes).random_(2)
 
@@ -34,20 +43,20 @@ class TestBacterialGenomeDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        return BacGenesInputSample(
-            genes_tensor=self.data[idx],
+        return BacInputSample(
+            input_tensor=self.data[idx],
             labels=self.labels[idx],
         )
 
 
 def get_test_dataloader(
-        n_samples: int = 100,
-        n_genes: int = 5,
-        n_classes: int = 4,
-        seq_length: int = 1024,
-        regression: bool = False,
-        batch_size: int = 10,
-        num_workers: int = 0,
+    n_samples: int = 100,
+    n_genes: int = 5,
+    n_classes: int = 4,
+    seq_length: int = 1024,
+    regression: bool = False,
+    batch_size: int = 10,
+    num_workers: int = 0,
 ):
     dataset = TestBacterialGenomeDataset(
         n_samples=n_samples,
@@ -76,7 +85,7 @@ class BasicLogger(LightningLoggerBase):
         return "Basic"
 
     def log_metrics(
-            self, metrics: Dict[str, float], step: Optional[int] = None
+        self, metrics: Dict[str, float], step: Optional[int] = None
     ):
         if "train_loss" in metrics:
             self.train_logs.append(metrics)

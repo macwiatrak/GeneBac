@@ -8,20 +8,21 @@ from torch.utils.data import DataLoader
 
 @dataclass_json
 @dataclass
-class BacGenesInputSample:
-    genes_tensor: torch.Tensor
+class BacInputSample:
+    input_tensor: torch.Tensor
     variants_in_gene: Optional[torch.Tensor] = None
     labels: Optional[torch.Tensor] = None
-    unique_id: Optional[str] = None
+    strain_id: Optional[str] = None
+    gene_name: Optional[str] = None
 
 
 @dataclass_json
 @dataclass
-class BatchBacGenesInputSample:
-    genes_tensor: torch.Tensor
+class BatchBacInputSample:
+    input_tensor: torch.Tensor
     variants_in_gene: Optional[torch.Tensor] = None
     labels: Optional[torch.Tensor] = None
-    unique_ids: List[str] = None
+    strain_ids: List[str] = None
 
 
 @dataclass_json

@@ -5,15 +5,20 @@ import torch
 from torch import nn
 from transformers import get_linear_schedule_with_warmup
 
-from deep_bac.data_preprocessing.data_types import BatchBacGenesInputSample
+from deep_bac.data_preprocessing.data_types import BatchBacInputSample
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.metrics import compute_agg_stats
-from deep_bac.modelling.utils import remove_ignore_index, get_gene_encoder, get_graph_model
+from deep_bac.modelling.utils import (
+    remove_ignore_index,
+    get_gene_encoder,
+    get_graph_model,
+)
 
 
 class DeepBac(pl.LightningModule):
     def __init__(
-            self, config: DeepBacConfig,
+        self,
+        config: DeepBacConfig,
     ):
         super().__init__()
         self.config = config
@@ -22,7 +27,11 @@ class DeepBac(pl.LightningModule):
 
         self.regression = config.regression
         # get loss depending on whether we predict LOG2MIC or binary MIC
-        self.loss_fn = nn.MSELoss(reduction="none") if self.regression else nn.BCEWithLogitsLoss(reduction="none")
+        self.loss_fn = (
+            nn.MSELoss(reduction="none")
+            if self.regression
+            else nn.BCEWithLogitsLoss(reduction="none")
+        )
 
     def forward(self, batch_genes_tensor: torch.Tensor) -> torch.Tensor:
         # encode each gene
@@ -31,8 +40,10 @@ class DeepBac(pl.LightningModule):
         logits = self.graph_model(gene_encodings)
         return logits
 
-    def training_step(self, batch: BatchBacGenesInputSample, batch_idx: int) -> torch.Tensor:
-        logits = self(batch.genes_tensor)
+    def training_step(
+        self, batch: BatchBacInputSample, batch_idx: int
+    ) -> torch.Tensor:
+        logits = self(batch.input_tensor)
         # get loss with reduction="none" to compute loss per sample
         loss = self.loss_fn(logits, batch.labels)
         # remove loss for samples with no label and compute mean
@@ -45,8 +56,8 @@ class DeepBac(pl.LightningModule):
         )
         return loss
 
-    def eval_step(self, batch: BatchBacGenesInputSample):
-        logits = self(batch.genes_tensor)
+    def eval_step(self, batch: BatchBacInputSample):
+        logits = self(batch.input_tensor)
         loss = self.loss_fn(logits, batch.labels)
         # remove loss for samples with no label and compute mean
         loss = remove_ignore_index(loss, batch.labels).mean()
@@ -57,7 +68,7 @@ class DeepBac(pl.LightningModule):
         )
 
     def eval_epoch_end(
-            self, outputs: List[Dict[str, torch.tensor]], data_split: str
+        self, outputs: List[Dict[str, torch.tensor]], data_split: str
     ) -> Dict[str, float]:
         agg_stats = compute_agg_stats(outputs, regression=self.regression)
         agg_stats = {f"{data_split}_{k}": v for k, v in agg_stats.items()}
@@ -70,7 +81,7 @@ class DeepBac(pl.LightningModule):
         return agg_stats
 
     def validation_step(
-            self, batch: BatchBacGenesInputSample, batch_idx: int
+        self, batch: BatchBacInputSample, batch_idx: int
     ) -> Dict[str, torch.tensor]:
         stats = self.eval_step(batch=batch)
         self.log(
@@ -82,7 +93,7 @@ class DeepBac(pl.LightningModule):
         return stats
 
     def test_step(
-            self, batch: BatchBacGenesInputSample, batch_idx: int
+        self, batch: BatchBacInputSample, batch_idx: int
     ) -> Dict[str, torch.tensor]:
         stats = self.eval_step(batch=batch)
         self.log(
@@ -96,12 +107,12 @@ class DeepBac(pl.LightningModule):
         return stats
 
     def validation_epoch_end(
-            self, outputs: List[Dict[str, torch.tensor]]
+        self, outputs: List[Dict[str, torch.tensor]]
     ) -> Dict[str, float]:
         return self.eval_epoch_end(outputs=outputs, data_split="val")
 
     def test_epoch_end(
-            self, outputs: List[Dict[str, torch.tensor]]
+        self, outputs: List[Dict[str, torch.tensor]]
     ) -> Dict[str, float]:
         return self.eval_epoch_end(outputs=outputs, data_split="test")
 
@@ -111,8 +122,8 @@ class DeepBac(pl.LightningModule):
             lr=self.config.lr,
         )
         if (
-                self.config.train_set_len is None
-                or self.config.warmup_proportion is None
+            self.config.train_set_len is None
+            or self.config.warmup_proportion is None
         ):
             return opt
         scheduler = self.get_scheduler(opt)
@@ -128,8 +139,8 @@ class DeepBac(pl.LightningModule):
 
     def get_scheduler(self, optimizer: torch.optim.Optimizer):
         num_train_steps = (
-                int(self.config.train_set_len / self.config.batch_size)
-                * self.config.max_epochs
+            int(self.config.train_set_len / self.config.batch_size)
+            * self.config.max_epochs
         )
         num_warmup_steps = int(num_train_steps * self.config.warmup_proportion)
         scheduler = get_linear_schedule_with_warmup(
