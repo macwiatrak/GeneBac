@@ -62,7 +62,7 @@ def test_model_gene_expr_train_fake_data(tmpdir):
 
     config = DeepBacConfig(
         gene_encoder_type="scbasset",
-        lr=0.001,
+        lr=0.0001,
         batch_size=batch_size,
         n_gene_bottleneck_layer=n_bottleneck_layer,
         max_epochs=max_epochs,

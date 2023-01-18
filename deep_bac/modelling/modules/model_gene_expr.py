@@ -32,7 +32,7 @@ class DeepBacGeneExpr(pl.LightningModule):
         gene_encodings = self.gene_encoder(batch_genes_tensor)
         # pass the genes through the graph encoder
         logits = self.decoder(self.dropout(gene_encodings))
-        return logits
+        return logits.view(-1)
 
     def training_step(
         self, batch: BatchBacInputSample, batch_idx: int
@@ -45,6 +45,7 @@ class DeepBacGeneExpr(pl.LightningModule):
             loss,
             prog_bar=True,
             logger=True,
+            batch_size=self.config.batch_size,
         )
         return loss
 
@@ -79,6 +80,7 @@ class DeepBacGeneExpr(pl.LightningModule):
             stats["loss"],
             prog_bar=True,
             logger=True,
+            batch_size=self.config.batch_size,
         )
         return stats
 
