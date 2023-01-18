@@ -27,7 +27,7 @@ def test_bac_genome_gene_reg_dataset():
     data = [dataset[i] for i in range(dataset.__len__())]
     assert len(data) == 6
     assert torch.stack(
-        [item.genes_tensor for item in data]
+        [item.input_tensor for item in data]
     ).shape == torch.Size(
         [dataset_len, n_genes, n_nucleotides, max_gene_length]
     )
@@ -35,10 +35,10 @@ def test_bac_genome_gene_reg_dataset():
     item = data[0]
     assert item.variants_in_gene.tolist() == [1, 1, 1, 1, 1]
     assert int(item.labels.mean().item()) == -28
-    assert item.unique_id == "site.01.subj.DR0011.lab.DR0011.iso.1"
+    assert item.strain_id == "site.01.subj.DR0011.lab.DR0011.iso.1"
 
     assert all(
-        [torch.all(item.genes_tensor.sum(dim=1) == 1.0).item() for item in data]
+        [torch.all(item.input_tensor.sum(dim=1) == 1.0).item() for item in data]
     )
 
 
@@ -56,14 +56,16 @@ def test_bac_genome_gene_expr_dataset():
     )
     data = [dataset[i] for i in range(dataset.__len__())]
     assert len(data) == dataset_len
-    # assert torch.stack([item.genes_tensor for item in data]).shape == torch.Size(
-    #     [dataset_len, n_genes, n_nucleotides, max_gene_length])
+    assert torch.stack(
+        [item.input_tensor for item in data]
+    ).shape == torch.Size([dataset_len, n_nucleotides, max_gene_length])
 
     item = data[0]
-    assert item.variants_in_gene.tolist() == [1, 1, 1, 1, 1]
-    assert int(item.labels.mean().item()) == -28
-    assert item.unique_id == "site.01.subj.DR0011.lab.DR0011.iso.1"
+    assert item.variants_in_gene == 1
+    assert torch.allclose(item.labels, torch.tensor(2.3919))
+    assert item.strain_id == "ZG302367"
+    assert item.gene_name == "PA0001"
 
     assert all(
-        [torch.all(item.genes_tensor.sum(dim=1) == 1.0).item() for item in data]
+        [torch.all(item.input_tensor.sum(dim=0) == 1.0).item() for item in data]
     )
