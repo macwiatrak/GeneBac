@@ -15,7 +15,9 @@ class TrainArgumentParser(Tap):
     n_highly_variable_genes: int = 500
     # model arguments
     batch_size: int = 1
-    gene_encoder_type: Literal["conv_transformer"] = "conv_transformer"
+    gene_encoder_type: Literal[
+        "conv_transformer", "scbasset"
+    ] = "conv_transformer"
     graph_model_type: Literal["transformer"] = "transformer"
     regression: bool = False
     lr: float = 1e-3

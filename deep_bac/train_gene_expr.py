@@ -7,7 +7,7 @@ from pytorch_lightning.utilities.seed import seed_everything
 from deep_bac.argparser import TrainArgumentParser
 from deep_bac.data_preprocessing.data_reader import get_gene_expr_data
 from deep_bac.modelling.data_types import DeepBacConfig
-from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
+from deep_bac.modelling.modules.model_gene_expr import DeepBacGeneExpr
 from deep_bac.modelling.modules.trainer import get_trainer
 
 
@@ -39,9 +39,8 @@ def run(
 
     config.train_set_len = data.train_set_len
     # this should always be true for gene expression prediction
-    config.regression = True
     trainer = get_trainer(config, output_dir)
-    model = DeepBacGeneReg(config)
+    model = DeepBacGeneExpr(config)
 
     results = None
     if test:

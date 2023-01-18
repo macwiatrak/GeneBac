@@ -1,38 +1,33 @@
-import json
-
 import torch
 import pytorch_lightning as pl
 
-from deep_bac.data_preprocessing.data_reader import get_gene_reg_dataloader
+from deep_bac.data_preprocessing.data_reader import get_gene_expr_dataloader
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
 from deep_bac.modelling.data_types import DeepBacConfig
-from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
+from deep_bac.modelling.modules.model_gene_expr import DeepBacGeneExpr
 from deep_bac.modelling.modules.utils import count_parameters
-from tests.modelling.helpers import get_test_gene_reg_dataloader, BasicLogger
+from tests.modelling.helpers import BasicLogger, get_test_gene_expr_dataloader
 
 
-def test_model_gene_reg_steps():
+def test_model_gene_expr_steps():
     batch_size = 2
-    n_genes = 3
     seq_length = 2048
     in_channels = 4
     n_filters = 256
     n_bottleneck_layer = 128
-    n_output = 5
+    n_output = 1
 
-    x = torch.rand(batch_size, n_genes, in_channels, seq_length)
-    labels = torch.empty(batch_size, n_output).random_(2)
+    x = torch.rand(batch_size, in_channels, seq_length)
+    labels = torch.rand(batch_size, n_output)
 
     config = DeepBacConfig(
-        gene_encoder_type="conv_transformer",
-        graph_model_type="transformer",
-        regression=False,
+        gene_encoder_type="scbasset",
         n_gene_bottleneck_layer=n_bottleneck_layer,
         n_init_filters=n_filters,
         n_output=n_output,
     )
 
-    model = DeepBacGeneReg(config)
+    model = DeepBacGeneExpr(config)
 
     # test forward
     out = model(x)
@@ -58,41 +53,28 @@ def test_model_gene_reg_steps():
     assert out["loss"] > 0.0
 
 
-def test_model_gene_reg_train_fake_data(tmpdir):
+def test_model_gene_expr_train_fake_data(tmpdir):
     n_samples = 100
-    n_genes = 5
-    n_classes = 4
-    seq_length = 1024
-    regression = False
-    n_bottleneck_layer = 128
-    n_filters = 256
+    seq_length = 2048
+    n_bottleneck_layer = 32
     max_epochs = 20
     batch_size = 10
 
     config = DeepBacConfig(
-        gene_encoder_type="conv_transformer",
-        graph_model_type="transformer",
+        gene_encoder_type="scbasset",
         lr=0.001,
         batch_size=batch_size,
-        regression=regression,
         n_gene_bottleneck_layer=n_bottleneck_layer,
-        n_init_filters=n_filters,
-        n_output=n_classes,
         max_epochs=max_epochs,
         train_set_len=n_samples,
-        n_graph_layers=2,
-        n_transformer_heads=4,
     )
 
-    dataloader = get_test_gene_reg_dataloader(
+    dataloader = get_test_gene_expr_dataloader(
         n_samples=n_samples,
-        n_genes=n_genes,
-        n_classes=n_classes,
         seq_length=seq_length,
-        regression=regression,
     )
 
-    model = DeepBacGeneReg(config)
+    model = DeepBacGeneExpr(config)
     n_params = count_parameters(model)
     print("Number of trainable model parameters: ", n_params)
 
@@ -111,42 +93,26 @@ def test_model_gene_reg_train_fake_data(tmpdir):
     )
 
 
-def test_model_gene_reg_train_real_data(tmpdir):
-    n_classes = 14
-    regression = True
-    n_bottleneck_layer = 128
+def test_model_gene_expr_train_real_data(tmpdir):
+    n_bottleneck_layer = 32
     n_filters = 256
-    max_epochs = 50
-    batch_size = 3
+    max_epochs = 10
+    batch_size = 20
     max_gene_length = 2048
-    selected_genes = ["PE1", "Rv1716", "Rv2000", "pepC", "pepD"]
-
-    with open("../test_data/reference_gene_seqs.json", "r") as f:
-        reference_gene_seqs_dict = json.load(f)
 
     config = DeepBacConfig(
-        gene_encoder_type="conv_transformer",
-        graph_model_type="transformer",
-        lr=0.01,
+        gene_encoder_type="scbasset",
+        lr=0.001,
         batch_size=batch_size,
-        regression=regression,
         n_gene_bottleneck_layer=n_bottleneck_layer,
         n_init_filters=n_filters,
-        n_output=n_classes,
         max_epochs=max_epochs,
-        train_set_len=None,
-        n_graph_layers=2,
-        n_transformer_heads=4,
     )
 
-    dataloader = get_gene_reg_dataloader(
+    dataloader, dataset_len = get_gene_expr_dataloader(
         batch_size=batch_size,
-        bac_genes_df_file_path="../test_data/sample_agg_variants.parquet",
-        reference_gene_seqs_dict=reference_gene_seqs_dict,
-        phenotype_dataframe_file_path="../test_data/phenotype_labels_with_binary_labels.parquet",
+        bac_genes_df_file_path="../test_data/sample_genes_with_variants_and_expression.parquet",
         max_gene_length=max_gene_length,
-        selected_genes=selected_genes,
-        regression=regression,
         shift_max=0,
         pad_value=0.25,
         reverse_complement_prob=0.0,
@@ -154,8 +120,9 @@ def test_model_gene_reg_train_real_data(tmpdir):
         num_workers=0,
         pin_memory=False,
     )
+    config.train_set_len = dataset_len
 
-    model = DeepBacGeneReg(config)
+    model = DeepBacGeneExpr(config)
     n_params = count_parameters(model)
     print("Number of trainable model parameters: ", n_params)
 

@@ -22,10 +22,10 @@ class DeepBacGeneExpr(pl.LightningModule):
         self.config = config
         self.gene_encoder = get_gene_encoder(config)
         self.decoder = nn.Linear(config.n_gene_bottleneck_layer, 1)
-        self.dropout = nn.Dropout(config.dropout)
+        self.dropout = nn.Dropout(0.2)
 
         # get loss depending on whether we predict LOG2MIC or binary MIC
-        self.loss_fn = nn.MSELoss(reduction="none")
+        self.loss_fn = nn.MSELoss(reduction="mean")
 
     def forward(self, batch_genes_tensor: torch.Tensor) -> torch.Tensor:
         # encode each gene

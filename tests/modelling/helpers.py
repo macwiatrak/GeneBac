@@ -10,7 +10,7 @@ from deep_bac.data_preprocessing.data_reader import _collate_samples
 from deep_bac.data_preprocessing.data_types import BacInputSample
 
 
-class TestBacterialGenomeDataset(Dataset):
+class TestBacGenomeGeneRegDataset(Dataset):
     def __init__(
         self,
         n_samples: int = 100,
@@ -49,7 +49,41 @@ class TestBacterialGenomeDataset(Dataset):
         )
 
 
-def get_test_dataloader(
+class TestBacGenomeGeneExprDataset(Dataset):
+    def __init__(
+        self,
+        n_samples: int = 100,
+        seq_length: int = 1024,
+    ):
+        # (n_samples, n_genes, n_nucletoides, seq_length)
+        self.data = (
+            F.one_hot(
+                torch.randint(0, 4, (n_samples, seq_length)),
+                num_classes=4,
+            )
+            .transpose(-2, -1)
+            .type(torch.float32)
+        )
+
+        self.labels = torch.log(
+            1
+            + torch.normal(
+                torch.zeros(n_samples),
+                1.5 * torch.ones(n_samples),
+            ).abs()
+        )
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        return BacInputSample(
+            input_tensor=self.data[idx],
+            labels=self.labels[idx],
+        )
+
+
+def get_test_gene_reg_dataloader(
     n_samples: int = 100,
     n_genes: int = 5,
     n_classes: int = 4,
@@ -58,12 +92,31 @@ def get_test_dataloader(
     batch_size: int = 10,
     num_workers: int = 0,
 ):
-    dataset = TestBacterialGenomeDataset(
+    dataset = TestBacGenomeGeneRegDataset(
         n_samples=n_samples,
         n_genes=n_genes,
         n_classes=n_classes,
         seq_length=seq_length,
         regression=regression,
+    )
+    return torch.utils.data.DataLoader(
+        dataset,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        shuffle=False,
+        collate_fn=_collate_samples,
+    )
+
+
+def get_test_gene_expr_dataloader(
+    n_samples: int = 100,
+    seq_length: int = 1024,
+    batch_size: int = 10,
+    num_workers: int = 4,
+):
+    dataset = TestBacGenomeGeneExprDataset(
+        n_samples=n_samples,
+        seq_length=seq_length,
     )
     return torch.utils.data.DataLoader(
         dataset,
