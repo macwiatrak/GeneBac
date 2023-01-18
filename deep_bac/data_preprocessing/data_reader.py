@@ -263,39 +263,55 @@ def get_gene_expr_data(
 
 
 def main():
-    input_dir = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
-    with open(os.path.join(input_dir, "reference_gene_seqs.json"), "r") as f:
-        reference_gene_seqs_dict = json.load(f)
-
-    gene_variance_df = pd.read_csv(
-        os.path.join(input_dir, "unnormalised_variance_per_gene.csv")
-    )
-    selected_genes = gene_variance_df["Gene"].tolist()[:1000]
-
-    max_gene_length = 2048
-    dl = get_gene_reg_dataloader(
-        batch_size=32,
-        unique_ids=None,
-        bac_genes_df_file_path=os.path.join(
-            input_dir, "processed-genome-per-strain", "agg_variants.parquet"
-        ),
-        reference_gene_seqs_dict=reference_gene_seqs_dict,
-        phenotype_dataframe_file_path=os.path.join(
-            input_dir, "phenotype_labels_with_binary_labels.parquet"
-        ),
-        max_gene_length=max_gene_length,
-        selected_genes=selected_genes,
+    # input_dir = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
+    # with open(os.path.join(input_dir, "reference_gene_seqs.json"), "r") as f:
+    #     reference_gene_seqs_dict = json.load(f)
+    #
+    # gene_variance_df = pd.read_csv(
+    #     os.path.join(input_dir, "unnormalised_variance_per_gene.csv")
+    # )
+    # selected_genes = gene_variance_df["Gene"].tolist()[:1000]
+    #
+    # max_gene_length = 2048
+    # dl = get_gene_reg_dataloader(
+    #     batch_size=32,
+    #     unique_ids=None,
+    #     bac_genes_df_file_path=os.path.join(
+    #         input_dir, "processed-genome-per-strain", "agg_variants.parquet"
+    #     ),
+    #     reference_gene_seqs_dict=reference_gene_seqs_dict,
+    #     phenotype_dataframe_file_path=os.path.join(
+    #         input_dir, "phenotype_labels_with_binary_labels.parquet"
+    #     ),
+    #     max_gene_length=max_gene_length,
+    #     selected_genes=selected_genes,
+    #     shift_max=3,
+    #     pad_value=0.25,
+    #     reverse_complement_prob=0.5,
+    #     shuffle=True,
+    #     num_workers=os.cpu_count(),
+    #     pin_memory=False,
+    # )
+    #
+    # for _ in tqdm(dl):
+    #     pass
+    # print("Done!")
+    data = get_gene_expr_data(
+        input_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/",
+        batch_size=512,
+        max_gene_length=2048,
         shift_max=3,
         pad_value=0.25,
         reverse_complement_prob=0.5,
-        shuffle=True,
-        num_workers=os.cpu_count(),
-        pin_memory=False,
+        num_workers=8,
+        test=False,
     )
-
-    for _ in tqdm(dl):
+    for _ in tqdm(data.val_dataloader):
         pass
-    print("Done!")
+    print("Val done!")
+    for _ in tqdm(data.train_dataloader):
+        pass
+    print("Train done!")
 
 
 if __name__ == "__main__":

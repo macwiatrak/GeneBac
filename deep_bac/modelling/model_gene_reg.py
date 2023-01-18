@@ -15,7 +15,7 @@ from deep_bac.modelling.utils import (
 )
 
 
-class DeepBac(pl.LightningModule):
+class DeepBacGeneReg(pl.LightningModule):
     def __init__(
         self,
         config: DeepBacConfig,

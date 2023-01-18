@@ -1,14 +1,56 @@
 from typing import List, Dict
 
 import torch
-from torchmetrics.functional import mean_squared_error, mean_absolute_error, r2_score, spearman_corrcoef, \
-    pearson_corrcoef, auroc, accuracy
+from torchmetrics.functional import (
+    mean_squared_error,
+    mean_absolute_error,
+    r2_score,
+    spearman_corrcoef,
+    pearson_corrcoef,
+    auroc,
+    accuracy,
+)
+
+
+def get_regression_metrics(
+    logits: torch.Tensor, labels: torch.Tensor
+) -> Dict[str, torch.Tensor]:
+    """
+    Get metrics for regression task.
+    Returns:
+        dict of metrics
+    """
+    return {
+        "pearson": pearson_corrcoef(logits, labels),
+        "spearman": spearman_corrcoef(logits, labels),
+        "mse": mean_squared_error(logits, labels),
+        "mae": mean_absolute_error(logits, labels),
+        "r2": r2_score(logits, labels),
+    }
+
+
+def binary_cls_metrics(
+    logits: torch.Tensor, labels: torch.Tensor, ignore_index: int
+) -> Dict[str, torch.Tensor]:
+    """
+    Get metrics for binary classification task.
+    Returns:
+        dict of metrics
+    """
+    return {
+        "accuracy": accuracy(
+            logits, labels, task="binary", ignore_index=ignore_index
+        ),
+        "auroc": auroc(
+            logits, labels, task="binary", ignore_index=ignore_index
+        ),
+    }
 
 
 def compute_agg_stats(
-        outputs: List[Dict[str, torch.tensor]],
-        regression: bool,
-        ignore_index: int = -100
+    outputs: List[Dict[str, torch.tensor]],
+    regression: bool,
+    ignore_index: int = -100,
 ) -> Dict[str, torch.Tensor]:
     """
     Compute aggregate statistics from model outputs.
@@ -22,20 +64,14 @@ def compute_agg_stats(
     logits = torch.cat([x["logits"] for x in outputs])
     labels = torch.cat([x["labels"] for x in outputs])
     loss = torch.stack([x["loss"] for x in outputs]).mean()
+    metrics = {"loss": loss}
     if not regression:
-        return {
-            "accuracy": accuracy(logits, labels, task="binary", ignore_index=ignore_index),
-            "auroc": auroc(logits, labels, task="binary", ignore_index=ignore_index),
-            "loss": loss,
-        }
+        bin_cls_metrics = binary_cls_metrics(logits, labels, ignore_index)
+        metrics.update(bin_cls_metrics)
+        return metrics
 
     labels_wo_ignore = labels[labels != ignore_index]
     logits_wo_ignore = logits[labels != ignore_index]
-    return {
-        "pearson": pearson_corrcoef(logits_wo_ignore, labels_wo_ignore),
-        "spearman": spearman_corrcoef(logits_wo_ignore, labels_wo_ignore),
-        "mse": mean_squared_error(logits_wo_ignore, labels_wo_ignore),
-        "mae": mean_absolute_error(logits_wo_ignore, labels_wo_ignore),
-        "r2": r2_score(logits_wo_ignore, labels_wo_ignore),
-        "loss": loss,
-    }
+    reg_metrics = get_regression_metrics(logits_wo_ignore, labels_wo_ignore)
+    metrics.update(reg_metrics)
+    return metrics

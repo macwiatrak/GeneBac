@@ -6,7 +6,7 @@ import pytorch_lightning as pl
 from deep_bac.data_preprocessing.data_reader import get_gene_reg_dataloader
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
 from deep_bac.modelling.data_types import DeepBacConfig
-from deep_bac.modelling.model import DeepBac
+from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
 from deep_bac.modelling.modules.utils import count_parameters
 from tests.modelling.helpers import get_test_dataloader, BasicLogger
 
@@ -32,7 +32,7 @@ def test_model_steps():
         n_output=n_output,
     )
 
-    model = DeepBac(config)
+    model = DeepBacGeneReg(config)
 
     # test forward
     out = model(x)
@@ -92,7 +92,7 @@ def test_model_train_fake_data(tmpdir):
         regression=regression,
     )
 
-    model = DeepBac(config)
+    model = DeepBacGeneReg(config)
     n_params = count_parameters(model)
     print("Number of trainable model parameters: ", n_params)
 
@@ -155,7 +155,7 @@ def test_model_train_real_data(tmpdir):
         pin_memory=False,
     )
 
-    model = DeepBac(config)
+    model = DeepBacGeneReg(config)
     n_params = count_parameters(model)
     print("Number of trainable model parameters: ", n_params)
 
