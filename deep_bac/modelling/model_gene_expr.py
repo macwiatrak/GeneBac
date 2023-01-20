@@ -46,6 +46,8 @@ class DeepBacGeneExpr(pl.LightningModule):
             prog_bar=True,
             logger=True,
             batch_size=self.config.batch_size,
+            on_step=False,
+            on_epoch=True,
         )
         return loss
 
@@ -81,6 +83,8 @@ class DeepBacGeneExpr(pl.LightningModule):
             prog_bar=True,
             logger=True,
             batch_size=self.config.batch_size,
+            on_step=False,
+            on_epoch=True,
         )
         return stats
 
@@ -91,7 +95,7 @@ class DeepBacGeneExpr(pl.LightningModule):
         self.log(
             "test_loss",
             stats["loss"],
-            on_step=True,
+            on_step=False,
             on_epoch=True,
             prog_bar=True,
             logger=True,

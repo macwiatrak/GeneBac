@@ -4,7 +4,7 @@ import pytorch_lightning as pl
 from deep_bac.data_preprocessing.data_reader import get_gene_expr_dataloader
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
 from deep_bac.modelling.data_types import DeepBacConfig
-from deep_bac.modelling.modules.model_gene_expr import DeepBacGeneExpr
+from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
 from deep_bac.modelling.modules.utils import count_parameters
 from tests.modelling.helpers import BasicLogger, get_test_gene_expr_dataloader
 

@@ -53,6 +53,8 @@ class DeepBacGeneReg(pl.LightningModule):
             loss,
             prog_bar=True,
             logger=True,
+            on_step=False,
+            on_epoch=True,
         )
         return loss
 
@@ -89,6 +91,8 @@ class DeepBacGeneReg(pl.LightningModule):
             stats["loss"],
             prog_bar=True,
             logger=True,
+            on_step=False,
+            on_epoch=True,
         )
         return stats
 
@@ -99,7 +103,7 @@ class DeepBacGeneReg(pl.LightningModule):
         self.log(
             "test_loss",
             stats["loss"],
-            on_step=True,
+            on_step=False,
             on_epoch=True,
             prog_bar=True,
             logger=True,
