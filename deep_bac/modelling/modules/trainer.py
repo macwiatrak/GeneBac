@@ -15,6 +15,11 @@ def get_trainer(config: DeepBacConfig, output_dir: str) -> Trainer:
         devices = None
         accelerator = "cpu"
         strategy = None
+
+    monitor_metric = (
+        config.monitor_metric if config.monitor_metric else "val_loss"
+    )
+    mode = "min" if "loss" in config.monitor_metric else "max"
     """Get the trainer"""
     return Trainer(
         default_root_dir=output_dir,
@@ -25,16 +30,16 @@ def get_trainer(config: DeepBacConfig, output_dir: str) -> Trainer:
         gradient_clip_val=config.gradient_clip_val,
         callbacks=[
             EarlyStopping(
-                monitor="val_loss",
+                monitor=monitor_metric,
                 patience=config.early_stopping_patience,
-                mode="min",
+                mode=mode,
             ),
-            # ModelCheckpoint(
-            #     monitor="val_loss",
-            #     mode="min",
-            #     save_top_k=1,
-            #     save_last=True,
-            # ),
+            ModelCheckpoint(
+                monitor=monitor_metric,
+                mode=mode,
+                save_top_k=1,
+                save_last=True,
+            ),
         ],
         logger=TensorBoardLogger(output_dir),
         accumulate_grad_batches=config.accumulate_grad_batches,
