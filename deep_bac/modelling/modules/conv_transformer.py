@@ -8,15 +8,15 @@ from deep_bac.modelling.modules.layers import ConvLayer, DenseLayer
 
 class ConvTransformerEncoder(nn.Module):
     def __init__(
-            self,
-            n_bottleneck_layer: int = 128,
-            n_filters: int = 256,
-            kernel_size: int = 24,
-            pool_size: int = 8,
-            batch_norm: bool = True,
-            dropout: float = 0.,
-            n_transformer_layers: int = 1,
-            n_transformer_heads: int = 8,
+        self,
+        n_bottleneck_layer: int = 128,
+        n_filters: int = 256,
+        kernel_size: int = 24,
+        pool_size: int = 8,
+        batch_norm: bool = True,
+        dropout: float = 0.0,
+        n_transformer_layers: int = 1,
+        n_transformer_heads: int = 8,
     ):
         super().__init__()
         self.n_botlleneck_layer = n_bottleneck_layer
@@ -36,19 +36,17 @@ class ConvTransformerEncoder(nn.Module):
             dim_feedforward=n_filters * 4,
             batch_first=True,
         )
-        self.transformer = nn.TransformerEncoder(transformer_layer, num_layers=n_transformer_layers)
+        self.transformer = nn.TransformerEncoder(
+            transformer_layer, num_layers=n_transformer_layers
+        )
         self.dense_layer = DenseLayer(
-            in_features=2*n_filters,
+            in_features=2 * n_filters,
             out_features=n_bottleneck_layer,
             dropout=0.2,
-            activation_fn=nn.ReLU()
+            activation_fn=nn.ReLU(),
         )
 
     def forward(self, x: torch.Tensor):
-        # x: (batch_size, n_genes, in_channels, seq_length)
-        batch_size, n_genes, n_channels, seq_length = x.shape
-        # reshape the input to allow the convolutional layer to work
-        x = x.view(batch_size * n_genes, n_channels, seq_length)
         # pass through layers
         x = self.conv_layer(x)
         x = self.rearrange_fn(x)
@@ -57,6 +55,4 @@ class ConvTransformerEncoder(nn.Module):
         # concatenate the max and mean pooling
         x = torch.cat([x.max(dim=1)[0], x.mean(dim=1)], dim=1)
         x = self.dense_layer(x)
-        # reshape to out: (batch_size, n_genes, n_bottleneck_layer)
-        out = x.view(batch_size, n_genes, self.n_botlleneck_layer)
-        return out
+        return x

@@ -14,7 +14,7 @@ class DeepBacConfig:
     regression: bool = False
     lr: float = 0.001
     batch_size: int = 1
-    n_gene_bottleneck_layer: int = 128
+    n_gene_bottleneck_layer: int = 64
     n_init_filters: int = 256
     n_transformer_heads: int = 4
     n_graph_layers: int = 2
@@ -26,6 +26,6 @@ class DeepBacConfig:
     gradient_clip_val: float = 1.0
     early_stopping_patience: int = 10
     accumulate_grad_batches: int = 1
-    monitor_metric = Literal[
+    monitor_metric: Literal[
         "val_loss", "val_auroc", "val_r2", "val_spearmann"
     ] = "val_loss"

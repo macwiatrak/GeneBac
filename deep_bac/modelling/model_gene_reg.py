@@ -22,6 +22,7 @@ class DeepBacGeneReg(pl.LightningModule):
     ):
         super().__init__()
         self.config = config
+        self.n_bottleneck_layer = config.n_gene_bottleneck_layer
         self.gene_encoder = get_gene_encoder(config)
         self.graph_model = get_graph_model(config)
 
@@ -34,8 +35,18 @@ class DeepBacGeneReg(pl.LightningModule):
         )
 
     def forward(self, batch_genes_tensor: torch.Tensor) -> torch.Tensor:
+        # x: (batch_size, n_genes, in_channels, seq_length)
+        batch_size, n_genes, n_channels, seq_length = batch_genes_tensor.shape
+        # reshape the input to allow the convolutional layer to work
+        x = batch_genes_tensor.view(
+            batch_size * n_genes, n_channels, seq_length
+        )
         # encode each gene
-        gene_encodings = self.gene_encoder(batch_genes_tensor)
+        gene_encodings = self.gene_encoder(x)
+        # reshape to out: (batch_size, n_genes, n_bottleneck_layer)
+        gene_encodings = gene_encodings.view(
+            batch_size, n_genes, self.n_bottleneck_layer
+        )
         # pass the genes through the graph encoder
         logits = self.graph_model(gene_encodings)
         return logits

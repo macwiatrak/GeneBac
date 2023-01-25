@@ -1,6 +1,10 @@
 import torch.cuda
 from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
+from pytorch_lightning.callbacks import (
+    EarlyStopping,
+    ModelCheckpoint,
+    TQDMProgressBar,
+)
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from deep_bac.modelling.data_types import DeepBacConfig
@@ -40,8 +44,8 @@ def get_trainer(config: DeepBacConfig, output_dir: str) -> Trainer:
                 save_top_k=1,
                 save_last=True,
             ),
+            TQDMProgressBar(refresh_rate=200),
         ],
         logger=TensorBoardLogger(output_dir),
         accumulate_grad_batches=config.accumulate_grad_batches,
-        log_every_n_steps=200,
     )

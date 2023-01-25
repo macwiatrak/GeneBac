@@ -2,6 +2,7 @@ import json
 
 import torch
 import pytorch_lightning as pl
+from pytorch_lightning.callbacks import TQDMProgressBar
 
 from deep_bac.data_preprocessing.data_reader import get_gene_reg_dataloader
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
@@ -17,14 +18,14 @@ def test_model_gene_reg_steps():
     seq_length = 2048
     in_channels = 4
     n_filters = 256
-    n_bottleneck_layer = 128
+    n_bottleneck_layer = 64
     n_output = 5
 
     x = torch.rand(batch_size, n_genes, in_channels, seq_length)
     labels = torch.empty(batch_size, n_output).random_(2)
 
     config = DeepBacConfig(
-        gene_encoder_type="conv_transformer",
+        gene_encoder_type="scbasset",
         graph_model_type="transformer",
         regression=False,
         n_gene_bottleneck_layer=n_bottleneck_layer,
@@ -62,15 +63,15 @@ def test_model_gene_reg_train_fake_data(tmpdir):
     n_samples = 100
     n_genes = 5
     n_classes = 4
-    seq_length = 1024
+    seq_length = 2048
     regression = False
-    n_bottleneck_layer = 128
+    n_bottleneck_layer = 64
     n_filters = 256
     max_epochs = 20
     batch_size = 10
 
     config = DeepBacConfig(
-        gene_encoder_type="conv_transformer",
+        gene_encoder_type="scbasset",
         graph_model_type="transformer",
         lr=0.001,
         batch_size=batch_size,
@@ -114,7 +115,7 @@ def test_model_gene_reg_train_fake_data(tmpdir):
 def test_model_gene_reg_train_real_data(tmpdir):
     n_classes = 14
     regression = True
-    n_bottleneck_layer = 128
+    n_bottleneck_layer = 64
     n_filters = 256
     max_epochs = 50
     batch_size = 3
@@ -125,9 +126,9 @@ def test_model_gene_reg_train_real_data(tmpdir):
         reference_gene_seqs_dict = json.load(f)
 
     config = DeepBacConfig(
-        gene_encoder_type="conv_transformer",
+        gene_encoder_type="scbasset",
         graph_model_type="transformer",
-        lr=0.01,
+        lr=0.001,
         batch_size=batch_size,
         regression=regression,
         n_gene_bottleneck_layer=n_bottleneck_layer,
@@ -166,6 +167,7 @@ def test_model_gene_reg_train_real_data(tmpdir):
         enable_checkpointing=True,
         gradient_clip_val=1.0,
         logger=logger,
+        callbacks=[TQDMProgressBar(refresh_rate=2)],
     )
     trainer.fit(model, train_dataloaders=dataloader, val_dataloaders=dataloader)
     assert logger.val_logs[-1]["val_loss"] < logger.val_logs[0]["val_loss"]
