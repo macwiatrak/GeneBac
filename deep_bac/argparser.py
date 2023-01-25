@@ -19,7 +19,7 @@ class TrainArgumentParser(Tap):
     graph_model_type: Literal["transformer"] = "transformer"
     regression: bool = False
     lr: float = 1e-3
-    n_gene_bottleneck_layer: int = 128
+    n_gene_bottleneck_layer: int = 64
     n_init_filters: int = 256
     n_transformer_heads: int = 8
     n_graph_layers: int = 4
