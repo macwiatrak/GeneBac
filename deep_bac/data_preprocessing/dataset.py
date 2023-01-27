@@ -26,8 +26,10 @@ class BacGenomeGeneRegDataset(Dataset):
         shift_max: int = 3,
         pad_value: float = 0.25,
         reverse_complement_prob: float = 0.5,
+        use_drug_idx: int = None,
     ):
         self.genes_df = pd.read_parquet(bac_genes_df_file_path)
+        self.use_drug_idx = use_drug_idx
         # get unique ids
         self.unique_ids = unique_ids
         if not self.unique_ids:
@@ -40,6 +42,13 @@ class BacGenomeGeneRegDataset(Dataset):
             self.id_to_labels_df = pd.read_parquet(
                 phenotype_dataframe_file_path, columns=[self.label_column]
             )
+        if use_drug_idx is not None:
+            unq_ids = [
+                idx
+                for idx, row in self.id_to_labels_df.iterrows()
+                if row[self.label_column][use_drug_idx] != -100.0
+            ]
+            self.unique_ids = [idx for idx in self.unique_ids if idx in unq_ids]
 
         self.max_gene_length = max_gene_length
         self.shift_max = shift_max
@@ -111,10 +120,18 @@ class BacGenomeGeneRegDataset(Dataset):
 
         labels = None
         if self.id_to_labels_df is not None:
-            labels = torch.tensor(
-                self.id_to_labels_df.loc[unq_id][self.label_column],
-                dtype=torch.float32,
-            )
+            if self.use_drug_idx:
+                labels = torch.tensor(
+                    self.id_to_labels_df.loc[unq_id][self.label_column][
+                        self.use_drug_idx
+                    ],
+                    dtype=torch.float32,
+                )
+            else:
+                labels = torch.tensor(
+                    self.id_to_labels_df.loc[unq_id][self.label_column],
+                    dtype=torch.float32,
+                )
 
         return BacInputSample(
             input_tensor=genes_tensor,

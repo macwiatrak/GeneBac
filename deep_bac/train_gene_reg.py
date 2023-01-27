@@ -19,6 +19,7 @@ def run(
     input_dir: str,
     output_dir: str,
     n_highly_variable_genes: int = 500,
+    use_drug_idx: int = None,
     max_gene_length: int = 2048,
     shift_max: int = 3,
     pad_value: float = 0.25,
@@ -46,6 +47,7 @@ def run(
         max_gene_length=max_gene_length,
         n_highly_variable_genes=n_highly_variable_genes,
         regression=config.regression,
+        use_drug_idx=use_drug_idx,
         batch_size=config.batch_size,
         shift_max=shift_max,
         pad_value=pad_value,
@@ -55,6 +57,9 @@ def run(
     logging.info("Finished loading data")
 
     config.train_set_len = data.train_set_len
+    if use_drug_idx is not None:
+        config.n_output = 1
+
     trainer = get_trainer(config, output_dir)
     model = DeepBacGeneReg(config)
 
@@ -84,6 +89,7 @@ def main(args):
         num_workers=args.num_workers,
         test=args.test,
         ckpt_path=args.ckpt_path,
+        use_drug_idx=args.use_drug_idx,
     )
 
 
