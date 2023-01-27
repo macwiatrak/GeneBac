@@ -29,7 +29,7 @@ class DeepBacGeneReg(pl.LightningModule):
         self.regression = config.regression
         # get loss depending on whether we predict LOG2MIC or binary MIC
         self.loss_fn = (
-            nn.MSELoss(reduction="none")
+            nn.MSELoss(reduction="mean")
             if self.regression
             else nn.BCEWithLogitsLoss(reduction="none")
         )
@@ -56,9 +56,9 @@ class DeepBacGeneReg(pl.LightningModule):
     ) -> torch.Tensor:
         logits = self(batch.input_tensor)
         # get loss with reduction="none" to compute loss per sample
-        loss = self.loss_fn(logits, batch.labels)
+        loss = self.loss_fn(logits.view(-1), batch.labels.view(-1))
         # remove loss for samples with no label and compute mean
-        loss = remove_ignore_index(loss, batch.labels).mean()
+        # loss = remove_ignore_index(loss, batch.labels).mean()
         self.log(
             "train_loss",
             loss,
@@ -73,7 +73,7 @@ class DeepBacGeneReg(pl.LightningModule):
         logits = self(batch.input_tensor)
         loss = self.loss_fn(logits.view(-1), batch.labels.view(-1))
         # remove loss for samples with no label and compute mean
-        loss = remove_ignore_index(loss, batch.labels).mean()
+        # loss = remove_ignore_index(loss, batch.labels).mean()
         return dict(
             loss=loss,
             logits=logits,
