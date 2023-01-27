@@ -29,3 +29,4 @@ class DeepBacConfig:
     monitor_metric: Literal[
         "val_loss", "val_auroc", "val_r2", "val_spearmann"
     ] = "val_loss"
+    n_highly_variable_genes: int = 500

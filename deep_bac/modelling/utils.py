@@ -1,8 +1,10 @@
 import torch
+from torch import nn
 
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
 from deep_bac.modelling.modules.graph_transformer import GraphTransformer
+from deep_bac.modelling.modules.layers import DenseLayer
 from deep_bac.modelling.modules.scBasset_encoder import scBassetEncoder
 
 
@@ -40,5 +42,18 @@ def get_graph_model(config: DeepBacConfig):
             n_output=config.n_output,
             n_layers=config.n_graph_layers,
             n_heads=config.n_transformer_heads,
+        )
+
+    if config.graph_model_type == "dense_flat":
+        return nn.Sequential(
+            DenseLayer(
+                in_features=config.n_gene_bottleneck_layer
+                * config.n_highly_variable_genes,
+                out_features=config.n_gene_bottleneck_layer,
+            ),
+            nn.Linear(
+                in_features=config.n_gene_bottleneck_layer,
+                out_features=config.n_output,
+            ),
         )
     raise ValueError(f"Unknown graph model type: {config.graph_model_type}")
