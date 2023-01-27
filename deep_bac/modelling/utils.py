@@ -17,6 +17,11 @@ def remove_ignore_index(
     return loss
 
 
+class Flatten(nn.Module):
+    def forward(self, x):
+        return x.view(x.size(0), -1)
+
+
 def get_gene_encoder(config: DeepBacConfig):
     """Get the gene encoder"""
     if config.gene_encoder_type == "conv_transformer":
@@ -46,6 +51,7 @@ def get_graph_model(config: DeepBacConfig):
 
     if config.graph_model_type == "dense_flat":
         return nn.Sequential(
+            Flatten(),
             DenseLayer(
                 in_features=config.n_gene_bottleneck_layer
                 * config.n_highly_variable_genes,
