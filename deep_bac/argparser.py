@@ -40,3 +40,6 @@ class TrainArgumentParser(Tap):
     warmup_proportion: float = 0.1
     gradient_clip_val: float = 1.0
     accumulate_grad_batches: int = 1
+    monitor_metric: Literal[
+        "val_loss", "val_auroc", "val_r2", "val_spearmann"
+    ] = "val_loss"
