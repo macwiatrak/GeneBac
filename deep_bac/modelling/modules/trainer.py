@@ -39,6 +39,8 @@ def get_trainer(config: DeepBacConfig, output_dir: str) -> Trainer:
                 mode=mode,
             ),
             ModelCheckpoint(
+                dirpath=output_dir,
+                filename="{epoch:02d}-{val_loss:.4f}",
                 monitor=monitor_metric,
                 mode=mode,
                 save_top_k=1,
