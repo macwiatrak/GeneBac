@@ -1,0 +1,17 @@
+ISONIAZID_GENES = [
+    "katG",
+    "proA",
+    "ahpC",
+    "fabG1",
+    "rpoB",
+    "inhA",
+    "embB",
+    "Rv1139",
+    "Rv1140",
+    "Rv1158c",
+    "rpsL",
+    "Rv1219c",
+    "ftsK",
+    "Rv2749",
+    "gid",
+]

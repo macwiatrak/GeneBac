@@ -9,7 +9,7 @@ from deep_bac.data_preprocessing.data_reader import get_gene_reg_data
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
 from deep_bac.modelling.modules.trainer import get_trainer
-
+from deep_bac.utis import ISONIAZID_GENES
 
 logging.basicConfig(level=logging.INFO)
 
@@ -53,6 +53,7 @@ def run(
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
         num_workers=num_workers if num_workers is not None else os.cpu_count(),
+        selected_genes=ISONIAZID_GENES,
     )
     logging.info("Finished loading data")
 
