@@ -10,7 +10,7 @@ class DeepBacConfig:
     gene_encoder_type: Literal[
         "conv_transformer", "scbasset"
     ] = "conv_transformer"
-    graph_model_type: Literal["transformer"] = "transformer"
+    graph_model_type: Literal["transformer", "dense"] = "transformer"
     regression: bool = False
     lr: float = 0.001
     batch_size: int = 1

@@ -49,7 +49,7 @@ def get_graph_model(config: DeepBacConfig):
             n_heads=config.n_transformer_heads,
         )
 
-    if config.graph_model_type == "dense_flat":
+    if config.graph_model_type == "dense":
         return nn.Sequential(
             Flatten(),
             DenseLayer(
