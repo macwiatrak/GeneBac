@@ -31,7 +31,7 @@ class DeepBacGeneReg(pl.LightningModule):
         self.loss_fn = (
             nn.MSELoss(reduction="mean")
             if self.regression
-            else nn.BCEWithLogitsLoss(reduction="none")
+            else nn.BCEWithLogitsLoss(reduction="mean")
         )
 
     def forward(self, batch_genes_tensor: torch.Tensor) -> torch.Tensor:

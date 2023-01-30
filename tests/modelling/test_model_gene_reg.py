@@ -72,7 +72,7 @@ def test_model_gene_reg_train_fake_data(tmpdir):
 
     config = DeepBacConfig(
         gene_encoder_type="scbasset",
-        graph_model_type="transformer",
+        graph_model_type="dense",
         lr=0.001,
         batch_size=batch_size,
         regression=regression,
@@ -83,6 +83,7 @@ def test_model_gene_reg_train_fake_data(tmpdir):
         train_set_len=n_samples,
         n_graph_layers=2,
         n_transformer_heads=4,
+        n_highly_variable_genes=n_genes,
     )
 
     dataloader = get_test_gene_reg_dataloader(
@@ -114,7 +115,7 @@ def test_model_gene_reg_train_fake_data(tmpdir):
 
 def test_model_gene_reg_train_real_data(tmpdir):
     n_classes = 14
-    regression = True
+    regression = False
     n_bottleneck_layer = 64
     n_filters = 256
     max_epochs = 50
@@ -138,6 +139,7 @@ def test_model_gene_reg_train_real_data(tmpdir):
         train_set_len=None,
         n_graph_layers=2,
         n_transformer_heads=4,
+        n_highly_variable_genes=len(selected_genes),
     )
 
     dataloader = get_gene_reg_dataloader(
