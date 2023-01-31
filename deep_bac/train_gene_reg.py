@@ -60,6 +60,7 @@ def run(
     config.train_set_len = data.train_set_len
     if use_drug_idx is not None:
         config.n_output = 1
+    config.n_highly_variable_genes = len(ISONIAZID_GENES)
 
     trainer = get_trainer(config, output_dir)
     model = DeepBacGeneReg(config)
