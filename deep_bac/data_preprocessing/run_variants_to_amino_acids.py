@@ -45,8 +45,6 @@ def apply_variants_to_a_gene(
     for ref, alt, nucleotide_nr, is_indel in zip(
         row["REF"], row["ALT"], row["NUCLEOTIDE_NUMBER"], row["IS_INDEL"]
     ):
-        if nucleotide_nr < 0:
-            continue
         # get len of the ref to see where we stopped
         len_variant = len(ref)
         # get this for sanity assertions later
@@ -83,7 +81,6 @@ def apply_variants_to_a_gene(
     amino_acids_seq = Seq(gene_seq_w_variants).translate(
         to_stop=True, table="Bacterial"
     )
-    # TODO: translate it to amino acids
 
     return dict(
         amino_acids_seq_w_variants=str(amino_acids_seq),
@@ -129,10 +126,6 @@ def run(
         genome_assembly=genome_assembly,
         prom_seq_len=0,
     )
-    # with open(os.path.join(output_dir, "gene_data_dict.json"), "w") as f:
-    #     gene_data_dict = {k: v.to_dict() for k, v in gene_data_dict.items()}
-    #     json.dump(gene_data_dict, f)
-    # logging.info("Finished saving gene data dict")
 
     # get unique ids to use
     strain_w_phenotype_ids = get_strain_w_phenotype_ids(
@@ -144,6 +137,7 @@ def run(
     variants_df = get_and_filter_variants_df(
         file_path=os.path.join(input_dir, VARIANTS_FILE_NAME),
         unique_ids_to_use=strain_w_phenotype_ids,
+        use_cds=True,
     )
     logging.info("Finished reading variants")
 

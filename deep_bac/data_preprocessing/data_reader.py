@@ -12,10 +12,8 @@ from deep_bac.data_preprocessing.data_types import (
     BatchBacInputSample,
     DataReaderOutput,
 )
-from deep_bac.data_preprocessing.dataset import (
-    BacGenomeGeneRegDataset,
-    BacGenomeGeneExprDataset,
-)
+from deep_bac.data_preprocessing.datasets.gene_expression import GeneExprDataset
+from deep_bac.data_preprocessing.datasets.gene_reg_dna import DnaGeneRegDataset
 
 VARIANCE_PER_GENE_FILE_PATH = (
     "/Users/maciejwiatrak/Desktop/bacterial_genomics/"
@@ -60,7 +58,7 @@ def get_gene_reg_dataloader(
     num_workers: int = 4,
     pin_memory: bool = True,
 ) -> DataLoader:
-    dataset = BacGenomeGeneRegDataset(
+    dataset = DnaGeneRegDataset(
         unique_ids=unique_ids,
         bac_genes_df_file_path=bac_genes_df_file_path,
         reference_gene_seqs_dict=reference_gene_seqs_dict,
@@ -194,7 +192,7 @@ def get_gene_expr_dataloader(
     num_workers: int = 4,
     pin_memory: bool = True,
 ) -> Tuple[DataLoader, int]:
-    dataset = BacGenomeGeneExprDataset(
+    dataset = GeneExprDataset(
         bac_genes_df_file_path=bac_genes_df_file_path,
         max_gene_length=max_gene_length,
         shift_max=shift_max,

@@ -1,9 +1,7 @@
 import torch
 
-from deep_bac.data_preprocessing.dataset import (
-    BacGenomeGeneRegDataset,
-    BacGenomeGeneExprDataset,
-)
+from deep_bac.data_preprocessing.datasets.gene_expression import GeneExprDataset
+from deep_bac.data_preprocessing.datasets.gene_reg_dna import DnaGeneRegDataset
 
 
 def test_bac_genome_gene_reg_dataset():
@@ -15,7 +13,7 @@ def test_bac_genome_gene_reg_dataset():
     max_gene_length = 1000
     reference_gene_seqs_dict = {gene: "atcgt" * 100 for gene in selected_genes}
 
-    dataset = BacGenomeGeneRegDataset(
+    dataset = DnaGeneRegDataset(
         unique_ids=None,
         bac_genes_df_file_path="../test_data/sample_agg_variants.parquet",
         reference_gene_seqs_dict=reference_gene_seqs_dict,
@@ -47,7 +45,7 @@ def test_bac_genome_gene_expr_dataset():
     n_nucleotides = 4
     max_gene_length = 2048
 
-    dataset = BacGenomeGeneExprDataset(
+    dataset = GeneExprDataset(
         bac_genes_df_file_path="../test_data/sample_genes_with_variants_and_expression.parquet",
         max_gene_length=max_gene_length,
         shift_max=3,

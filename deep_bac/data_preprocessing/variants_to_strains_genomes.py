@@ -18,8 +18,11 @@ def get_and_filter_variants_df(
     file_path: str,
     unique_ids_to_use: Set[str],
     cols_to_use: List[str] = VARIANTS_COLS_TO_USE,
+    use_cds: bool = False,
 ) -> pd.DataFrame:
     # filter cols
+    if use_cds:
+        cols_to_use.append("IN_CDS")
     df = pd.read_csv(
         file_path,
         usecols=cols_to_use,
@@ -29,6 +32,8 @@ def get_and_filter_variants_df(
     # filter unique ids
     df = df[df["UNIQUEID"].isin(unique_ids_to_use)]
     df = df[~df["GENE"].isna()]
+    if use_cds:
+        return df[df["IN_CDS"]]
     return df
 
 
