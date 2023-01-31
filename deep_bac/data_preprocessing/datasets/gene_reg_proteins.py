@@ -10,7 +10,7 @@ from torch.utils.data import Dataset
 from deep_bac.data_preprocessing.data_types import BacInputSample
 
 
-def get_esm_embedding(
+def get_esm_embeddings(
     model, batch_converter, padding_idx: int, seqs: List[str]
 ) -> torch.Tensor:
     data = [(f"protein_{idx}", seq) for idx, seq in enumerate(seqs)]
@@ -43,8 +43,14 @@ class ProteinGeneRegDataset(Dataset):
         self.genes_df = pd.read_parquet(bac_genes_df_file_path)
         self.use_drug_idx = use_drug_idx
         self.model, self.alphabet = esm.pretrained.esm2_t33_650M_UR50D()
+        batch_converter = self.alphabet.get_batch_converter()
         self.model.eval()
-        self.get_esm_embedding_fn = partial(get_esm_embedding, self.model)
+        self.get_esm_embedding_fn = partial(
+            get_esm_embeddings,
+            self.model,
+            batch_converter,
+            self.alphabet.padding_idx,
+        )
         # get unique ids
         self.unique_ids = unique_ids
         if not self.unique_ids:
@@ -104,7 +110,6 @@ class ProteinGeneRegDataset(Dataset):
             else:
                 seq = self.reference_gene_aa_seqs_df.iloc[idx]["seq"]
                 variants_in_protein.append(0)
-            # TODO: Use ESM to get embedding of the sequence
             protein_embedding = self.get_esm_embedding_fn(seq)
             protein_tensor.append(protein_embedding)
 
