@@ -43,3 +43,4 @@ class TrainArgumentParser(Tap):
     monitor_metric: Literal[
         "val_loss", "val_auroc", "val_r2", "val_spearmann"
     ] = "val_loss"
+    use_drug_specific_genes: Literal["INH"] = None
