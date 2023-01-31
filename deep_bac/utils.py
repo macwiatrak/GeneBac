@@ -6,7 +6,7 @@ ISONIAZID_GENES = [
     "rpoB",
     "inhA",
     "embB",
-    "Rv1139",
+    "Rv1139c",
     "Rv1140",
     "Rv1158c",
     "rpsL",
