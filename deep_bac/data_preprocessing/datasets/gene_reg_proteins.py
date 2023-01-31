@@ -110,7 +110,7 @@ class ProteinGeneRegDataset(Dataset):
             else:
                 seq = self.reference_gene_aa_seqs_df.iloc[idx]["seq"]
                 variants_in_protein.append(0)
-            protein_embedding = self.get_esm_embedding_fn(seq)
+            protein_embedding = self.get_esm_embedding_fn([seq])
             protein_tensor.append(protein_embedding)
 
         protein_tensor = torch.cat(protein_tensor)

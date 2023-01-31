@@ -131,32 +131,32 @@ def get_gene_reg_prot_data(
 
 def main():
     input_dir = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
-    with open(os.path.join(input_dir, "reference_gene_seqs.json"), "r") as f:
+    with open(
+        os.path.join(input_dir, "data", "reference_gene_amino_acid_seqs.json"),
+        "r",
+    ) as f:
         reference_gene_seqs_dict = json.load(f)
 
     gene_variance_df = pd.read_csv(
         os.path.join(input_dir, "unnormalised_variance_per_gene.csv")
     )
-    selected_genes = gene_variance_df["Gene"].tolist()[:1000]
+    selected_genes = gene_variance_df["Gene"].tolist()[:10]
 
-    max_gene_length = 2048
     dl = get_gene_reg_prot_dataloader(
-        batch_size=32,
+        batch_size=2,
         unique_ids=None,
         bac_genes_df_file_path=os.path.join(
-            input_dir, "processed-genome-per-strain", "agg_variants.parquet"
+            input_dir,
+            "processed-amino-acids-per-strain",
+            "agg_variants.parquet",
         ),
         reference_gene_seqs_dict=reference_gene_seqs_dict,
         phenotype_dataframe_file_path=os.path.join(
-            input_dir, "phenotype_labels_with_binary_labels.parquet"
+            input_dir, "data", "phenotype_labels_with_binary_labels.parquet"
         ),
-        max_gene_length=max_gene_length,
         selected_genes=selected_genes,
-        shift_max=3,
-        pad_value=0.25,
-        reverse_complement_prob=0.5,
         shuffle=True,
-        num_workers=os.cpu_count(),
+        num_workers=0,
         pin_memory=False,
     )
 
