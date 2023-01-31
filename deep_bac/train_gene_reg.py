@@ -5,7 +5,9 @@ from typing import Optional, Literal
 from pytorch_lightning.utilities.seed import seed_everything
 
 from deep_bac.argparser import TrainArgumentParser
-from deep_bac.data_preprocessing.data_reader import get_gene_reg_data
+from deep_bac.data_preprocessing.data_readers.gene_reg_dna import (
+    get_gene_reg_dna_data,
+)
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
 from deep_bac.modelling.modules.trainer import get_trainer
@@ -30,7 +32,7 @@ def run(
     use_drug_specific_genes: Literal["INH"] = None,
 ):
     selected_genes = get_selected_genes(use_drug_specific_genes)
-    data = get_gene_reg_data(
+    data = get_gene_reg_dna_data(
         input_df_file_path=os.path.join(
             input_dir, "processed_agg_variants.parquet"
         ),

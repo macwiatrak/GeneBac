@@ -5,7 +5,9 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import TQDMProgressBar, ModelCheckpoint
 
-from deep_bac.data_preprocessing.data_reader import get_gene_reg_dataloader
+from deep_bac.data_preprocessing.data_readers.gene_reg_dna import (
+    get_gene_reg_dna_dataloader,
+)
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
@@ -143,7 +145,7 @@ def test_model_gene_reg_train_real_data(tmpdir):
         n_highly_variable_genes=len(selected_genes),
     )
 
-    dataloader = get_gene_reg_dataloader(
+    dataloader = get_gene_reg_dna_dataloader(
         batch_size=batch_size,
         bac_genes_df_file_path="../test_data/sample_agg_variants.parquet",
         reference_gene_seqs_dict=reference_gene_seqs_dict,

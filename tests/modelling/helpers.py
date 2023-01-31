@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from pytorch_lightning.loggers import LightningLoggerBase
 from torch.utils.data import Dataset
 
-from deep_bac.data_preprocessing.data_reader import _collate_samples
+from deep_bac.data_preprocessing.data_readers.utils import _collate_samples
 from deep_bac.data_preprocessing.data_types import BacInputSample
 
 

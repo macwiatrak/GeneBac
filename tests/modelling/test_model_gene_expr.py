@@ -1,7 +1,9 @@
 import torch
 import pytorch_lightning as pl
 
-from deep_bac.data_preprocessing.data_reader import get_gene_expr_dataloader
+from deep_bac.data_preprocessing.data_readers.gene_expression import (
+    get_gene_expr_dataloader,
+)
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
