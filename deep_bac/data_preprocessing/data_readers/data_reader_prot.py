@@ -152,7 +152,7 @@ def main():
     )
     out = []
     vals = list(reference_gene_seqs_dict.values())
-    for seq in tqdm(vals):
+    for seq in tqdm(vals, mininterval=300):
         out.append(get_esm_embedding_fn(seq))
     output = torch.cat(out)
     torch.save(
