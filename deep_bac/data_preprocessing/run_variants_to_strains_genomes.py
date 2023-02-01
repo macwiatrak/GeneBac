@@ -122,7 +122,7 @@ def run(
     mean_ref_correct_ratio = agg_variants_df["ref_correct_ratio"].mean()
     std_ref_correct_ratio = agg_variants_df["ref_correct_ratio"].std()
     logging.info(
-        f"Mean ref correct ratio: {mean_ref_correct_ratio}"
+        f"Mean ref correct ratio: {mean_ref_correct_ratio}\n"
         f"Std ref correct ratio: {std_ref_correct_ratio}"
     )
 
@@ -134,7 +134,7 @@ def run(
 def main():
     run(
         input_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/",
-        output_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/processed-genome-per-strain/",
+        output_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/processed-genome-per-strain-2/",
         prom_seq_len=100,
     )
 
