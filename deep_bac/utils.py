@@ -1,6 +1,31 @@
 from typing import Literal
 
 DRUG_SPECIFIC_GENES_DICT = {
+    "All": [
+        "ahpC",
+        "fabG1",
+        "inhA",
+        "katG",
+        "ndh",
+        "rpoB",
+        "embA",
+        "embB",
+        "embC",
+        "embR",
+        "iniA",
+        "iniC",
+        "manB",
+        "rmlD",
+        "pncA",
+        "rpsA",
+        "gyrA",
+        "gyrB",
+        "rpsL",
+        "gid",
+        "rrs",
+        "tlyA",
+        "eis",
+    ],
     "INH": [
         "katG",
         "proA",
@@ -17,7 +42,7 @@ DRUG_SPECIFIC_GENES_DICT = {
         "ftsK",
         "Rv2749",
         "gid",
-    ]
+    ],
 }
 
 
