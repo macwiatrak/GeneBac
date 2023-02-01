@@ -134,9 +134,9 @@ def get_gene_reg_prot_data(
 
 
 def main():
-    input_dir = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
+    input_dir = "/home/mw896/projects/deep-bac/data/input-data/"
     with open(
-        os.path.join(input_dir, "data", "reference_gene_amino_acid_seqs.json"),
+        os.path.join(input_dir, "reference_gene_amino_acid_seqs.json"),
         "r",
     ) as f:
         reference_gene_seqs_dict = json.load(f)
@@ -157,7 +157,7 @@ def main():
     output = torch.cat(out)
     torch.save(
         output,
-        os.path.join(input_dir, "data", f"reference_gene_esm_embeddings.pt"),
+        os.path.join(input_dir, "reference_gene_esm_embeddings.pt"),
     )
 
     # gene_variance_df = pd.read_csv(
