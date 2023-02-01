@@ -5,20 +5,30 @@ import pandas as pd
 from deep_bac.data_preprocessing.utils import get_complement
 
 VARIANTS_COLS_TO_USE = [
-    'UNIQUEID', 'REF', 'ALT', 'GENE', 'NUCLEOTIDE_NUMBER', 'IS_INDEL'
+    "UNIQUEID",
+    "REF",
+    "ALT",
+    "GENE",
+    "NUCLEOTIDE_NUMBER",
+    "IS_INDEL",
 ]
 
 
 def get_and_filter_variants_df(
-        file_path: str,
-        unique_ids_to_use: Set[str],
-        cols_to_use: List[str] = VARIANTS_COLS_TO_USE,
+    file_path: str,
+    unique_ids_to_use: Set[str],
+    cols_to_use: List[str] = VARIANTS_COLS_TO_USE,
 ) -> pd.DataFrame:
     # filter cols
-    df = pd.read_csv(file_path, usecols=cols_to_use, compression='gzip', error_bad_lines=False)
+    df = pd.read_csv(
+        file_path,
+        usecols=cols_to_use,
+        compression="gzip",
+        error_bad_lines=False,
+    )
     # filter unique ids
-    df = df[df['UNIQUEID'].isin(unique_ids_to_use)]
-    df = df[~df['GENE'].isna()]
+    df = df[df["UNIQUEID"].isin(unique_ids_to_use)]
+    df = df[~df["GENE"].isna()]
     return df
 
 
@@ -41,8 +51,10 @@ def retrieve_idxs_neg_strand(nucleotide_nr: int, ref_len: int, is_indel: bool):
     return nucleotide_nr - 1, nucleotide_nr
 
 
-def retrieve_variant_idxs(nucleotide_nr: int, ref_len: int, strand: str, is_indel: bool):
-    if strand == '+':
+def retrieve_variant_idxs(
+    nucleotide_nr: int, ref_len: int, strand: str, is_indel: bool
+):
+    if strand == "+":
         return retrieve_idxs_pos_strand(
             nucleotide_nr=nucleotide_nr,
             ref_len=ref_len,
@@ -56,12 +68,12 @@ def retrieve_variant_idxs(nucleotide_nr: int, ref_len: int, strand: str, is_inde
 
 
 def apply_variants_to_a_gene(
-        ref_gene_seq: str,
-        ref_prom_seq: str,
-        strand: str,
-        row: Dict[str, Optional[List]],
+    ref_gene_seq: str,
+    ref_prom_seq: str,
+    strand: str,
+    row: Dict[str, Optional[List]],
 ) -> Dict[str, float]:
-    prom_gene_seq_w_variants = ''
+    prom_gene_seq_w_variants = ""
 
     ref_seq = ref_prom_seq + ref_gene_seq
     len_ref_seq = len(ref_seq)
@@ -69,11 +81,14 @@ def apply_variants_to_a_gene(
     curr_index = 0
     len_change = 0  # for sanity assertions
     ref_correct = 0
+    n_nucleotide_change = 0
 
     for ref, alt, nucleotide_nr, is_indel in zip(
-            row["REF"], row["ALT"], row["NUCLEOTIDE_NUMBER"], row["IS_INDEL"]):
+        row["REF"], row["ALT"], row["NUCLEOTIDE_NUMBER"], row["IS_INDEL"]
+    ):
         # get len of the ref to see where we stopped
         len_variant = len(ref)
+        n_nucleotide_change += len_variant
         # get this for sanity assertions later
         len_change += len(alt) - len(ref)
 
@@ -100,9 +115,10 @@ def apply_variants_to_a_gene(
             ref_correct += 1
 
     prom_gene_seq_w_variants += ref_seq[curr_index:]
-    ref_correct_ratio = ref_correct / len(row['REF'])
+    ref_correct_ratio = ref_correct / len(row["REF"])
 
     return dict(
         prom_gene_seq_w_variants=prom_gene_seq_w_variants,
         ref_correct_ratio=ref_correct_ratio,
+        n_nucleotide_change=n_nucleotide_change,
     )
