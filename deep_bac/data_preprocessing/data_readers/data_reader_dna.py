@@ -8,31 +8,37 @@ from tqdm import tqdm
 
 from deep_bac.data_preprocessing.data_readers.utils import _collate_samples
 from deep_bac.data_preprocessing.data_types import DataReaderOutput
-from deep_bac.data_preprocessing.datasets.gene_reg_proteins import (
-    ProteinGeneRegDataset,
-)
+from deep_bac.data_preprocessing.datasets.dataset_dna import DnaGeneRegDataset
 
 
-def get_gene_reg_prot_dataloader(
+def get_gene_reg_dna_dataloader(
     batch_size: int,
     bac_genes_df_file_path: str,
     reference_gene_seqs_dict: Dict[str, str],
     unique_ids: List[str] = None,
     phenotype_dataframe_file_path: str = None,
+    max_gene_length: int = 2048,
     selected_genes: List = None,
     regression: bool = False,
     use_drug_idx: int = None,
+    shift_max: int = 3,
+    pad_value: float = 0.25,
+    reverse_complement_prob: float = 0.5,
     shuffle: bool = True,
     num_workers: int = 4,
     pin_memory: bool = True,
 ) -> DataLoader:
-    dataset = ProteinGeneRegDataset(
+    dataset = DnaGeneRegDataset(
         unique_ids=unique_ids,
         bac_genes_df_file_path=bac_genes_df_file_path,
         reference_gene_seqs_dict=reference_gene_seqs_dict,
         phenotype_dataframe_file_path=phenotype_dataframe_file_path,
+        max_gene_length=max_gene_length,
         selected_genes=selected_genes,
         regression=regression,
+        shift_max=shift_max,
+        pad_value=pad_value,
+        reverse_complement_prob=reverse_complement_prob,
         use_drug_idx=use_drug_idx,
     )
     dataloader = DataLoader(
@@ -46,7 +52,7 @@ def get_gene_reg_prot_dataloader(
     return dataloader
 
 
-def get_gene_reg_prot_data(
+def get_gene_reg_dna_data(
     input_df_file_path: str,
     reference_gene_seqs_dict_path: str,
     phenotype_df_file_path: str,
@@ -57,6 +63,10 @@ def get_gene_reg_prot_data(
     regression: bool = False,
     use_drug_idx: int = None,
     batch_size: int = 8,
+    max_gene_length: int = 2048,
+    shift_max: int = 3,
+    pad_value: float = 0.25,
+    reverse_complement_prob: float = 0.5,
     num_workers: int = 8,
     test: bool = False,
 ):
@@ -74,29 +84,37 @@ def get_gene_reg_prot_data(
     val_unique_ids = train_val_test_split_indices["val"]
     test_unique_ids = train_val_test_split_indices["test"]
 
-    train_dataloader = get_gene_reg_prot_dataloader(
+    train_dataloader = get_gene_reg_dna_dataloader(
         batch_size=batch_size,
         unique_ids=train_unique_ids,
-        phenotype_dataframe_file_path=phenotype_df_file_path,
         bac_genes_df_file_path=input_df_file_path,
         reference_gene_seqs_dict=reference_gene_seqs_dict,
+        phenotype_dataframe_file_path=phenotype_df_file_path,
+        max_gene_length=max_gene_length,
         selected_genes=selected_genes,
         regression=regression,
         use_drug_idx=use_drug_idx,
+        shift_max=shift_max,
+        pad_value=pad_value,
+        reverse_complement_prob=reverse_complement_prob,
         shuffle=True,
         num_workers=num_workers,
         pin_memory=True,
     )
 
-    val_dataloader = get_gene_reg_prot_dataloader(
+    val_dataloader = get_gene_reg_dna_dataloader(
         batch_size=batch_size,
         unique_ids=val_unique_ids,
-        phenotype_dataframe_file_path=phenotype_df_file_path,
         bac_genes_df_file_path=input_df_file_path,
         reference_gene_seqs_dict=reference_gene_seqs_dict,
+        phenotype_dataframe_file_path=phenotype_df_file_path,
+        max_gene_length=max_gene_length,
         selected_genes=selected_genes,
         regression=regression,
         use_drug_idx=use_drug_idx,
+        shift_max=shift_max,
+        pad_value=pad_value,
+        reverse_complement_prob=reverse_complement_prob,
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
@@ -107,15 +125,19 @@ def get_gene_reg_prot_data(
             val_dataloader=val_dataloader,
             train_set_len=len(train_unique_ids),
         )
-    test_dataloader = get_gene_reg_prot_dataloader(
+    test_dataloader = get_gene_reg_dna_dataloader(
         batch_size=batch_size,
         unique_ids=test_unique_ids,
-        phenotype_dataframe_file_path=phenotype_df_file_path,
         bac_genes_df_file_path=input_df_file_path,
         reference_gene_seqs_dict=reference_gene_seqs_dict,
+        phenotype_dataframe_file_path=phenotype_df_file_path,
+        max_gene_length=max_gene_length,
         selected_genes=selected_genes,
         regression=regression,
         use_drug_idx=use_drug_idx,
+        shift_max=shift_max,
+        pad_value=pad_value,
+        reverse_complement_prob=reverse_complement_prob,
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
@@ -131,32 +153,32 @@ def get_gene_reg_prot_data(
 
 def main():
     input_dir = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
-    with open(
-        os.path.join(input_dir, "data", "reference_gene_amino_acid_seqs.json"),
-        "r",
-    ) as f:
+    with open(os.path.join(input_dir, "reference_gene_seqs.json"), "r") as f:
         reference_gene_seqs_dict = json.load(f)
 
     gene_variance_df = pd.read_csv(
         os.path.join(input_dir, "unnormalised_variance_per_gene.csv")
     )
-    selected_genes = gene_variance_df["Gene"].tolist()[:10]
+    selected_genes = gene_variance_df["Gene"].tolist()[:1000]
 
-    dl = get_gene_reg_prot_dataloader(
-        batch_size=2,
+    max_gene_length = 2048
+    dl = get_gene_reg_dna_dataloader(
+        batch_size=32,
         unique_ids=None,
         bac_genes_df_file_path=os.path.join(
-            input_dir,
-            "processed-amino-acids-per-strain",
-            "agg_variants.parquet",
+            input_dir, "processed-genome-per-strain", "agg_variants.parquet"
         ),
         reference_gene_seqs_dict=reference_gene_seqs_dict,
         phenotype_dataframe_file_path=os.path.join(
-            input_dir, "data", "phenotype_labels_with_binary_labels.parquet"
+            input_dir, "phenotype_labels_with_binary_labels.parquet"
         ),
+        max_gene_length=max_gene_length,
         selected_genes=selected_genes,
+        shift_max=3,
+        pad_value=0.25,
+        reverse_complement_prob=0.5,
         shuffle=True,
-        num_workers=0,
+        num_workers=os.cpu_count(),
         pin_memory=False,
     )
 

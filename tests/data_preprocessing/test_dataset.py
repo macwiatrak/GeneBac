@@ -1,7 +1,9 @@
 import torch
 
-from deep_bac.data_preprocessing.datasets.gene_expression import GeneExprDataset
-from deep_bac.data_preprocessing.datasets.gene_reg_dna import DnaGeneRegDataset
+from deep_bac.data_preprocessing.datasets.dataset_expression import (
+    GeneExprDataset,
+)
+from deep_bac.data_preprocessing.datasets.dataset_dna import DnaGeneRegDataset
 
 
 def test_bac_genome_gene_reg_dataset():

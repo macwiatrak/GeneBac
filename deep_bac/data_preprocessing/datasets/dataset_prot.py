@@ -13,6 +13,8 @@ from deep_bac.data_preprocessing.data_types import BacInputSample
 def get_esm_embeddings(
     model, batch_converter, padding_idx: int, seqs: List[str]
 ) -> torch.Tensor:
+    if isinstance(seqs, str):
+        seqs = [seqs]
     data = [(f"protein_{idx}", seq) for idx, seq in enumerate(seqs)]
     batch_labels, batch_strs, batch_tokens = batch_converter(data)
     batch_lens = (batch_tokens != padding_idx).sum(1)

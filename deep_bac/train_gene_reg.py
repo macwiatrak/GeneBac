@@ -5,7 +5,7 @@ from typing import Optional, Literal
 from pytorch_lightning.utilities.seed import seed_everything
 
 from deep_bac.argparser import TrainArgumentParser
-from deep_bac.data_preprocessing.data_readers.gene_reg_dna import (
+from deep_bac.data_preprocessing.data_readers.data_reader_dna import (
     get_gene_reg_dna_data,
 )
 from deep_bac.modelling.data_types import DeepBacConfig

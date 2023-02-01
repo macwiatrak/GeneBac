@@ -1,7 +1,7 @@
 import torch
 import pytorch_lightning as pl
 
-from deep_bac.data_preprocessing.data_readers.gene_expression import (
+from deep_bac.data_preprocessing.data_readers.data_reader_expression import (
     get_gene_expr_dataloader,
 )
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample

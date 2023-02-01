@@ -5,7 +5,7 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import TQDMProgressBar, ModelCheckpoint
 
-from deep_bac.data_preprocessing.data_readers.gene_reg_dna import (
+from deep_bac.data_preprocessing.data_readers.data_reader_dna import (
     get_gene_reg_dna_dataloader,
 )
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample

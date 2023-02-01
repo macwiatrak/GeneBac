@@ -5,7 +5,7 @@ from typing import Optional
 from pytorch_lightning.utilities.seed import seed_everything
 
 from deep_bac.argparser import TrainArgumentParser
-from deep_bac.data_preprocessing.data_readers.gene_expression import (
+from deep_bac.data_preprocessing.data_readers.data_reader_expression import (
     get_gene_expr_data,
 )
 from deep_bac.modelling.data_types import DeepBacConfig

@@ -8,7 +8,9 @@ from deep_bac.data_preprocessing.data_readers.utils import _collate_samples
 from deep_bac.data_preprocessing.data_types import (
     DataReaderOutput,
 )
-from deep_bac.data_preprocessing.datasets.gene_expression import GeneExprDataset
+from deep_bac.data_preprocessing.datasets.dataset_expression import (
+    GeneExprDataset,
+)
 
 
 def get_gene_expr_dataloader(
