@@ -52,9 +52,14 @@ def postprocess_agg_variants(agg_variants_df: pd.DataFrame) -> pd.DataFrame:
     agg_variants_df["prom_gene_seq_w_variants"] = agg_variants_df[
         "features"
     ].progress_apply(lambda x: x["prom_gene_seq_w_variants"])
+
     agg_variants_df["ref_correct_ratio"] = agg_variants_df[
         "features"
     ].progress_apply(lambda x: x["ref_correct_ratio"])
+
+    agg_variants_df["n_nucleotide_change"] = agg_variants_df[
+        "features"
+    ].progress_apply(lambda x: x["n_nucleotide_change"])
     # remove the features column as we don't need it anymore
     agg_variants_df = agg_variants_df.drop(columns=["features"])
     return agg_variants_df

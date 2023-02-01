@@ -27,9 +27,11 @@ def run(
     num_workers: int = None,
     test: bool = False,
     ckpt_path: Optional[str] = None,
-    use_drug_specific_genes: Literal["INH"] = None,
+    use_drug_specific_genes: Literal["INH", "All"] = None,
 ):
     selected_genes = get_selected_genes(use_drug_specific_genes)
+    logging.info(f"Selected genes: {selected_genes}")
+
     data = get_gene_reg_data(
         input_df_file_path=os.path.join(
             input_dir, "processed_agg_variants.parquet"
@@ -96,6 +98,7 @@ def main(args):
         test=args.test,
         ckpt_path=args.ckpt_path,
         use_drug_idx=args.use_drug_idx,
+        use_drug_specific_genes=args.use_drug_specific_genes,
     )
 
 
