@@ -157,7 +157,7 @@ def main():
     output = torch.cat(out)
     torch.save(
         output,
-        os.path.join(input_dir, "data", "reference_gene_esm_embeddings.pt"),
+        os.path.join(input_dir, "data", f"reference_gene_esm_embeddings.pt"),
     )
 
     # gene_variance_df = pd.read_csv(
