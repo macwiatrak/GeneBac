@@ -8,7 +8,7 @@ from deep_bac.argparser import TrainArgumentParser
 from deep_bac.data_preprocessing.data_reader import get_gene_reg_data
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
-from deep_bac.modelling.modules.trainer import get_trainer
+from deep_bac.modelling.trainer import get_trainer
 from deep_bac.utils import get_selected_genes
 
 logging.basicConfig(level=logging.INFO)
