@@ -48,4 +48,4 @@ class TrainArgumentParser(Tap):
         "val_spearman",
     ] = "val_loss"
     use_drug_specific_genes: Literal["INH", "All"] = None
-    pos_encoder_type: Literal["learnable", "fixed"] = "fixed"
+    pos_encoder_type: Literal["learnable", "fixed"] = None
