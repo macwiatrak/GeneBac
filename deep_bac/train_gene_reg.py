@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Optional
+from typing import Optional, Literal
 
 from pytorch_lightning.utilities.seed import seed_everything
 
@@ -8,8 +8,8 @@ from deep_bac.argparser import TrainArgumentParser
 from deep_bac.data_preprocessing.data_reader import get_gene_reg_data
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
-from deep_bac.modelling.modules.trainer import get_trainer
-
+from deep_bac.modelling.trainer import get_trainer
+from deep_bac.utils import get_selected_genes
 
 logging.basicConfig(level=logging.INFO)
 
@@ -27,7 +27,11 @@ def run(
     num_workers: int = None,
     test: bool = False,
     ckpt_path: Optional[str] = None,
+    use_drug_specific_genes: Literal["INH", "All"] = None,
 ):
+    selected_genes = get_selected_genes(use_drug_specific_genes)
+    logging.info(f"Selected genes: {selected_genes}")
+
     data = get_gene_reg_data(
         input_df_file_path=os.path.join(
             input_dir, "processed_agg_variants.parquet"
@@ -53,12 +57,16 @@ def run(
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
         num_workers=num_workers if num_workers is not None else os.cpu_count(),
+        selected_genes=selected_genes,
     )
     logging.info("Finished loading data")
 
     config.train_set_len = data.train_set_len
     if use_drug_idx is not None:
         config.n_output = 1
+    config.n_highly_variable_genes = (
+        len(selected_genes) if selected_genes else n_highly_variable_genes
+    )
 
     trainer = get_trainer(config, output_dir)
     model = DeepBacGeneReg(config)
@@ -90,6 +98,7 @@ def main(args):
         test=args.test,
         ckpt_path=args.ckpt_path,
         use_drug_idx=args.use_drug_idx,
+        use_drug_specific_genes=args.use_drug_specific_genes,
     )
 
 

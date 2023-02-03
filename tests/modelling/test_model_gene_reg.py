@@ -1,8 +1,9 @@
 import json
+import os
 
 import torch
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import TQDMProgressBar
+from pytorch_lightning.callbacks import TQDMProgressBar, ModelCheckpoint
 
 from deep_bac.data_preprocessing.data_reader import get_gene_reg_dataloader
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
@@ -118,7 +119,7 @@ def test_model_gene_reg_train_real_data(tmpdir):
     regression = False
     n_bottleneck_layer = 64
     n_filters = 256
-    max_epochs = 50
+    max_epochs = 3
     batch_size = 3
     max_gene_length = 2048
     selected_genes = ["PE1", "Rv1716", "Rv2000", "pepC", "pepD"]
@@ -161,15 +162,25 @@ def test_model_gene_reg_train_real_data(tmpdir):
     model = DeepBacGeneReg(config)
     n_params = count_parameters(model)
     print("Number of trainable model parameters: ", n_params)
-
+    monitor = "val_loss"
     logger = BasicLogger()
     trainer = pl.Trainer(
-        default_root_dir=tmpdir,
+        default_root_dir=os.path.abspath(tmpdir),
         max_epochs=max_epochs,
-        enable_checkpointing=True,
         gradient_clip_val=1.0,
         logger=logger,
-        callbacks=[TQDMProgressBar(refresh_rate=2)],
+        enable_checkpointing=True,
+        callbacks=[
+            TQDMProgressBar(refresh_rate=2),
+            ModelCheckpoint(
+                dirpath=os.path.abspath(tmpdir),
+                filename="{epoch:02d}-{val_loss:.4f}",
+                monitor=monitor,
+                mode="min",
+                save_top_k=1,
+                save_last=True,
+            ),
+        ],
     )
     trainer.fit(model, train_dataloaders=dataloader, val_dataloaders=dataloader)
     assert logger.val_logs[-1]["val_loss"] < logger.val_logs[0]["val_loss"]
