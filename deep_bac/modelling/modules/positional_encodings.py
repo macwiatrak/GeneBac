@@ -43,7 +43,7 @@ class FixedPositionalEncoding(nn.Module):
     ) -> torch.Tensor:
         """
         Args:
-            x: Tensor, shape [seq_len, batch_size, embedding_dim]
+            x: Tensor, shape [batch_size, seq_len, embedding_dim]
         """
         # TODO: make it [batch_size, seq_len, embedding_dim]
         x = x + self.pe[tss_indexes]

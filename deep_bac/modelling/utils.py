@@ -74,12 +74,10 @@ def get_pos_encoder(config: DeepBacConfig):
     if config.pos_encoder_type == "learnable":
         return LearnablePositionalEncoding(
             dim=config.n_gene_bottleneck_layer,
-            dropout=config.dropout,
             n_genes=config.n_highly_variable_genes,
         )
     if config.pos_encoder_type == "fixed":
         return FixedPositionalEncoding(
             dim=config.n_gene_bottleneck_layer,
-            dropout=config.dropout,
         )
     raise ValueError(f"Unknown pos encoder type: {config.pos_encoder_type}")

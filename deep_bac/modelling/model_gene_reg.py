@@ -76,7 +76,7 @@ class DeepBacGeneReg(pl.LightningModule):
         return loss
 
     def eval_step(self, batch: BatchBacInputSample):
-        logits = self(batch.input_tensor)
+        logits = self(batch.input_tensor, batch.tss_indexes)
         loss = self.loss_fn(logits.view(-1), batch.labels.view(-1))
         # remove loss for samples with no label and compute mean
         # loss = remove_ignore_index(loss, batch.labels).mean()
