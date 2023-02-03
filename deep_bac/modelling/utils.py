@@ -8,7 +8,8 @@ from deep_bac.modelling.modules.layers import DenseLayer
 from deep_bac.modelling.modules.positional_encodings import (
     IdentityPositionalEncoding,
     LearnablePositionalEncoding,
-    FixedPositionalEncoding,
+    SinCosFixedPositionalEncoding,
+    ExpGammaFixedPositionalEncoding,
 )
 from deep_bac.modelling.modules.scBasset_encoder import scBassetEncoder
 from deep_bac.modelling.modules.utils import Flatten
@@ -76,8 +77,13 @@ def get_pos_encoder(config: DeepBacConfig):
             dim=config.n_gene_bottleneck_layer,
             n_genes=config.n_highly_variable_genes,
         )
-    if config.pos_encoder_type == "fixed":
-        return FixedPositionalEncoding(
+    if config.pos_encoder_type == "sincos_fixed":
+        return SinCosFixedPositionalEncoding(
+            dim=config.n_gene_bottleneck_layer,
+        )
+
+    if config.pos_encoder_type == "expgamma_fixed":
+        return ExpGammaFixedPositionalEncoding(
             dim=config.n_gene_bottleneck_layer,
         )
     raise ValueError(f"Unknown pos encoder type: {config.pos_encoder_type}")

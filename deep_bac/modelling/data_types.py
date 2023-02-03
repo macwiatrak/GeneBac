@@ -30,4 +30,6 @@ class DeepBacConfig:
         "val_loss", "val_auroc", "val_f1", "val_r2", "val_spearman"
     ] = "val_loss"
     n_highly_variable_genes: int = 500
-    pos_encoder_type: Literal["learnable", "fixed"] = "fixed"
+    pos_encoder_type: Literal[
+        "learnable", "sincos_fixed", "expgamma_fixed"
+    ] = None
