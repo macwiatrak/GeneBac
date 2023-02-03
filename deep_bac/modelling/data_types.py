@@ -10,7 +10,7 @@ class DeepBacConfig:
     gene_encoder_type: Literal[
         "conv_transformer", "scbasset"
     ] = "conv_transformer"
-    graph_model_type: Literal["transformer", "dense"] = "transformer"
+    graph_model_type: Literal["transformer", "dense"] = "dense"
     regression: bool = False
     lr: float = 0.001
     batch_size: int = 1
@@ -30,4 +30,4 @@ class DeepBacConfig:
         "val_loss", "val_auroc", "val_f1", "val_r2", "val_spearman"
     ] = "val_loss"
     n_highly_variable_genes: int = 500
-    pos_encoder_type: Literal["learnable", "fixed"] = None
+    pos_encoder_type: Literal["learnable", "fixed"] = "fixed"
