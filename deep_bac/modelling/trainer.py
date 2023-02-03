@@ -1,5 +1,3 @@
-import os
-
 import torch.cuda
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import (

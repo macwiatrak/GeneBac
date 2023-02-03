@@ -70,6 +70,8 @@ def run(
     output_dir: str,
     prom_seq_len: int,
 ):
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
     # read ref genome
     ref_genome = read_ref_genome(os.path.join(input_dir, REF_GENOME_FILE_NAME))
 
@@ -134,7 +136,7 @@ def run(
 def main():
     run(
         input_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/",
-        output_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/processed-genome-per-strain-2/",
+        output_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/processed-genome-per-strain-1/",
         prom_seq_len=100,
     )
 
