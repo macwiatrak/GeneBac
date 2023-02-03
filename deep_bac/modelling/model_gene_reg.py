@@ -12,6 +12,7 @@ from deep_bac.modelling.utils import (
     remove_ignore_index,
     get_gene_encoder,
     get_graph_model,
+    get_pos_encoder,
 )
 
 
@@ -25,6 +26,7 @@ class DeepBacGeneReg(pl.LightningModule):
         self.n_bottleneck_layer = config.n_gene_bottleneck_layer
         self.gene_encoder = get_gene_encoder(config)
         self.graph_model = get_graph_model(config)
+        self.pos_encoder = get_pos_encoder(config)
 
         self.regression = config.regression
         # get loss depending on whether we predict LOG2MIC or binary MIC
@@ -34,7 +36,9 @@ class DeepBacGeneReg(pl.LightningModule):
             else nn.BCEWithLogitsLoss(reduction="mean")
         )
 
-    def forward(self, batch_genes_tensor: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, batch_genes_tensor: torch.Tensor, tss_indexes: torch.Tensor
+    ) -> torch.Tensor:
         # x: (batch_size, n_genes, in_channels, seq_length)
         batch_size, n_genes, n_channels, seq_length = batch_genes_tensor.shape
         # reshape the input to allow the convolutional layer to work
@@ -47,6 +51,8 @@ class DeepBacGeneReg(pl.LightningModule):
         gene_encodings = gene_encodings.view(
             batch_size, n_genes, self.n_bottleneck_layer
         )
+        # add positional encodings
+        gene_encodings = self.pos_encoder(gene_encodings, tss_indexes)
         # pass the genes through the graph encoder
         logits = self.graph_model(gene_encodings)
         return logits
@@ -54,7 +60,7 @@ class DeepBacGeneReg(pl.LightningModule):
     def training_step(
         self, batch: BatchBacInputSample, batch_idx: int
     ) -> torch.Tensor:
-        logits = self(batch.input_tensor)
+        logits = self(batch.input_tensor, batch.tss_indexes)
         # get loss with reduction="none" to compute loss per sample
         loss = self.loss_fn(logits.view(-1), batch.labels.view(-1))
         # remove loss for samples with no label and compute mean
