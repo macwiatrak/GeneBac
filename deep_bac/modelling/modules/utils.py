@@ -12,26 +12,25 @@ class StochasticShift(nn.Module):
     adapted from https://github.com/calico/scBasset/blob/main/scbasset/basenji_utils.py
     """
 
-    def __init__(self, shift_max: int = 3, pad: float = 0.):
+    def __init__(self, shift_max: int = 3, pad: float = 0.0):
         super().__init__()
         self.shift_max = shift_max
         self.pad = pad
 
-    def forward(
-            self,
-            seq_1hot: torch.Tensor,
-            training: bool = False
-    ):
+    def forward(self, seq_1hot: torch.Tensor, training: bool = False):
         if not training:
             return seq_1hot
         shifts = torch.randint(
             low=-self.shift_max,
             high=self.shift_max + 1,
-            size=(seq_1hot.shape[0], ),  # first dim is the batch dim
+            size=(seq_1hot.shape[0],),  # first dim is the batch dim
         )
-        return torch.stack([
-            shift_seq(seq, shift, pad=self.pad) for seq, shift in zip(seq_1hot, shifts)
-        ])
+        return torch.stack(
+            [
+                shift_seq(seq, shift, pad=self.pad)
+                for seq, shift in zip(seq_1hot, shifts)
+            ]
+        )
 
 
 class StochasticReverseComplement(nn.Module):
@@ -41,7 +40,9 @@ class StochasticReverseComplement(nn.Module):
         super(StochasticReverseComplement, self).__init__()
         self.prob = prob
 
-    def forward(self, seq: torch.Tensor, training: bool = False) -> Tuple[torch.Tensor, torch.tensor]:
+    def forward(
+        self, seq: torch.Tensor, training: bool = False
+    ) -> Tuple[torch.Tensor, torch.tensor]:
         if not training:
             return seq, torch.zeros(seq.shape[0], dtype=torch.bool)
         batch_size = seq.shape[0]
@@ -53,3 +54,8 @@ class StochasticReverseComplement(nn.Module):
 
 def count_parameters(model: nn.Module) -> int:
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
+class Flatten(nn.Module):
+    def forward(self, x):
+        return x.view(x.size(0), -1)

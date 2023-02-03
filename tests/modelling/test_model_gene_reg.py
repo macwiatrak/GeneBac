@@ -73,7 +73,7 @@ def test_model_gene_reg_train_fake_data(tmpdir):
 
     config = DeepBacConfig(
         gene_encoder_type="scbasset",
-        graph_model_type="dense",
+        graph_model_type="transformer",
         lr=0.001,
         batch_size=batch_size,
         regression=regression,
@@ -119,7 +119,7 @@ def test_model_gene_reg_train_real_data(tmpdir):
     regression = False
     n_bottleneck_layer = 64
     n_filters = 256
-    max_epochs = 3
+    max_epochs = 10
     batch_size = 3
     max_gene_length = 2048
     selected_genes = ["PE1", "Rv1716", "Rv2000", "pepC", "pepD"]
@@ -129,7 +129,7 @@ def test_model_gene_reg_train_real_data(tmpdir):
 
     config = DeepBacConfig(
         gene_encoder_type="scbasset",
-        graph_model_type="dense",
+        graph_model_type="transformer",
         lr=0.001,
         batch_size=batch_size,
         regression=regression,
@@ -138,8 +138,8 @@ def test_model_gene_reg_train_real_data(tmpdir):
         n_output=n_classes,
         max_epochs=max_epochs,
         train_set_len=None,
-        n_graph_layers=2,
-        n_transformer_heads=4,
+        n_graph_layers=1,
+        n_transformer_heads=2,
         n_highly_variable_genes=len(selected_genes),
     )
 
