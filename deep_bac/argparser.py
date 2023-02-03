@@ -16,7 +16,7 @@ class TrainArgumentParser(Tap):
     # model arguments
     batch_size: int = 1
     gene_encoder_type: Literal["conv_transformer", "scbasset"] = "scbasset"
-    graph_model_type: Literal["transformer", "dense"] = "transformer"
+    graph_model_type: Literal["transformer", "dense"] = "dense"
     regression: bool = False
     use_drug_idx: int = None
     lr: float = 1e-3
