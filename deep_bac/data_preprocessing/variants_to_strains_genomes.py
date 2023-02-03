@@ -77,17 +77,20 @@ def apply_variants_to_a_gene(
 
     ref_seq = ref_prom_seq + ref_gene_seq
     len_ref_seq = len(ref_seq)
+    len_prom = len(ref_prom_seq)
     curr_index = 0
-    n_nucleotide_change = 0  # for sanity assertions
+    len_change = 0  # for sanity assertions
     ref_correct = 0
+    n_nucleotide_change = 0
 
     for ref, alt, nucleotide_nr, is_indel in zip(
         row["REF"], row["ALT"], row["NUCLEOTIDE_NUMBER"], row["IS_INDEL"]
     ):
         # get len of the ref to see where we stopped
         len_variant = len(ref)
-        # get this for sanity assertions later
         n_nucleotide_change += len_variant
+        # get this for sanity assertions later
+        len_change += len(alt) - len(ref)
 
         # get complement and reverse if strand is negative and is indel
         if strand == "-" and is_indel:
@@ -99,6 +102,8 @@ def apply_variants_to_a_gene(
             strand=strand,
             is_indel=is_indel,
         )
+        vstart_idx += len_prom
+        vend_idx += len_prom
 
         vstart_idx = max(0, vstart_idx)
         vend_idx = vend_idx if vend_idx >= 0 else len_ref_seq

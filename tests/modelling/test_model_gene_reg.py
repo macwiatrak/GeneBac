@@ -183,5 +183,4 @@ def test_model_gene_reg_train_real_data(tmpdir):
         ],
     )
     trainer.fit(model, train_dataloaders=dataloader, val_dataloaders=dataloader)
-    print(os.listdir(os.path.abspath(tmpdir)))
     assert logger.val_logs[-1]["val_loss"] < logger.val_logs[0]["val_loss"]
