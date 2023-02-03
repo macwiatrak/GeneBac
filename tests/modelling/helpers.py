@@ -20,7 +20,7 @@ class TestBacGenomeGeneRegDataset(Dataset):
         regression: bool = False,
     ):
         # (n_samples, n_genes, n_nucletoides, seq_length)
-        self.data = (
+        self.dna_data = (
             F.one_hot(
                 torch.randint(0, 4, (n_samples, n_genes, seq_length)),
                 num_classes=4,
@@ -28,6 +28,7 @@ class TestBacGenomeGeneRegDataset(Dataset):
             .transpose(-2, -1)
             .type(torch.float32)
         )
+        self.tss_indexes = torch.randint(0, n_genes, (n_samples, n_genes))
 
         if regression:
             self.labels = torch.log2(
@@ -40,12 +41,13 @@ class TestBacGenomeGeneRegDataset(Dataset):
             self.labels = torch.empty(n_samples, n_classes).random_(2)
 
     def __len__(self):
-        return len(self.data)
+        return len(self.dna_data)
 
     def __getitem__(self, idx):
         return BacInputSample(
-            input_tensor=self.data[idx],
+            input_tensor=self.dna_data[idx],
             labels=self.labels[idx],
+            tss_index=self.tss_indexes[idx],
         )
 
 

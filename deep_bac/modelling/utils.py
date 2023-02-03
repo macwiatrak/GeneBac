@@ -5,6 +5,11 @@ from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
 from deep_bac.modelling.modules.graph_transformer import GraphTransformer
 from deep_bac.modelling.modules.layers import DenseLayer
+from deep_bac.modelling.modules.positional_encodings import (
+    IdentityPositionalEncoding,
+    LearnablePositionalEncoding,
+    FixedPositionalEncoding,
+)
 from deep_bac.modelling.modules.scBasset_encoder import scBassetEncoder
 from deep_bac.modelling.modules.utils import Flatten
 
@@ -60,3 +65,19 @@ def get_graph_model(config: DeepBacConfig):
             ),
         )
     raise ValueError(f"Unknown graph model type: {config.graph_model_type}")
+
+
+def get_pos_encoder(config: DeepBacConfig):
+    """Get the positional encoder"""
+    if config.pos_encoder_type is None:
+        return IdentityPositionalEncoding()
+    if config.pos_encoder_type == "learnable":
+        return LearnablePositionalEncoding(
+            dim=config.n_gene_bottleneck_layer,
+            n_genes=config.n_highly_variable_genes,
+        )
+    if config.pos_encoder_type == "fixed":
+        return FixedPositionalEncoding(
+            dim=config.n_gene_bottleneck_layer,
+        )
+    raise ValueError(f"Unknown pos encoder type: {config.pos_encoder_type}")

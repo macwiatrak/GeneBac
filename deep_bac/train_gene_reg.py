@@ -36,8 +36,8 @@ def run(
         input_df_file_path=os.path.join(
             input_dir, "processed_agg_variants.parquet"
         ),
-        reference_gene_seqs_dict_path=os.path.join(
-            input_dir, "reference_gene_seqs.json"
+        reference_gene_data_df_path=os.path.join(
+            input_dir, "reference_gene_data.parquet"
         ),
         phenotype_df_file_path=os.path.join(
             input_dir, "phenotype_labels_with_binary_labels.parquet"

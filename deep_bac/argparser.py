@@ -16,7 +16,7 @@ class TrainArgumentParser(Tap):
     # model arguments
     batch_size: int = 1
     gene_encoder_type: Literal["conv_transformer", "scbasset"] = "scbasset"
-    graph_model_type: Literal["transformer", "dense"] = "transformer"
+    graph_model_type: Literal["transformer", "dense"] = "dense"
     regression: bool = False
     use_drug_idx: int = None
     lr: float = 1e-3
@@ -41,6 +41,11 @@ class TrainArgumentParser(Tap):
     gradient_clip_val: float = 1.0
     accumulate_grad_batches: int = 1
     monitor_metric: Literal[
-        "val_loss", "val_auroc", "val_r2", "val_spearmann"
+        "val_loss",
+        "val_auroc",
+        "val_f1",
+        "val_r2",
+        "val_spearman",
     ] = "val_loss"
     use_drug_specific_genes: Literal["INH", "All"] = None
+    pos_encoder_type: Literal["learnable", "fixed"] = None

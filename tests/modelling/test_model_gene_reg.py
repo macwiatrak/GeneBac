@@ -1,4 +1,4 @@
-import json
+import pandas as pd
 import os
 
 import torch
@@ -73,7 +73,7 @@ def test_model_gene_reg_train_fake_data(tmpdir):
 
     config = DeepBacConfig(
         gene_encoder_type="scbasset",
-        graph_model_type="transformer",
+        graph_model_type="dense",
         lr=0.001,
         batch_size=batch_size,
         regression=regression,
@@ -119,17 +119,19 @@ def test_model_gene_reg_train_real_data(tmpdir):
     regression = False
     n_bottleneck_layer = 64
     n_filters = 256
-    max_epochs = 10
+    max_epochs = 20
     batch_size = 3
     max_gene_length = 2048
     selected_genes = ["PE1", "Rv1716", "Rv2000", "pepC", "pepD"]
 
-    with open("../test_data/reference_gene_seqs.json", "r") as f:
-        reference_gene_seqs_dict = json.load(f)
+    reference_gene_data_df = pd.read_parquet(
+        "../test_data/reference_gene_data.parquet"
+    )
 
     config = DeepBacConfig(
         gene_encoder_type="scbasset",
         graph_model_type="transformer",
+        pos_encoder_type="fixed",
         lr=0.001,
         batch_size=batch_size,
         regression=regression,
@@ -146,7 +148,7 @@ def test_model_gene_reg_train_real_data(tmpdir):
     dataloader = get_gene_reg_dataloader(
         batch_size=batch_size,
         bac_genes_df_file_path="../test_data/sample_agg_variants.parquet",
-        reference_gene_seqs_dict=reference_gene_seqs_dict,
+        reference_gene_data_df=reference_gene_data_df,
         phenotype_dataframe_file_path="../test_data/phenotype_labels_with_binary_labels.parquet",
         max_gene_length=max_gene_length,
         selected_genes=selected_genes,
