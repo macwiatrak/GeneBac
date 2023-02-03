@@ -69,19 +69,6 @@ class BacGenomeGeneRegDataset(Dataset):
             if gene in selected_genes
         }
 
-        # convert reference gene seqs to a dataframe to avoid memory leak
-        # due to a pytorch issue with native python data structures
-        # as it's a big dictionary
-        # self.reference_gene_seqs_df = pd.DataFrame(
-        #     {
-        #         "gene": list(self.gene_to_id.keys()),
-        #         "seq": [
-        #             reference_gene_seqs_dict[gene]
-        #             for gene in self.gene_to_id.keys()
-        #         ],
-        #     }
-        # )
-
     def __getitem__(self, idx):
         unq_id = self.unique_ids[idx]
         unq_id_subset = self.genes_df.xs(unq_id, level="UNIQUEID")
