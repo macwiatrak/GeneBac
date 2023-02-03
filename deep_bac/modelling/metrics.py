@@ -10,6 +10,7 @@ from torchmetrics.functional import (
     auroc,
     accuracy,
 )
+from torchmetrics.functional.classification import binary_stat_scores
 
 
 def get_regression_metrics(
@@ -37,6 +38,10 @@ def binary_cls_metrics(
     Returns:
         dict of metrics
     """
+    tp, fp, tn, fn, sup = binary_stat_scores(
+        logits, labels, ignore_index=ignore_index
+    )
+
     return {
         "accuracy": accuracy(
             logits, labels, task="binary", ignore_index=ignore_index
@@ -44,6 +49,12 @@ def binary_cls_metrics(
         "auroc": auroc(
             logits, labels, task="binary", ignore_index=ignore_index
         ),
+        "specificity": tn / (tn + fp),
+        "sensitivity": tp / (tp + fn),
+        "tp": tp,
+        "fp": fp,
+        "tn": tn,
+        "fn": fn,
     }
 
 
