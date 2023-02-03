@@ -3,6 +3,7 @@ from typing import Dict, List
 
 import pandas as pd
 import torch
+from pandas import DataFrame
 from torch.utils.data import Dataset
 
 from deep_bac.data_preprocessing.data_types import BacInputSample
@@ -17,7 +18,7 @@ class BacGenomeGeneRegDataset(Dataset):
     def __init__(
         self,
         bac_genes_df_file_path: str,
-        reference_gene_seqs_dict: Dict[str, str],
+        reference_gene_data_df: DataFrame,
         unique_ids: List[str] = None,
         phenotype_dataframe_file_path: str = None,
         max_gene_length: int = 2048,
@@ -30,6 +31,8 @@ class BacGenomeGeneRegDataset(Dataset):
     ):
         self.genes_df = pd.read_parquet(bac_genes_df_file_path)
         self.use_drug_idx = use_drug_idx
+        self.reference_gene_data_df = reference_gene_data_df
+
         # get unique ids
         self.unique_ids = unique_ids
         if not self.unique_ids:
@@ -58,26 +61,26 @@ class BacGenomeGeneRegDataset(Dataset):
         self.selected_genes = (
             selected_genes
             if selected_genes is not None
-            else list(reference_gene_seqs_dict.keys())
+            else list(reference_gene_data_df["gene"].tolist())
         )
         self.gene_to_id = {
             gene: i
-            for i, gene in enumerate(reference_gene_seqs_dict.keys())
+            for i, gene in enumerate(reference_gene_data_df["gene"].tolist())
             if gene in selected_genes
         }
 
         # convert reference gene seqs to a dataframe to avoid memory leak
         # due to a pytorch issue with native python data structures
         # as it's a big dictionary
-        self.reference_gene_seqs_df = pd.DataFrame(
-            {
-                "gene": list(self.gene_to_id.keys()),
-                "seq": [
-                    reference_gene_seqs_dict[gene]
-                    for gene in self.gene_to_id.keys()
-                ],
-            }
-        )
+        # self.reference_gene_seqs_df = pd.DataFrame(
+        #     {
+        #         "gene": list(self.gene_to_id.keys()),
+        #         "seq": [
+        #             reference_gene_seqs_dict[gene]
+        #             for gene in self.gene_to_id.keys()
+        #         ],
+        #     }
+        # )
 
     def __getitem__(self, idx):
         unq_id = self.unique_ids[idx]
@@ -86,13 +89,21 @@ class BacGenomeGeneRegDataset(Dataset):
 
         genes_tensor = []
         variants_in_gene = []
+        tss_indexes = []
+        gene_names = []
         for idx, gene in enumerate(self.gene_to_id.keys()):
+            # append TSS index and gene name
+            tss_indexes.append(
+                self.reference_gene_data_df.iloc[idx]["tss_index_genome"]
+            )
+            gene_names.append(gene)
+
             if gene in unq_id_genes:
                 idx = unq_id_genes.index(gene)
                 seq = unq_id_subset.iloc[idx]["prom_gene_seq_w_variants"]
                 variants_in_gene.append(1)
             else:
-                seq = self.reference_gene_seqs_df.iloc[idx]["seq"]
+                seq = self.reference_gene_data_df.iloc[idx]["seq"]
                 variants_in_gene.append(0)
             # subset it to the max gene length
             one_hot_seq = seq_to_one_hot(seq[: self.max_gene_length])
@@ -117,6 +128,7 @@ class BacGenomeGeneRegDataset(Dataset):
 
         genes_tensor = torch.stack(genes_tensor)
         variants_in_gene = torch.tensor(variants_in_gene, dtype=torch.long)
+        tss_indexes = torch.tensor(tss_indexes, dtype=torch.long)
 
         labels = None
         if self.id_to_labels_df is not None:
@@ -137,7 +149,9 @@ class BacGenomeGeneRegDataset(Dataset):
             input_tensor=genes_tensor,
             variants_in_gene=variants_in_gene,
             labels=labels,
+            tss_index=tss_indexes,
             strain_id=unq_id,
+            gene_name=gene_names,
         )
 
     def __len__(self):

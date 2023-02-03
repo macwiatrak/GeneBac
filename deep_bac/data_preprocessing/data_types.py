@@ -12,6 +12,7 @@ class BacInputSample:
     input_tensor: torch.Tensor
     variants_in_gene: Optional[torch.Tensor] = None
     labels: Optional[torch.Tensor] = None
+    tss_index: Optional[torch.Tensor] = None
     strain_id: Optional[str] = None
     gene_name: Optional[str] = None
 
@@ -22,7 +23,9 @@ class BatchBacInputSample:
     input_tensor: torch.Tensor
     variants_in_gene: Optional[torch.Tensor] = None
     labels: Optional[torch.Tensor] = None
+    tss_indexes: Optional[torch.Tensor] = None
     strain_ids: List[str] = None
+    gene_names: Optional[List[str]] = None
 
 
 @dataclass_json

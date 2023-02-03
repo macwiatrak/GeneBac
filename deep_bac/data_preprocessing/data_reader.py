@@ -4,6 +4,7 @@ from typing import Dict, List, Tuple
 
 import pandas as pd
 import torch
+from pandas import DataFrame
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -25,8 +26,8 @@ VARIANCE_PER_GENE_FILE_PATH = (
 
 def _collate_samples(data: List[BacInputSample]) -> BatchBacInputSample:
     genes_tensor = torch.stack([sample.input_tensor for sample in data])
-    variants_in_gene = [sample.variants_in_gene for sample in data]
 
+    variants_in_gene = [sample.variants_in_gene for sample in data]
     if None not in variants_in_gene:
         variants_in_gene = torch.stack(variants_in_gene)
 
@@ -34,19 +35,26 @@ def _collate_samples(data: List[BacInputSample]) -> BatchBacInputSample:
     if None not in labels:
         labels = torch.stack(labels)
 
+    tss_indexes = [sample.tss_index for sample in data]
+    if None not in tss_indexes:
+        tss_indexes = torch.stack(tss_indexes)
+
+    gene_names = [sample.gene_name for sample in data]
     unique_ids = [sample.strain_id for sample in data]
     return BatchBacInputSample(
         input_tensor=genes_tensor,
         variants_in_gene=variants_in_gene,
         labels=labels,
+        tss_indexes=tss_indexes,
         strain_ids=unique_ids,
+        gene_names=gene_names,
     )
 
 
 def get_gene_reg_dataloader(
     batch_size: int,
     bac_genes_df_file_path: str,
-    reference_gene_seqs_dict: Dict[str, str],
+    reference_gene_data_df: DataFrame,
     unique_ids: List[str] = None,
     phenotype_dataframe_file_path: str = None,
     max_gene_length: int = 2048,
@@ -63,7 +71,7 @@ def get_gene_reg_dataloader(
     dataset = BacGenomeGeneRegDataset(
         unique_ids=unique_ids,
         bac_genes_df_file_path=bac_genes_df_file_path,
-        reference_gene_seqs_dict=reference_gene_seqs_dict,
+        reference_gene_data_df=reference_gene_data_df,
         phenotype_dataframe_file_path=phenotype_dataframe_file_path,
         max_gene_length=max_gene_length,
         selected_genes=selected_genes,
@@ -86,7 +94,7 @@ def get_gene_reg_dataloader(
 
 def get_gene_reg_data(
     input_df_file_path: str,
-    reference_gene_seqs_dict_path: str,
+    reference_gene_data_df_path: str,
     phenotype_df_file_path: str,
     train_val_test_split_indices_file_path: str,
     variance_per_gene_file_path: str,
@@ -102,8 +110,7 @@ def get_gene_reg_data(
     num_workers: int = 8,
     test: bool = False,
 ):
-    with open(reference_gene_seqs_dict_path, "r") as f:
-        reference_gene_seqs_dict = json.load(f)
+    reference_gene_data_df = pd.read_parquet(reference_gene_data_df_path)
 
     if selected_genes is None:
         selected_genes = pd.read_csv(variance_per_gene_file_path)[
@@ -120,7 +127,7 @@ def get_gene_reg_data(
         batch_size=batch_size,
         unique_ids=train_unique_ids,
         bac_genes_df_file_path=input_df_file_path,
-        reference_gene_seqs_dict=reference_gene_seqs_dict,
+        reference_gene_data_df=reference_gene_data_df,
         phenotype_dataframe_file_path=phenotype_df_file_path,
         max_gene_length=max_gene_length,
         selected_genes=selected_genes,
@@ -138,7 +145,7 @@ def get_gene_reg_data(
         batch_size=batch_size,
         unique_ids=val_unique_ids,
         bac_genes_df_file_path=input_df_file_path,
-        reference_gene_seqs_dict=reference_gene_seqs_dict,
+        reference_gene_data_df=reference_gene_data_df,
         phenotype_dataframe_file_path=phenotype_df_file_path,
         max_gene_length=max_gene_length,
         selected_genes=selected_genes,
@@ -161,7 +168,7 @@ def get_gene_reg_data(
         batch_size=batch_size,
         unique_ids=test_unique_ids,
         bac_genes_df_file_path=input_df_file_path,
-        reference_gene_seqs_dict=reference_gene_seqs_dict,
+        reference_gene_data_df=reference_gene_data_df,
         phenotype_dataframe_file_path=phenotype_df_file_path,
         max_gene_length=max_gene_length,
         selected_genes=selected_genes,
