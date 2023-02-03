@@ -1,30 +1,43 @@
 import torch
 from torch import nn
 
+from deep_bac.modelling.modules.layers import DenseLayer
+from deep_bac.modelling.modules.utils import Flatten
+
 
 class GraphTransformer(nn.Module):
     def __init__(
-            self,
-            dim: int,
-            n_output: int,
-            n_layers: int = 4,
-            n_heads: int = 8,
+        self,
+        n_gene_bottleneck_layer: int,
+        n_output: int,
+        n_genes: int,
+        n_layers: int = 1,
+        n_heads: int = 2,
     ):
         super().__init__()
         self.layer = nn.TransformerEncoderLayer(
-            d_model=dim,
+            d_model=n_gene_bottleneck_layer,
             nhead=n_heads,
-            dim_feedforward=dim * 4,
+            dim_feedforward=n_gene_bottleneck_layer * 4,
             batch_first=True,
         )
-        self.transformer = nn.TransformerEncoder(self.layer, num_layers=n_layers)
+        self.transformer = nn.TransformerEncoder(
+            self.layer, num_layers=n_layers
+        )
         self.dropout = nn.Dropout(0.2)
-        self.decoder = nn.Linear(dim * 2, n_output)
+        self.decoder = nn.Sequential(
+            Flatten(),
+            DenseLayer(
+                in_features=n_gene_bottleneck_layer * n_genes,
+                out_features=n_gene_bottleneck_layer,
+            ),
+            nn.Linear(
+                in_features=n_gene_bottleneck_layer,
+                out_features=n_output,
+            ),
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.transformer(x)
-        x = self.dropout(x)
-        # mean and max pooling
-        x = torch.cat([x.max(dim=1)[0], x.mean(dim=1)], dim=1)
         logits = self.decoder(x)
         return logits

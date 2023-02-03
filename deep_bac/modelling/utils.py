@@ -6,6 +6,7 @@ from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
 from deep_bac.modelling.modules.graph_transformer import GraphTransformer
 from deep_bac.modelling.modules.layers import DenseLayer
 from deep_bac.modelling.modules.scBasset_encoder import scBassetEncoder
+from deep_bac.modelling.modules.utils import Flatten
 
 
 def remove_ignore_index(
@@ -15,11 +16,6 @@ def remove_ignore_index(
     # Remove loss for ignore index
     loss = loss[labels != ignore_index]
     return loss
-
-
-class Flatten(nn.Module):
-    def forward(self, x):
-        return x.view(x.size(0), -1)
 
 
 def get_gene_encoder(config: DeepBacConfig):
@@ -43,8 +39,9 @@ def get_graph_model(config: DeepBacConfig):
     """Get the graph model"""
     if config.graph_model_type == "transformer":
         return GraphTransformer(
-            dim=config.n_gene_bottleneck_layer,
+            n_gene_bottleneck_layer=config.n_gene_bottleneck_layer,
             n_output=config.n_output,
+            n_genes=config.n_highly_variable_genes,
             n_layers=config.n_graph_layers,
             n_heads=config.n_transformer_heads,
         )
