@@ -17,6 +17,27 @@ from torchmetrics.functional.classification import (
 
 BINARY_CLS_METRICS = ["accuracy", "f1", "auroc", "specificity", "sensitivity"]
 
+DRUG_TO_LABEL_IDX = {
+    "MXF": 0,
+    "BDQ": 1,
+    "KAN": 2,
+    "CFZ": 3,
+    "AMI": 4,
+    "PAS": 5,
+    "DLM": 6,
+    "RFB": 7,
+    "LZD": 8,
+    "EMB": 9,
+    "LEV": 10,
+    "ETH": 11,
+    "INH": 12,
+    "RIF": 13,
+}
+
+FIRST_LINE_DRUGS = ["INH", "RIF", "EMB"]
+
+SECOND_LINE_DRUGS = ["AMI", "ETH", "KAN", "LEV", "MXF", "RFB"]
+
 
 def get_regression_metrics(
     logits: torch.Tensor, labels: torch.Tensor
@@ -99,13 +120,15 @@ def compute_agg_stats(
                 {f"drug_{drug_idx}_{k}": v for k, v in drug_m.items()}
             )
         for metric in BINARY_CLS_METRICS:
-            metrics[f"{metric}"] = torch.stack(
-                [
-                    drug_metrics[f"drug_{drug_idx}_{metric}"]
-                    for drug_idx in range(labels.shape[1])
-                    if drug_metrics[f"drug_{drug_idx}_{metric}"] > -1.0
-                ]
-            ).mean()
+            metrics[f"{metric}"] = get_macro_metric(
+                metrics_dict=drug_metrics,
+                metric=metric,
+                # use only first line drugs for macro metrics
+                drug_idxs=[
+                    DRUG_TO_LABEL_IDX[idx]
+                    for idx in FIRST_LINE_DRUGS + SECOND_LINE_DRUGS
+                ],
+            )
         metrics.update(drug_metrics)
         return metrics
 
@@ -114,3 +137,17 @@ def compute_agg_stats(
     reg_metrics = get_regression_metrics(logits_wo_ignore, labels_wo_ignore)
     metrics.update(reg_metrics)
     return metrics
+
+
+def get_macro_metric(
+    metrics_dict: Dict[str, torch.Tensor],
+    metric: str,
+    drug_idxs: List[int],
+):
+    return torch.stack(
+        [
+            metrics_dict[f"drug_{drug_idx}_{metric}"]
+            for drug_idx in drug_idxs
+            if metrics_dict[f"drug_{drug_idx}_{metric}"] > -1.0
+        ]
+    ).mean()
