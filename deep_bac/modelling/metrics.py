@@ -15,6 +15,8 @@ from torchmetrics.functional.classification import (
     binary_f1_score,
 )
 
+BINARY_CLS_METRICS = ["accuracy", "f1", "auroc", "specificity", "sensitivity"]
+
 
 def get_regression_metrics(
     logits: torch.Tensor, labels: torch.Tensor
@@ -84,19 +86,27 @@ def compute_agg_stats(
     loss = torch.stack([x["loss"] for x in outputs]).mean()
     metrics = {"loss": loss}
     if not regression:
-        bin_cls_metrics = binary_cls_metrics(logits, labels, ignore_index)
-        metrics.update(bin_cls_metrics)
         if len(labels.shape) == 1:
+            bin_cls_metrics = binary_cls_metrics(logits, labels, ignore_index)
+            metrics.update(bin_cls_metrics)
             return metrics
+        drug_metrics = {}
         for drug_idx in range(labels.shape[1]):
             drug_labels = labels[:, drug_idx]
             drug_logits = logits[:, drug_idx]
-            drug_metrics = binary_cls_metrics(
-                drug_logits, drug_labels, ignore_index
+            drug_m = binary_cls_metrics(drug_logits, drug_labels, ignore_index)
+            drug_metrics.update(
+                {f"drug_{drug_idx}_{k}": v for k, v in drug_m.items()}
             )
-            metrics.update(
-                {f"drug_{drug_idx}_{k}": v for k, v in drug_metrics.items()}
-            )
+        for metric in BINARY_CLS_METRICS:
+            metrics[f"{metric}"] = torch.stack(
+                [
+                    drug_metrics[f"drug_{drug_idx}_{metric}"]
+                    for drug_idx in range(labels.shape[1])
+                    if drug_metrics[f"drug_{drug_idx}_{metric}"] > -1.0
+                ]
+            ).mean()
+        metrics.update(drug_metrics)
         return metrics
 
     labels_wo_ignore = labels[labels != ignore_index]
