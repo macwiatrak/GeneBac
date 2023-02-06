@@ -58,10 +58,10 @@ def binary_cls_metrics(
         "f1": binary_f1_score(logits, labels, ignore_index=ignore_index),
         "specificity": tn / (tn + fp),
         "sensitivity": tp / (tp + fn),
-        "tp": tp.type(torch.float32),
-        "fp": fp.type(torch.float32),
-        "tn": tn.type(torch.float32),
-        "fn": fn.type(torch.float32),
+        # "tp": tp.type(torch.float32),
+        # "fp": fp.type(torch.float32),
+        # "tn": tn.type(torch.float32),
+        # "fn": fn.type(torch.float32),
     }
 
 
