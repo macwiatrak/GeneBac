@@ -63,7 +63,7 @@ def test_model_gene_reg_steps():
 def test_model_gene_reg_train_fake_data(tmpdir):
     n_samples = 100
     n_genes = 5
-    n_classes = 4
+    n_classes = 1
     seq_length = 2048
     regression = False
     n_bottleneck_layer = 64
@@ -120,7 +120,7 @@ def test_model_gene_reg_train_real_data(tmpdir):
     n_bottleneck_layer = 64
     n_filters = 256
     max_epochs = 20
-    batch_size = 3
+    batch_size = 2
     max_gene_length = 2048
     selected_genes = ["PE1", "Rv1716", "Rv2000", "pepC", "pepD"]
 

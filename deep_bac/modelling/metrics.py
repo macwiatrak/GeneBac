@@ -44,13 +44,17 @@ def binary_cls_metrics(
     tp, fp, tn, fn, sup = binary_stat_scores(
         logits, labels, ignore_index=ignore_index
     )
+    if labels[labels != -100].sum() == 0:
+        auroc_score = torch.tensor(-100.0)
+    else:
+        auroc_score = auroc(
+            logits, labels, task="binary", ignore_index=ignore_index
+        )
     return {
         "accuracy": accuracy(
             logits, labels, task="binary", ignore_index=ignore_index
         ),
-        "auroc": auroc(
-            logits, labels, task="binary", ignore_index=ignore_index
-        ),
+        "auroc": auroc_score,
         "f1": binary_f1_score(logits, labels, ignore_index=ignore_index),
         "specificity": tn / (tn + fp),
         "sensitivity": tp / (tp + fn),
@@ -82,6 +86,17 @@ def compute_agg_stats(
     if not regression:
         bin_cls_metrics = binary_cls_metrics(logits, labels, ignore_index)
         metrics.update(bin_cls_metrics)
+        if len(labels.shape) == 1:
+            return metrics
+        for drug_idx in range(labels.shape[1]):
+            drug_labels = labels[:, drug_idx]
+            drug_logits = logits[:, drug_idx]
+            drug_metrics = binary_cls_metrics(
+                drug_logits, drug_labels, ignore_index
+            )
+            metrics.update(
+                {f"drug_{drug_idx}_{k}": v for k, v in drug_metrics.items()}
+            )
         return metrics
 
     labels_wo_ignore = labels[labels != ignore_index]
