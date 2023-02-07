@@ -29,7 +29,7 @@ def run(
     test: bool = False,
     ckpt_path: Optional[str] = None,
     use_drug_specific_genes: Literal["INH", "All"] = None,
-    test_after_test: bool = False,
+    test_after_train: bool = False,
 ):
     selected_genes = get_selected_genes(use_drug_specific_genes)
     logging.info(f"Selected genes: {selected_genes}")
@@ -60,7 +60,7 @@ def run(
         reverse_complement_prob=reverse_complement_prob,
         num_workers=num_workers if num_workers is not None else os.cpu_count(),
         selected_genes=selected_genes,
-        test=any([test, test_after_test]),
+        test=any([test, test_after_train]),
     )
     logging.info("Finished loading data")
 
@@ -82,7 +82,7 @@ def run(
     else:
         trainer.fit(model, data.train_dataloader, data.val_dataloader)
 
-    if test_after_test:
+    if test_after_train:
         results = trainer.test(
             model, dataloaders=data.test_dataloader, ckpt_path=ckpt_path
         )
@@ -107,7 +107,7 @@ def main(args):
         ckpt_path=args.ckpt_path,
         use_drug_idx=args.use_drug_idx,
         use_drug_specific_genes=args.use_drug_specific_genes,
-        test_after_test=args.test_after_test,
+        test_after_train=args.test_after_train,
     )
     if results is not None:
         with open(os.path.join(args.output_dir, "results.json"), "w") as f:
