@@ -9,7 +9,7 @@ from deep_bac.data_preprocessing.data_reader import get_gene_reg_data
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
 from deep_bac.modelling.trainer import get_trainer
-from deep_bac.utils import get_selected_genes
+from deep_bac.utils import get_selected_genes, write_results
 
 logging.basicConfig(level=logging.INFO)
 
@@ -28,6 +28,7 @@ def run(
     test: bool = False,
     ckpt_path: Optional[str] = None,
     use_drug_specific_genes: Literal["INH", "All"] = None,
+    test_after_train: bool = False,
 ):
     selected_genes = get_selected_genes(use_drug_specific_genes)
     logging.info(f"Selected genes: {selected_genes}")
@@ -58,6 +59,7 @@ def run(
         reverse_complement_prob=reverse_complement_prob,
         num_workers=num_workers if num_workers is not None else os.cpu_count(),
         selected_genes=selected_genes,
+        test=any([test, test_after_train]),
     )
     logging.info("Finished loading data")
 
@@ -78,6 +80,11 @@ def run(
         )
     else:
         trainer.fit(model, data.train_dataloader, data.val_dataloader)
+
+    if test_after_train:
+        results = trainer.test(
+            model, dataloaders=data.test_dataloader, ckpt_path=ckpt_path
+        )
     # in the future we could save the results
     return results
 
@@ -85,7 +92,7 @@ def run(
 def main(args):
     seed_everything(args.random_state)
     config = DeepBacConfig.from_dict(args.as_dict())
-    _ = run(
+    results = run(
         config=config,
         input_dir=args.input_dir,
         output_dir=args.output_dir,
@@ -99,6 +106,11 @@ def main(args):
         ckpt_path=args.ckpt_path,
         use_drug_idx=args.use_drug_idx,
         use_drug_specific_genes=args.use_drug_specific_genes,
+        test_after_train=args.test_after_train,
+    )
+    write_results(
+        results=results,
+        output_file_path=os.path.join(args.output_dir, "test_results.jsonl"),
     )
 
 

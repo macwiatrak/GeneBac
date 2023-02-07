@@ -35,6 +35,7 @@ class TrainArgumentParser(Tap):
     max_epochs: int = 100
     early_stopping_patience: int = 10
     test: bool = False
+    test_after_train: bool = False
     ckpt_path: str = None
     random_state: int = 42
     warmup_proportion: float = 0.1

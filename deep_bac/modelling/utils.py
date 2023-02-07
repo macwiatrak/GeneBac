@@ -19,8 +19,11 @@ def remove_ignore_index(
 ) -> torch.Tensor:
     """Remove the loss for the ignore index (-100)"""
     # Remove loss for ignore index
-    loss = loss[labels != ignore_index]
-    return loss
+    mask = torch.where(
+        labels == ignore_index, torch.zeros_like(loss), torch.ones_like(loss)
+    )
+    loss = loss * mask
+    return loss.sum() / mask.sum()
 
 
 def get_gene_encoder(config: DeepBacConfig):
