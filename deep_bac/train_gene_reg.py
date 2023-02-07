@@ -9,7 +9,7 @@ from deep_bac.data_preprocessing.data_reader import get_gene_reg_data
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
 from deep_bac.modelling.trainer import get_trainer
-from deep_bac.utils import get_selected_genes, write_results
+from deep_bac.utils import get_selected_genes, format_and_write_results
 
 logging.basicConfig(level=logging.INFO)
 
@@ -108,7 +108,7 @@ def main(args):
         use_drug_specific_genes=args.use_drug_specific_genes,
         test_after_train=args.test_after_train,
     )
-    write_results(
+    format_and_write_results(
         results=results,
         output_file_path=os.path.join(args.output_dir, "test_results.jsonl"),
     )
