@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 from typing import Optional, Literal
@@ -10,7 +9,7 @@ from deep_bac.data_preprocessing.data_reader import get_gene_reg_data
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
 from deep_bac.modelling.trainer import get_trainer
-from deep_bac.utils import get_selected_genes
+from deep_bac.utils import get_selected_genes, write_results
 
 logging.basicConfig(level=logging.INFO)
 
@@ -109,9 +108,10 @@ def main(args):
         use_drug_specific_genes=args.use_drug_specific_genes,
         test_after_train=args.test_after_train,
     )
-    if results is not None:
-        with open(os.path.join(args.output_dir, "results.json"), "w") as f:
-            json.dump(results, f)
+    write_results(
+        results=results,
+        output_file_path=os.path.join(args.output_dir, "test_results.jsonl"),
+    )
 
 
 if __name__ == "__main__":
