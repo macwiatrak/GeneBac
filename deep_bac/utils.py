@@ -63,6 +63,10 @@ def write_results(
 ):
     if not results or not output_file_path:
         return
+
+    if not isinstance(results, list):
+        results = [results]
+
     if not os.path.isfile(output_file_path):
         with open(output_file_path, "w") as f:
             for res in results:
@@ -86,11 +90,13 @@ def format_predictions(
     output = defaultdict(list)
     for preds in predictions:
         for metric in metrics_list:
-            output[metric].append(preds[f"{split}_{metric}"])
-            output["drug"].append("First and Second line drugs")
+            output["value"].append(preds[f"{split}_{metric}"])
+            output["metric"].append(metric)
+            output["drug"].append("All first and Second line drugs")
             for drug, idx in drug_to_idx_dict.items():
                 output["drug"].append(drug)
-                output[metric].append(preds[f"{split}_drug_{idx}_{metric}"])
+                output["value"].append(preds[f"{split}_drug_{idx}_{metric}"])
+                output["metric"].append(metric)
 
     output["split"] = [split] * len(output["drug"])
     return output
