@@ -16,6 +16,7 @@ from torchmetrics.functional.classification import (
 )
 
 BINARY_CLS_METRICS = ["accuracy", "f1", "auroc", "specificity", "sensitivity"]
+REGRESSION_METRICS = ["pearson", "spearman", "mse", "mae", "r2"]
 
 DRUG_TO_LABEL_IDX = {
     "MXF": 0,
@@ -47,6 +48,15 @@ def get_regression_metrics(
     Returns:
         dict of metrics
     """
+    if len(logits) == 0:
+        return {
+            "pearson": torch.tensor(-100.0),
+            "spearman": torch.tensor(-100.0),
+            "mse": torch.tensor(-100.0),
+            "mae": torch.tensor(-100.0),
+            "r2": torch.tensor(-100.0),
+        }
+
     return {
         "pearson": pearson_corrcoef(logits, labels),
         "spearman": spearman_corrcoef(logits, labels),
@@ -132,10 +142,38 @@ def compute_agg_stats(
         metrics.update(drug_metrics)
         return metrics
 
-    labels_wo_ignore = labels[labels != ignore_index]
-    logits_wo_ignore = logits[labels != ignore_index]
-    reg_metrics = get_regression_metrics(logits_wo_ignore, labels_wo_ignore)
-    metrics.update(reg_metrics)
+    if len(labels.shape) == 1:
+        labels = labels.view(-1)
+        logits = logits.view(-1)
+        labels_wo_ignore = labels[labels != ignore_index]
+        logits_wo_ignore = logits[labels != ignore_index]
+        reg_metrics = get_regression_metrics(logits_wo_ignore, labels_wo_ignore)
+        metrics.update(reg_metrics)
+        return reg_metrics
+
+    drug_metrics = {}
+    for drug_idx in range(labels.shape[1]):
+        drug_labels = labels[:, drug_idx]
+        drug_logits = logits[:, drug_idx]
+        drug_labels_wo_ignore = drug_labels[drug_labels != ignore_index]
+        drug_logits_wo_ignore = drug_logits[drug_labels != ignore_index]
+        drug_m = get_regression_metrics(
+            drug_logits_wo_ignore, drug_labels_wo_ignore
+        )
+        drug_metrics.update(
+            {f"drug_{drug_idx}_{k}": v for k, v in drug_m.items()}
+        )
+    for metric in REGRESSION_METRICS:
+        metrics[f"{metric}"] = get_macro_metric(
+            metrics_dict=drug_metrics,
+            metric=metric,
+            # use only first & second line drugs for macro metrics
+            drug_idxs=[
+                DRUG_TO_LABEL_IDX[idx]
+                for idx in FIRST_LINE_DRUGS + SECOND_LINE_DRUGS
+            ],
+        )
+    metrics.update(drug_metrics)
     return metrics
 
 
@@ -148,6 +186,6 @@ def get_macro_metric(
         [
             metrics_dict[f"drug_{drug_idx}_{metric}"]
             for drug_idx in drug_idxs
-            if metrics_dict[f"drug_{drug_idx}_{metric}"] > -1.0
+            if metrics_dict[f"drug_{drug_idx}_{metric}"] > -100.0
         ]
     ).mean()
