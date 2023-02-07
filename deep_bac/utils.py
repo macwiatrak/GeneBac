@@ -1,6 +1,9 @@
 import json
 import os
+from collections import defaultdict
 from typing import Literal, Optional, Dict, List
+
+from deep_bac.modelling.metrics import DRUG_TO_LABEL_IDX
 
 DRUG_SPECIFIC_GENES_DICT = {
     "All": [
@@ -68,7 +71,26 @@ def write_results(
         with open(output_file_path, "r") as f:
             existing_results = [json.loads(line) for line in f.readlines()]
 
-        existing_results.append(results)
+        existing_results += results
         with open(output_file_path, "w") as f:
             for result in existing_results:
                 f.write(json.dumps(result) + "\n")
+
+
+def format_predictions(
+    predictions: List[Dict],
+    metrics_list: List[str],
+    drug_to_idx_dict: Dict[str, int] = DRUG_TO_LABEL_IDX,
+    split: str = "test",
+):
+    output = defaultdict(list)
+    for preds in predictions:
+        for metric in metrics_list:
+            output[metric].append(preds[f"{split}_{metric}"])
+            output["drug"].append("First and Second line drugs")
+            for drug, idx in drug_to_idx_dict.items():
+                output["drug"].append(drug)
+                output[metric].append(preds[f"{split}_drug_{idx}_{metric}"])
+
+    output["split"] = [split] * len(output["drug"])
+    return output
