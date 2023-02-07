@@ -33,7 +33,7 @@ class TrainArgumentParser(Tap):
     num_workers: int = None
     # trainer arguments
     max_epochs: int = 100
-    early_stopping_patience: int = 10
+    early_stopping_patience: int = 20
     test: bool = False
     test_after_train: bool = False
     ckpt_path: str = None
