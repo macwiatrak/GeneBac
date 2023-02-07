@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Literal, Optional, Dict
+from typing import Literal, Optional, Dict, List
 
 DRUG_SPECIFIC_GENES_DICT = {
     "All": [
@@ -55,14 +55,15 @@ def get_selected_genes(use_drug_specific_genes: Literal["INH"] = None):
 
 
 def write_results(
-    results: Optional[Dict] = None,
+    results: List[Optional[Dict]] = None,
     output_file_path: str = None,
 ):
     if not results or not output_file_path:
         return
     if not os.path.isfile(output_file_path):
         with open(output_file_path, "w") as f:
-            f.write(json.dumps(results) + "\n")
+            for res in results:
+                f.write(json.dumps(res) + "\n")
     else:
         with open(output_file_path, "r") as f:
             existing_results = [json.loads(line) for line in f.readlines()]
