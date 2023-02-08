@@ -10,7 +10,9 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from deep_bac.modelling.data_types import DeepBacConfig
 
 
-def get_trainer(config: DeepBacConfig, output_dir: str) -> Trainer:
+def get_trainer(
+    config: DeepBacConfig, output_dir: str, refresh_rate: int = 200
+) -> Trainer:
     if torch.cuda.is_available():
         devices = torch.cuda.device_count()
         accelerator = "gpu"
@@ -46,7 +48,7 @@ def get_trainer(config: DeepBacConfig, output_dir: str) -> Trainer:
             #     save_top_k=1,
             #     save_last=True,
             # ),
-            TQDMProgressBar(refresh_rate=200),
+            TQDMProgressBar(refresh_rate=refresh_rate),
         ],
         logger=TensorBoardLogger(output_dir),
         accumulate_grad_batches=config.accumulate_grad_batches,

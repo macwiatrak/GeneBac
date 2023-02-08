@@ -40,7 +40,7 @@ def run(
 
     config.train_set_len = data.train_set_len
     # this should always be true for gene expression prediction
-    trainer = get_trainer(config, output_dir)
+    trainer = get_trainer(config, output_dir, refresh_rate=1000)
     model = DeepBacGeneExpr(
         config=config,
         gene_vars_w_thresholds=get_gene_var_thresholds(
