@@ -126,3 +126,15 @@ def format_and_write_results(
         with open(output_file_path, "w") as f:
             for result in existing_results:
                 f.write(json.dumps(result) + "\n")
+
+
+def get_gene_var_thresholds(
+    most_variable_genes, gene_var_thresholds
+) -> Optional[Dict]:
+    if not gene_var_thresholds or not most_variable_genes:
+        return None
+    output = defaultdict(list)
+    for threshold in gene_var_thresholds:
+        genes = most_variable_genes[: int(threshold * len(most_variable_genes))]
+        output[threshold] = genes
+    return gene_var_thresholds

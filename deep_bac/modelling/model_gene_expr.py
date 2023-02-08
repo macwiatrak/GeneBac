@@ -17,11 +17,11 @@ class DeepBacGeneExpr(pl.LightningModule):
     def __init__(
         self,
         config: DeepBacConfig,
-        most_variable_genes: List[str] = None,
+        gene_vars_w_thresholds: Dict[int, List[str]] = None,
     ):
         super().__init__()
         self.config = config
-        self.most_variable_genes = most_variable_genes
+        self.gene_vars_w_thresholds = gene_vars_w_thresholds
 
         self.gene_encoder = get_gene_encoder(config)
         self.decoder = nn.Linear(config.n_gene_bottleneck_layer, 1)
@@ -72,10 +72,16 @@ class DeepBacGeneExpr(pl.LightningModule):
         # 2. Get top 10%, 25%, 50%, 100% of variable genes
         # 3. For each threshold, compute agg stats
         # 4. Combine the metrics for each threshold and log them
-        # TODO: Sort the genes by variability
-        # TODO: get a list of genes into a dict depending on the threshold
         # TODO: For each threshold, filter the genes, compute the metrics, update the main metrics dict
-        agg_stats = compute_agg_stats(outputs=outputs, regression=True)
+        if not self.gene_vars_w_thresholds:
+            agg_stats = compute_agg_stats(outputs=outputs, regression=True)
+        else:
+            for thresh, genes in self.gene_vars_w_thresholds.items():
+                # flatten the logits, labels and gene_names
+                logits = torch.cat([x["logits"] for x in outputs]).squeeze(-1)
+                labels = torch.cat([x["labels"] for x in outputs])
+                gene_names = [x["gene_names"] for x in outputs]
+
         agg_stats = {f"{data_split}_{k}": v for k, v in agg_stats.items()}
         self.log_dict(
             agg_stats,

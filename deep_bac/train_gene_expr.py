@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Optional
+from typing import Optional, List
 
 from pytorch_lightning.utilities.seed import seed_everything
 
@@ -9,7 +9,7 @@ from deep_bac.data_preprocessing.data_reader import get_gene_expr_data
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
 from deep_bac.modelling.trainer import get_trainer
-
+from deep_bac.utils import get_gene_var_thresholds
 
 logging.basicConfig(level=logging.INFO)
 
@@ -25,6 +25,7 @@ def run(
     num_workers: int = None,
     test: bool = False,
     ckpt_path: Optional[str] = None,
+    gene_var_thresholds: List[float] = [0.1, 0.25, 0.5, 1.0],
 ):
     data, most_variable_genes = get_gene_expr_data(
         input_dir=input_dir,
@@ -42,7 +43,9 @@ def run(
     trainer = get_trainer(config, output_dir)
     model = DeepBacGeneExpr(
         config=config,
-        most_variable_genes=most_variable_genes,
+        gene_vars_w_thresholds=get_gene_var_thresholds(
+            most_variable_genes, gene_var_thresholds
+        ),
     )
 
     results = None
