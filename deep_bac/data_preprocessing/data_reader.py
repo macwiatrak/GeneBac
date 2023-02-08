@@ -17,7 +17,7 @@ from deep_bac.data_preprocessing.dataset import (
     BacGenomeGeneRegDataset,
     BacGenomeGeneExprDataset,
 )
-from deep_bac.data_preprocessing.utils import get_most_variable_genes_expression
+from deep_bac.data_preprocessing.utils import get_gene_std_expression
 
 VARIANCE_PER_GENE_FILE_PATH = (
     "/Users/maciejwiatrak/Desktop/bacterial_genomics/"
@@ -231,9 +231,10 @@ def get_gene_expr_data(
     test: bool = False,
 ) -> Tuple[DataReaderOutput, List[str]]:
 
-    most_variable_genes = get_most_variable_genes_expression(
+    gene_std_dict = get_gene_std_expression(
         df=pd.read_parquet(os.path.join(input_dir, "train.parquet")),
     )
+    most_variable_genes = list(gene_std_dict.keys())
 
     train_dataloader, train_set_len = get_gene_expr_dataloader(
         batch_size=batch_size,

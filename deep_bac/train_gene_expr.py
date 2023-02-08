@@ -26,7 +26,7 @@ def run(
     test: bool = False,
     ckpt_path: Optional[str] = None,
 ):
-    data = get_gene_expr_data(
+    data, most_variable_genes = get_gene_expr_data(
         input_dir=input_dir,
         max_gene_length=max_gene_length,
         batch_size=config.batch_size,
@@ -40,7 +40,10 @@ def run(
     config.train_set_len = data.train_set_len
     # this should always be true for gene expression prediction
     trainer = get_trainer(config, output_dir)
-    model = DeepBacGeneExpr(config)
+    model = DeepBacGeneExpr(
+        config=config,
+        most_variable_genes=most_variable_genes,
+    )
 
     results = None
     if test:

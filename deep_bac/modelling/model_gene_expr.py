@@ -17,9 +17,12 @@ class DeepBacGeneExpr(pl.LightningModule):
     def __init__(
         self,
         config: DeepBacConfig,
+        most_variable_genes: List[str] = None,
     ):
         super().__init__()
         self.config = config
+        self.most_variable_genes = most_variable_genes
+
         self.gene_encoder = get_gene_encoder(config)
         self.decoder = nn.Linear(config.n_gene_bottleneck_layer, 1)
         self.dropout = nn.Dropout(0.2)
