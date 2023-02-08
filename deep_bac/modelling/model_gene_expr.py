@@ -22,7 +22,7 @@ class DeepBacGeneExpr(pl.LightningModule):
     def __init__(
         self,
         config: DeepBacConfig,
-        gene_vars_w_thresholds: Dict[int, List[str]] = None,
+        gene_vars_w_thresholds: Dict[float, List[str]] = None,
     ):
         super().__init__()
         self.config = config
@@ -72,19 +72,14 @@ class DeepBacGeneExpr(pl.LightningModule):
     def eval_epoch_end(
         self, outputs: List[Dict[str, torch.tensor]], data_split: str
     ) -> Dict[str, float]:
-        # Plan
-        # 1. Get a list of most variable genes using the train set
-        # 2. Get top 10%, 25%, 50%, 100% of variable genes
-        # 3. For each threshold, compute agg stats
-        # 4. Combine the metrics for each threshold and log them
-        # TODO: For each threshold, filter the genes, compute the metrics, update the main metrics dict
+
         logits = torch.cat([x["logits"] for x in outputs]).squeeze(-1)
         labels = torch.cat([x["labels"] for x in outputs])
         agg_stats = get_regression_metrics(logits=logits, labels=labels)
 
         if self.gene_vars_w_thresholds:
             gene_names = list(
-                itertools.chain([x["gene_names"] for x in outputs])
+                itertools.chain(*[x["gene_names"] for x in outputs])
             )
             thresh_stats = get_stats_for_thresholds(
                 logits=logits,

@@ -202,7 +202,8 @@ def get_stats_for_thresholds(
     for thresh, genes_in_thresh in gene_vars_w_thresholds.items():
         # flatten the logits, labels and gene_names
         gene_mask = torch.tensor(
-            [idx for idx, g in enumerate(gene_names) if g in genes_in_thresh]
+            [idx for idx, g in enumerate(gene_names) if g in genes_in_thresh],
+            dtype=torch.long,
         )
         thresh_stats = get_regression_metrics(
             logits=logits[gene_mask], labels=labels[gene_mask]
