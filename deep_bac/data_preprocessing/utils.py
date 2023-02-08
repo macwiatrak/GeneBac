@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict
+from typing import Dict, List
 
 import gffpandas.gffpandas as gffpd
 import pandas as pd
@@ -43,8 +43,8 @@ def get_gene_name(attr: str):
 
 
 def get_complement(seq):
-    complement_dict = {'a': 't', 't': 'a', 'g': 'c', 'c': 'g'}
-    out = ''
+    complement_dict = {"a": "t", "t": "a", "g": "c", "c": "g"}
+    out = ""
     for item in seq:
         out += complement_dict[item.lower()]
     assert len(out) == len(seq)
@@ -52,30 +52,30 @@ def get_complement(seq):
 
 
 def get_gene_seq(ref_genome: str, row: Dict):
-    start = row['start'] - 1
-    end = row['end']
+    start = row["start"] - 1
+    end = row["end"]
 
     gene_seq = ref_genome[start:end].lower()
-    if row['strand'] == "-":
+    if row["strand"] == "-":
         gene_seq = get_complement(gene_seq)[::-1]
     return gene_seq
 
 
 def get_promoter_seq(ref_genome: str, prom_seq_len: int, row: Dict):
-    start = row['start'] - 1
-    end = row['end']
+    start = row["start"] - 1
+    end = row["end"]
 
-    if row['strand'] == "-":
+    if row["strand"] == "-":
         if end + prom_seq_len > len(ref_genome):
             prom_seq = ref_genome[end:].lower()
         else:
-            prom_seq = ref_genome[end:end + prom_seq_len].lower()
+            prom_seq = ref_genome[end : end + prom_seq_len].lower()
         prom_seq = get_complement(prom_seq)[::-1]
     else:
         if start - prom_seq_len < 0:
             prom_seq = ref_genome[:start].lower()
         else:
-            prom_seq = ref_genome[start - 100:start].lower()
+            prom_seq = ref_genome[start - 100 : start].lower()
     return prom_seq
 
 
@@ -89,19 +89,23 @@ def convert_gene_data_df_to_dict(df: pd.DataFrame) -> Dict[str, Dict]:
     return gene_dict
 
 
-def get_gene_data_dict(ref_genome: str, genome_assembly: pd.DataFrame, prom_seq_len: int):
-    gene_data_df = genome_assembly[genome_assembly['type'] == 'gene']  # include genes only
+def get_gene_data_dict(
+    ref_genome: str, genome_assembly: pd.DataFrame, prom_seq_len: int
+):
+    gene_data_df = genome_assembly[
+        genome_assembly["type"] == "gene"
+    ]  # include genes only
 
     # get gene name
-    gene_data_df['GENE'] = gene_data_df['attributes'].apply(get_gene_name)
-    gene_data_df = gene_data_df.drop(columns=['seq_id', 'source', 'attributes'])
+    gene_data_df["GENE"] = gene_data_df["attributes"].apply(get_gene_name)
+    gene_data_df = gene_data_df.drop(columns=["seq_id", "source", "attributes"])
 
-    gene_data_df['gene_seq'] = gene_data_df.apply(
+    gene_data_df["gene_seq"] = gene_data_df.apply(
         lambda row: get_gene_seq(ref_genome=ref_genome, row=row),
         axis=1,
     )
 
-    gene_data_df['promoter_seq'] = gene_data_df.apply(
+    gene_data_df["promoter_seq"] = gene_data_df.apply(
         lambda row: get_promoter_seq(
             ref_genome=ref_genome,
             prom_seq_len=prom_seq_len,
@@ -113,11 +117,7 @@ def get_gene_data_dict(ref_genome: str, genome_assembly: pd.DataFrame, prom_seq_
     return convert_gene_data_df_to_dict(gene_data_df)
 
 
-def shift_seq(
-        seq: torch.Tensor,
-        shift: int,
-        pad: float = 0.
-):
+def shift_seq(seq: torch.Tensor, shift: int, pad: float = 0.0):
     """Shift a sequence left or right by shift_amount.
     adapted from https://github.com/calico/scBasset/blob/main/scbasset/basenji_utils.py
     Args:
@@ -131,7 +131,7 @@ def shift_seq(
         return seq
 
     # create the padding
-    pad = pad * torch.ones_like((seq[:abs(shift), :]))
+    pad = pad * torch.ones_like((seq[: abs(shift), :]))
 
     def _shift_right(_seq):
         # shift is positive
@@ -156,9 +156,19 @@ def seq_to_one_hot(seq: str) -> torch.Tensor:
     return ONE_HOT_EMBED[seq_chrs]
 
 
-def pad_one_hot_seq(one_hot_seq: torch.Tensor, max_length: int, pad_value: float = 0.25) -> torch.Tensor:
+def pad_one_hot_seq(
+    one_hot_seq: torch.Tensor, max_length: int, pad_value: float = 0.25
+) -> torch.Tensor:
     seq_length, n_nucleotides = one_hot_seq.shape
     if seq_length == max_length:
         return one_hot_seq
     to_pad = max_length - seq_length
-    return torch.cat([one_hot_seq, torch.full((to_pad, n_nucleotides), pad_value)], dim=0)
+    return torch.cat(
+        [one_hot_seq, torch.full((to_pad, n_nucleotides), pad_value)], dim=0
+    )
+
+
+def get_most_variable_genes_expression(
+    df: pd.DataFrame,
+) -> List[str]:
+    return []

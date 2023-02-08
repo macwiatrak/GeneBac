@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 import pandas as pd
 import torch
@@ -17,6 +17,7 @@ from deep_bac.data_preprocessing.dataset import (
     BacGenomeGeneRegDataset,
     BacGenomeGeneExprDataset,
 )
+from deep_bac.data_preprocessing.utils import get_most_variable_genes_expression
 
 VARIANCE_PER_GENE_FILE_PATH = (
     "/Users/maciejwiatrak/Desktop/bacterial_genomics/"
@@ -228,7 +229,11 @@ def get_gene_expr_data(
     reverse_complement_prob: float = 0.5,
     num_workers: int = 8,
     test: bool = False,
-):
+) -> Tuple[DataReaderOutput, List[str]]:
+
+    most_variable_genes = get_most_variable_genes_expression(
+        df=pd.read_parquet(os.path.join(input_dir, "train.parquet")),
+    )
 
     train_dataloader, train_set_len = get_gene_expr_dataloader(
         batch_size=batch_size,
@@ -253,10 +258,13 @@ def get_gene_expr_data(
         pin_memory=True,
     )
     if not test:
-        return DataReaderOutput(
-            train_dataloader=train_dataloader,
-            val_dataloader=val_dataloader,
-            train_set_len=train_set_len,
+        return (
+            DataReaderOutput(
+                train_dataloader=train_dataloader,
+                val_dataloader=val_dataloader,
+                train_set_len=train_set_len,
+            ),
+            most_variable_genes,
         )
     test_dataloader, _ = get_gene_expr_dataloader(
         batch_size=batch_size,
@@ -269,11 +277,14 @@ def get_gene_expr_data(
         pin_memory=True,
     )
 
-    return DataReaderOutput(
-        train_dataloader=train_dataloader,
-        val_dataloader=val_dataloader,
-        test_dataloader=test_dataloader,
-        train_set_len=train_set_len,
+    return (
+        DataReaderOutput(
+            train_dataloader=train_dataloader,
+            val_dataloader=val_dataloader,
+            test_dataloader=test_dataloader,
+            train_set_len=train_set_len,
+        ),
+        most_variable_genes,
     )
 
 
@@ -311,7 +322,7 @@ def main():
     # for _ in tqdm(dl):
     #     pass
     # print("Done!")
-    data = get_gene_expr_data(
+    data, most_var_genes = get_gene_expr_data(
         input_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/",
         batch_size=512,
         max_gene_length=2048,
