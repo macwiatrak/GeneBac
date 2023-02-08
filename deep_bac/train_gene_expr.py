@@ -25,7 +25,7 @@ def run(
     num_workers: int = None,
     test: bool = False,
     ckpt_path: Optional[str] = None,
-    gene_var_thresholds: List[float] = [0.1, 0.25, 0.5, 1.0],
+    gene_var_thresholds: List[float] = [0.05, 0.1, 0.25, 0.5],
 ):
     data, most_variable_genes = get_gene_expr_data(
         input_dir=input_dir,

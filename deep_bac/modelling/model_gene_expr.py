@@ -1,3 +1,4 @@
+import itertools
 from typing import List, Dict
 
 import pytorch_lightning as pl
@@ -7,7 +8,11 @@ from transformers import get_linear_schedule_with_warmup
 
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
 from deep_bac.modelling.data_types import DeepBacConfig
-from deep_bac.modelling.metrics import compute_agg_stats
+from deep_bac.modelling.metrics import (
+    compute_agg_stats,
+    get_regression_metrics,
+    get_stats_for_thresholds,
+)
 from deep_bac.modelling.utils import (
     get_gene_encoder,
 )
@@ -73,15 +78,23 @@ class DeepBacGeneExpr(pl.LightningModule):
         # 3. For each threshold, compute agg stats
         # 4. Combine the metrics for each threshold and log them
         # TODO: For each threshold, filter the genes, compute the metrics, update the main metrics dict
-        if not self.gene_vars_w_thresholds:
-            agg_stats = compute_agg_stats(outputs=outputs, regression=True)
-        else:
-            for thresh, genes in self.gene_vars_w_thresholds.items():
-                # flatten the logits, labels and gene_names
-                logits = torch.cat([x["logits"] for x in outputs]).squeeze(-1)
-                labels = torch.cat([x["labels"] for x in outputs])
-                gene_names = [x["gene_names"] for x in outputs]
+        logits = torch.cat([x["logits"] for x in outputs]).squeeze(-1)
+        labels = torch.cat([x["labels"] for x in outputs])
+        agg_stats = get_regression_metrics(logits=logits, labels=labels)
 
+        if self.gene_vars_w_thresholds:
+            gene_names = list(
+                itertools.chain([x["gene_names"] for x in outputs])
+            )
+            thresh_stats = get_stats_for_thresholds(
+                logits=logits,
+                labels=labels,
+                gene_names=gene_names,
+                gene_vars_w_thresholds=self.gene_vars_w_thresholds,
+            )
+            agg_stats.update(thresh_stats)
+
+        agg_stats["loss"] = torch.stack([x["loss"] for x in outputs]).mean()
         agg_stats = {f"{data_split}_{k}": v for k, v in agg_stats.items()}
         self.log_dict(
             agg_stats,

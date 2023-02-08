@@ -1,3 +1,4 @@
+import itertools
 from typing import List, Dict
 
 import torch
@@ -189,3 +190,25 @@ def get_macro_metric(
             if metrics_dict[f"drug_{drug_idx}_{metric}"] > -100.0
         ]
     ).mean()
+
+
+def get_stats_for_thresholds(
+    logits: torch.Tensor,
+    labels: torch.tensor,
+    gene_names: List[str],
+    gene_vars_w_thresholds: Dict[float, List[str]],
+):
+    output = {}
+    for thresh, genes_in_thresh in gene_vars_w_thresholds.items():
+        # flatten the logits, labels and gene_names
+        gene_mask = torch.tensor(
+            [idx for idx, g in enumerate(gene_names) if g in genes_in_thresh]
+        )
+        thresh_stats = get_regression_metrics(
+            logits=logits[gene_mask], labels=labels[gene_mask]
+        )
+        thresh_stats = {
+            f"{k}_{str(thresh)}": v for k, v in thresh_stats.items()
+        }
+        output.update(thresh_stats)
+    return output
