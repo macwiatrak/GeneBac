@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Optional
+from typing import Optional, List
 
 from pytorch_lightning.utilities.seed import seed_everything
 
@@ -9,7 +9,7 @@ from deep_bac.data_preprocessing.data_reader import get_gene_expr_data
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
 from deep_bac.modelling.trainer import get_trainer
-
+from deep_bac.utils import get_gene_var_thresholds
 
 logging.basicConfig(level=logging.INFO)
 
@@ -25,8 +25,9 @@ def run(
     num_workers: int = None,
     test: bool = False,
     ckpt_path: Optional[str] = None,
+    gene_var_thresholds: List[float] = [0.1, 0.25, 0.5],
 ):
-    data = get_gene_expr_data(
+    data, most_variable_genes = get_gene_expr_data(
         input_dir=input_dir,
         max_gene_length=max_gene_length,
         batch_size=config.batch_size,
@@ -39,8 +40,13 @@ def run(
 
     config.train_set_len = data.train_set_len
     # this should always be true for gene expression prediction
-    trainer = get_trainer(config, output_dir)
-    model = DeepBacGeneExpr(config)
+    trainer = get_trainer(config, output_dir, refresh_rate=1000)
+    model = DeepBacGeneExpr(
+        config=config,
+        gene_vars_w_thresholds=get_gene_var_thresholds(
+            most_variable_genes, gene_var_thresholds
+        ),
+    )
 
     results = None
     if test:

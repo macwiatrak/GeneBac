@@ -1,11 +1,14 @@
+import pandas as pd
 import torch
 import pytorch_lightning as pl
 
 from deep_bac.data_preprocessing.data_reader import get_gene_expr_dataloader
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
+from deep_bac.data_preprocessing.utils import get_gene_std_expression
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
 from deep_bac.modelling.modules.utils import count_parameters
+from deep_bac.utils import get_gene_var_thresholds
 from tests.modelling.helpers import BasicLogger, get_test_gene_expr_dataloader
 
 
@@ -99,6 +102,10 @@ def test_model_gene_expr_train_real_data(tmpdir):
     max_epochs = 10
     batch_size = 20
     max_gene_length = 2048
+    bac_genes_df_file_path = (
+        "../test_data/sample_genes_with_variants_and_expression.parquet"
+    )
+    gene_var_thresholds = [0.1, 0.25, 0.5]
 
     config = DeepBacConfig(
         gene_encoder_type="scbasset",
@@ -109,9 +116,14 @@ def test_model_gene_expr_train_real_data(tmpdir):
         max_epochs=max_epochs,
     )
 
+    gene_std_dict = get_gene_std_expression(
+        df=pd.read_parquet(bac_genes_df_file_path),
+    )
+    most_variable_genes = list(gene_std_dict.keys())
+
     dataloader, dataset_len = get_gene_expr_dataloader(
         batch_size=batch_size,
-        bac_genes_df_file_path="../test_data/sample_genes_with_variants_and_expression.parquet",
+        bac_genes_df_file_path=bac_genes_df_file_path,
         max_gene_length=max_gene_length,
         shift_max=0,
         pad_value=0.25,
@@ -122,7 +134,12 @@ def test_model_gene_expr_train_real_data(tmpdir):
     )
     config.train_set_len = dataset_len
 
-    model = DeepBacGeneExpr(config)
+    model = DeepBacGeneExpr(
+        config=config,
+        gene_vars_w_thresholds=get_gene_var_thresholds(
+            most_variable_genes, gene_var_thresholds
+        ),
+    )
     n_params = count_parameters(model)
     print("Number of trainable model parameters: ", n_params)
 

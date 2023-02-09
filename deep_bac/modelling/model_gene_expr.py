@@ -1,3 +1,4 @@
+import itertools
 from typing import List, Dict
 
 import pytorch_lightning as pl
@@ -7,7 +8,11 @@ from transformers import get_linear_schedule_with_warmup
 
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
 from deep_bac.modelling.data_types import DeepBacConfig
-from deep_bac.modelling.metrics import compute_agg_stats
+from deep_bac.modelling.metrics import (
+    compute_agg_stats,
+    get_regression_metrics,
+    get_stats_for_thresholds,
+)
 from deep_bac.modelling.utils import (
     get_gene_encoder,
 )
@@ -17,9 +22,12 @@ class DeepBacGeneExpr(pl.LightningModule):
     def __init__(
         self,
         config: DeepBacConfig,
+        gene_vars_w_thresholds: Dict[float, List[str]] = None,
     ):
         super().__init__()
         self.config = config
+        self.gene_vars_w_thresholds = gene_vars_w_thresholds
+
         self.gene_encoder = get_gene_encoder(config)
         self.decoder = nn.Linear(config.n_gene_bottleneck_layer, 1)
         self.dropout = nn.Dropout(0.2)
@@ -58,12 +66,30 @@ class DeepBacGeneExpr(pl.LightningModule):
             loss=loss,
             logits=logits,
             labels=batch.labels,
+            gene_names=batch.gene_names,
         )
 
     def eval_epoch_end(
         self, outputs: List[Dict[str, torch.tensor]], data_split: str
     ) -> Dict[str, float]:
-        agg_stats = compute_agg_stats(outputs=outputs, regression=True)
+
+        logits = torch.cat([x["logits"] for x in outputs]).squeeze(-1)
+        labels = torch.cat([x["labels"] for x in outputs])
+        agg_stats = get_regression_metrics(logits=logits, labels=labels)
+
+        if self.gene_vars_w_thresholds:
+            gene_names = list(
+                itertools.chain(*[x["gene_names"] for x in outputs])
+            )
+            thresh_stats = get_stats_for_thresholds(
+                logits=logits,
+                labels=labels,
+                gene_names=gene_names,
+                gene_vars_w_thresholds=self.gene_vars_w_thresholds,
+            )
+            agg_stats.update(thresh_stats)
+
+        agg_stats["loss"] = torch.stack([x["loss"] for x in outputs]).mean()
         agg_stats = {f"{data_split}_{k}": v for k, v in agg_stats.items()}
         self.log_dict(
             agg_stats,
