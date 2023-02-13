@@ -54,7 +54,7 @@ class DeepBacGeneExpr(pl.LightningModule):
     def training_step(
         self, batch: BatchBacInputSample, batch_idx: int
     ) -> torch.Tensor:
-        logits = self(batch.input_tensor)
+        logits = self(batch.input_tensor, batch.tss_indexes)
         # get loss with reduction="none" to compute loss per sample
         loss = self.loss_fn(logits, batch.labels) + 1e-8
         self.log(
@@ -69,7 +69,7 @@ class DeepBacGeneExpr(pl.LightningModule):
         return loss
 
     def eval_step(self, batch: BatchBacInputSample):
-        logits = self(batch.input_tensor)
+        logits = self(batch.input_tensor, batch.tss_indexes)
         loss = self.loss_fn(logits, batch.labels) + 1e-4
         return dict(
             loss=loss,
