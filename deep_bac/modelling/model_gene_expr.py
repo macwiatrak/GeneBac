@@ -9,9 +9,11 @@ from transformers import get_linear_schedule_with_warmup
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.metrics import (
-    compute_agg_stats,
     get_regression_metrics,
     get_stats_for_thresholds,
+)
+from deep_bac.modelling.modules.positional_encodings import (
+    FixedGeneExpressionPositionalEncoding,
 )
 from deep_bac.modelling.utils import (
     get_gene_encoder,
@@ -30,6 +32,9 @@ class DeepBacGeneExpr(pl.LightningModule):
 
         self.gene_encoder = get_gene_encoder(config)
         self.decoder = nn.Linear(config.n_gene_bottleneck_layer, 1)
+        self.pos_encoder = FixedGeneExpressionPositionalEncoding(
+            dim=config.n_gene_bottleneck_layer
+        )
         self.dropout = nn.Dropout(0.2)
 
         # get loss depending on whether we predict LOG2MIC or binary MIC

@@ -17,11 +17,12 @@ def test_model_gene_expr_steps():
     seq_length = 2048
     in_channels = 4
     n_filters = 256
-    n_bottleneck_layer = 128
+    n_bottleneck_layer = 64
     n_output = 1
 
     x = torch.rand(batch_size, in_channels, seq_length)
     labels = torch.rand(batch_size, n_output)
+    tss_indexes = torch.randint(0, 1000000, (batch_size,))
 
     config = DeepBacConfig(
         gene_encoder_type="scbasset",
@@ -33,8 +34,8 @@ def test_model_gene_expr_steps():
     model = DeepBacGeneExpr(config)
 
     # test forward
-    out = model(x)
-    assert out.shape == (batch_size, n_output)
+    out = model(x, tss_indexes=tss_indexes)
+    assert out.shape == torch.Size([batch_size * n_output])
 
     # test training step
     out = model.training_step(

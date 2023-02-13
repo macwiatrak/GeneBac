@@ -56,8 +56,9 @@ class TestBacGenomeGeneExprDataset(Dataset):
         self,
         n_samples: int = 100,
         seq_length: int = 1024,
+        genome_length: int = 100000,
     ):
-        # (n_samples, n_genes, n_nucletoides, seq_length)
+        # (n_samples, n_nucletoides, seq_length)
         self.data = (
             F.one_hot(
                 torch.randint(0, 4, (n_samples, seq_length)),
@@ -74,6 +75,7 @@ class TestBacGenomeGeneExprDataset(Dataset):
                 1.5 * torch.ones(n_samples),
             ).abs()
         )
+        self.tss_indexes = torch.randint(0, genome_length, (n_samples,))
 
     def __len__(self):
         return len(self.data)
@@ -82,6 +84,7 @@ class TestBacGenomeGeneExprDataset(Dataset):
         return BacInputSample(
             input_tensor=self.data[idx],
             labels=self.labels[idx],
+            tss_index=self.tss_indexes[idx],
         )
 
 
