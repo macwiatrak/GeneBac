@@ -51,7 +51,7 @@ class DeepBacGeneExpr(pl.LightningModule):
     ) -> torch.Tensor:
         logits = self(batch.input_tensor)
         # get loss with reduction="none" to compute loss per sample
-        loss = self.loss_fn(logits, batch.labels) + 1e-4
+        loss = self.loss_fn(logits, batch.labels) + 1e-8
         self.log(
             "train_loss",
             loss,

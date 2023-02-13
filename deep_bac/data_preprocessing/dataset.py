@@ -189,6 +189,7 @@ class BacGenomeGeneExprDataset(Dataset):
             labels=torch.tensor(row["expression_log1"], dtype=torch.float32),
             strain_id=row["strain"],
             gene_name=row["gene_name"],
+            tss_index=row.get("dist_from_replication_origin", None),
             variants_in_gene=torch.tensor(1)
             if row["n_nucleotide_mutations"] > 0
             else torch.tensor(0),
