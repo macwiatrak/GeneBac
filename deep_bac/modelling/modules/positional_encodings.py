@@ -86,4 +86,4 @@ class FixedGeneExpressionPositionalEncoding(nn.Module):
         ) * self.coef_linspace.unsqueeze(0)
         pe = torch.ones_like(vals) - vals
         x = x + pe
-        return self.dropout(x)
+        return x
