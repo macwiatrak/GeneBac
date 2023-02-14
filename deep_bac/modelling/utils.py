@@ -102,4 +102,7 @@ def get_pos_weights(df):
             pos_weight[idx] = 1.0
         else:
             pos_weight[idx] = len(drug_labels[idx]) / sum(drug_labels[idx])
-    return torch.tensor(list(pos_weight.values()), dtype=torch.float32).sqrt()
+    pos_weights = torch.tensor(list(pos_weight.values()), dtype=torch.float32)
+    return torch.where(
+        pos_weights.log() > 1, pos_weights.log(), torch.ones_like(pos_weights)
+    )
