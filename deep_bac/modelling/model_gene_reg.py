@@ -20,6 +20,7 @@ class DeepBacGeneReg(pl.LightningModule):
     def __init__(
         self,
         config: DeepBacConfig,
+        pos_weight: torch.Tensor = None,
     ):
         super().__init__()
         self.config = config
@@ -33,7 +34,7 @@ class DeepBacGeneReg(pl.LightningModule):
         self.loss_fn = (
             nn.MSELoss(reduction="none")
             if self.regression
-            else nn.BCEWithLogitsLoss(reduction="none")
+            else nn.BCEWithLogitsLoss(pos_weight=pos_weight, reduction="none")
         )
 
     def forward(

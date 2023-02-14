@@ -2,6 +2,7 @@ import logging
 import os
 from typing import Optional, Literal
 
+from pandas import read_parquet
 from pytorch_lightning.utilities.seed import seed_everything
 
 from deep_bac.argparser import TrainArgumentParser
@@ -9,6 +10,7 @@ from deep_bac.data_preprocessing.data_reader import get_gene_reg_data
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
 from deep_bac.modelling.trainer import get_trainer
+from deep_bac.modelling.utils import get_pos_weights
 from deep_bac.utils import get_selected_genes, format_and_write_results
 
 logging.basicConfig(level=logging.INFO)
@@ -71,7 +73,16 @@ def run(
     )
 
     trainer = get_trainer(config, output_dir)
-    model = DeepBacGeneReg(config)
+    model = DeepBacGeneReg(
+        config,
+        pos_weight=get_pos_weights(
+            read_parquet(
+                os.path.join(
+                    input_dir, "phenotype_labels_with_binary_labels.parquet"
+                )
+            )
+        ),
+    )
 
     results = None
     if test:

@@ -1,4 +1,7 @@
+from collections import defaultdict
+
 import torch
+from pandas import DataFrame
 from torch import nn
 
 from deep_bac.modelling.data_types import DeepBacConfig
@@ -84,3 +87,16 @@ def get_pos_encoder(config: DeepBacConfig):
             dim=config.n_gene_bottleneck_layer,
         )
     raise ValueError(f"Unknown pos encoder type: {config.pos_encoder_type}")
+
+
+def get_pos_weights(df: DataFrame) -> torch.Tensor:
+    drug_labels = defaultdict(list)
+    for strain_labels in df["BINARY_LABELS"]:
+        for idx, label_val in enumerate(strain_labels):
+            if label_val != -100:
+                drug_labels[idx].append(label_val)
+
+    pos_weight = dict()
+    for drug, labels in drug_labels.items():
+        pos_weight[drug] = len(labels) / sum(labels)
+    return torch.tensor(list(pos_weight.values()), dtype=torch.float32)
