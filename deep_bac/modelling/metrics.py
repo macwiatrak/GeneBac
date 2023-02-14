@@ -16,7 +16,7 @@ from torchmetrics.functional.classification import (
     binary_f1_score,
 )
 
-BINARY_CLS_METRICS = ["accuracy", "f1", "auroc", "specificity", "sensitivity"]
+BINARY_CLS_METRICS = ["accuracy", "f1", "auroc", "spec", "sens", "mean_sp_sn"]
 REGRESSION_METRICS = ["pearson", "spearman", "mse", "mae", "r2"]
 
 DRUG_TO_LABEL_IDX = {
