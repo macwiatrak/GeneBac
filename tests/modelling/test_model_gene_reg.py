@@ -3,6 +3,7 @@ import os
 
 import torch
 import pytorch_lightning as pl
+from pandas import read_parquet
 from pytorch_lightning.callbacks import TQDMProgressBar, ModelCheckpoint
 
 from deep_bac.data_preprocessing.data_reader import get_gene_reg_dataloader
@@ -10,6 +11,7 @@ from deep_bac.data_preprocessing.data_types import BatchBacInputSample
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
 from deep_bac.modelling.modules.utils import count_parameters
+from deep_bac.modelling.utils import get_pos_weights
 from tests.modelling.helpers import get_test_gene_reg_dataloader, BasicLogger
 
 
@@ -161,7 +163,14 @@ def test_model_gene_reg_train_real_data(tmpdir):
         pin_memory=False,
     )
 
-    model = DeepBacGeneReg(config)
+    pos_weights = get_pos_weights(
+        read_parquet("../test_data/phenotype_labels_with_binary_labels.parquet")
+    )
+
+    model = DeepBacGeneReg(
+        config,
+        pos_weights=pos_weights,
+    )
     n_params = count_parameters(model)
     print("Number of trainable model parameters: ", n_params)
     monitor = "val_loss"

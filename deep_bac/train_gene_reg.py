@@ -73,15 +73,18 @@ def run(
     )
 
     trainer = get_trainer(config, output_dir)
+
+    pos_weights = get_pos_weights(
+        read_parquet(
+            os.path.join(
+                input_dir, "phenotype_labels_with_binary_labels.parquet"
+            )
+        )
+    )
+
     model = DeepBacGeneReg(
         config,
-        pos_weight=get_pos_weights(
-            read_parquet(
-                os.path.join(
-                    input_dir, "phenotype_labels_with_binary_labels.parquet"
-                )
-            )
-        ),
+        pos_weights=pos_weights,
     )
 
     results = None

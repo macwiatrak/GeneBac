@@ -89,7 +89,7 @@ def get_pos_encoder(config: DeepBacConfig):
     raise ValueError(f"Unknown pos encoder type: {config.pos_encoder_type}")
 
 
-def get_pos_weights(df: DataFrame) -> torch.Tensor:
+def get_pos_weights(df):
     drug_labels = defaultdict(list)
     for strain_labels in df["BINARY_LABELS"]:
         for idx, label_val in enumerate(strain_labels):
@@ -97,6 +97,9 @@ def get_pos_weights(df: DataFrame) -> torch.Tensor:
                 drug_labels[idx].append(label_val)
 
     pos_weight = dict()
-    for drug, labels in drug_labels.items():
-        pos_weight[drug] = len(labels) / sum(labels)
+    for idx in range(max(drug_labels.keys()) + 1):
+        if idx not in drug_labels:
+            pos_weight[idx] = 1.0
+        else:
+            pos_weight[idx] = len(drug_labels[idx]) / sum(drug_labels[idx])
     return torch.tensor(list(pos_weight.values()), dtype=torch.float32)

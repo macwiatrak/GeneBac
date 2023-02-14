@@ -20,7 +20,7 @@ class DeepBacGeneReg(pl.LightningModule):
     def __init__(
         self,
         config: DeepBacConfig,
-        pos_weight: torch.Tensor = None,
+        pos_weights: torch.Tensor = None,
     ):
         super().__init__()
         self.config = config
@@ -34,7 +34,7 @@ class DeepBacGeneReg(pl.LightningModule):
         self.loss_fn = (
             nn.MSELoss(reduction="none")
             if self.regression
-            else nn.BCEWithLogitsLoss(pos_weight=pos_weight, reduction="none")
+            else nn.BCEWithLogitsLoss(pos_weight=pos_weights, reduction="none")
         )
 
     def forward(
@@ -63,9 +63,9 @@ class DeepBacGeneReg(pl.LightningModule):
     ) -> torch.Tensor:
         logits = self(batch.input_tensor, batch.tss_indexes)
         # get loss with reduction="none" to compute loss per sample
-        loss = self.loss_fn(logits.view(-1), batch.labels.view(-1))
+        loss = self.loss_fn(logits, batch.labels)
         # remove loss for samples with no label and compute mean
-        loss = remove_ignore_index(loss, batch.labels.view(-1))
+        loss = remove_ignore_index(loss.view(-1), batch.labels.view(-1))
         self.log(
             "train_loss",
             loss,
@@ -78,9 +78,9 @@ class DeepBacGeneReg(pl.LightningModule):
 
     def eval_step(self, batch: BatchBacInputSample):
         logits = self(batch.input_tensor, batch.tss_indexes)
-        loss = self.loss_fn(logits.view(-1), batch.labels.view(-1))
+        loss = self.loss_fn(logits, batch.labels)
         # remove loss for samples with no label and compute mean
-        loss = remove_ignore_index(loss, batch.labels.view(-1))
+        loss = remove_ignore_index(loss.view(-1), batch.labels.view(-1))
         return dict(
             loss=loss,
             logits=logits,
