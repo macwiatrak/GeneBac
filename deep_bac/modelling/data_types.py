@@ -27,7 +27,12 @@ class DeepBacConfig:
     early_stopping_patience: int = 10
     accumulate_grad_batches: int = 1
     monitor_metric: Literal[
-        "val_loss", "val_auroc", "val_f1", "val_r2", "val_spearman"
+        "val_loss",
+        "val_auroc",
+        "val_f1",
+        "val_mean_sp_sn",
+        "val_r2",
+        "val_spearman",
     ] = "val_loss"
     n_highly_variable_genes: int = 500
     pos_encoder_type: Literal["learnable", "fixed"] = None

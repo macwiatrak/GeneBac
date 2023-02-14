@@ -45,6 +45,7 @@ class TrainArgumentParser(Tap):
         "val_loss",
         "val_auroc",
         "val_f1",
+        "val_mean_sp_sn",
         "val_r2",
         "val_spearman",
     ] = "val_loss"

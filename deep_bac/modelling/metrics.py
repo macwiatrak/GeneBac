@@ -84,14 +84,17 @@ def binary_cls_metrics(
         auroc_score = auroc(
             logits, labels, task="binary", ignore_index=ignore_index
         )
+    specificity = tn / (tn + fp)
+    sensitivity = tp / (tp + fn)
     return {
         "accuracy": accuracy(
             logits, labels, task="binary", ignore_index=ignore_index
         ),
         "auroc": auroc_score,
         "f1": binary_f1_score(logits, labels, ignore_index=ignore_index),
-        "specificity": tn / (tn + fp),
-        "sensitivity": tp / (tp + fn),
+        "spec": specificity,
+        "sens": sensitivity,
+        "mean_sp_sn": (specificity + sensitivity) / 2,
         # "tp": tp.type(torch.float32),
         # "fp": fp.type(torch.float32),
         # "tn": tn.type(torch.float32),
