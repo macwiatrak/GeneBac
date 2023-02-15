@@ -62,13 +62,7 @@ class MDCNN(nn.Module):
                     dropout=0.0,
                     batch_norm=False,
                 ),
-                DenseLayer(
-                    in_features=256,
-                    out_features=n_output,
-                    activation_fn=nn.ReLU(),
-                    dropout=0.0,
-                    batch_norm=False,
-                ),
+                nn.Linear(in_features=256, out_features=n_output),
             ]
         )
 
