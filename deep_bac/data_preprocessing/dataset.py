@@ -81,7 +81,7 @@ class BacGenomeGeneRegDataset(Dataset):
         for idx, gene in enumerate(self.gene_to_id.keys()):
             # append TSS index and gene name
             tss_indexes.append(
-                self.reference_gene_data_df.iloc[idx]["tss_index_genome"]
+                self.reference_gene_data_df.iloc[idx]["tss_pos_genome"]
             )
             gene_names.append(gene)
 
