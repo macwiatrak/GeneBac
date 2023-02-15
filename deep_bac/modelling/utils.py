@@ -52,6 +52,8 @@ def get_gene_encoder(config: DeepBacConfig):
 
 def get_graph_model(config: DeepBacConfig):
     """Get the graph model"""
+    if config.gene_encoder_type == "MD-CNN":
+        return None
     if config.graph_model_type == "transformer":
         return GraphTransformer(
             n_gene_bottleneck_layer=config.n_gene_bottleneck_layer,
