@@ -77,8 +77,14 @@ class FixedGeneExpressionPositionalEncoding(nn.Module):
         Args:
             x: Tensor, shape [batch_size, embedding_dim]
         """
-        # convert it to KBs
-        vals = tss_indexes.abs().unsqueeze(1) * self.coef_linspace.unsqueeze(0)
+        if len(tss_indexes.shape) == 1:
+            vals = tss_indexes.abs().unsqueeze(
+                1
+            ) * self.coef_linspace.unsqueeze(0)
+        else:
+            vals = tss_indexes.unsqueeze(-1).repeat(
+                1, 1, self.dim
+            ) * self.coef_linspace.unsqueeze(0)
         pe = torch.ones_like(vals) - vals
         x = x + pe
         return x

@@ -9,7 +9,7 @@ from deep_bac.modelling.modules.md_cnn import MDCNN
 from deep_bac.modelling.modules.positional_encodings import (
     IdentityPositionalEncoding,
     LearnablePositionalEncoding,
-    FixedPositionalEncoding,
+    FixedGeneExpressionPositionalEncoding,
 )
 from deep_bac.modelling.modules.scBasset_encoder import scBassetEncoder
 from deep_bac.modelling.modules.utils import Flatten
@@ -89,7 +89,7 @@ def get_pos_encoder(config: DeepBacConfig):
             n_genes=config.n_highly_variable_genes,
         )
     if config.pos_encoder_type == "fixed":
-        return FixedPositionalEncoding(
+        return FixedGeneExpressionPositionalEncoding(
             dim=config.n_gene_bottleneck_layer,
         )
     raise ValueError(f"Unknown pos encoder type: {config.pos_encoder_type}")
