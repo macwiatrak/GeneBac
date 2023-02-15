@@ -8,8 +8,8 @@ from dataclasses import dataclass
 @dataclass
 class DeepBacConfig:
     gene_encoder_type: Literal[
-        "conv_transformer", "scbasset"
-    ] = "conv_transformer"
+        "conv_transformer", "scbasset", "MD-CNN"
+    ] = "scbasset"
     graph_model_type: Literal["transformer", "dense"] = "dense"
     regression: bool = False
     lr: float = 0.001
@@ -19,6 +19,7 @@ class DeepBacConfig:
     n_transformer_heads: int = 4
     n_graph_layers: int = 2
     n_output: int = 14  # nr of drugs in the cryptic dataset
+    max_gene_length: int = 2048
     max_epochs: int = 100
     train_set_len: Optional[int] = None
     warmup_proportion: float = 0.1

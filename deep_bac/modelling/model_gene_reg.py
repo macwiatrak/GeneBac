@@ -23,6 +23,7 @@ class DeepBacGeneReg(pl.LightningModule):
     ):
         super().__init__()
         self.config = config
+        self.model_type = config.gene_encoder_type
         self.n_bottleneck_layer = config.n_gene_bottleneck_layer
         self.gene_encoder = get_gene_encoder(config)
         self.graph_model = get_graph_model(config)
@@ -41,6 +42,16 @@ class DeepBacGeneReg(pl.LightningModule):
     ) -> torch.Tensor:
         # x: (batch_size, n_genes, in_channels, seq_length)
         batch_size, n_genes, n_channels, seq_length = batch_genes_tensor.shape
+
+        # if using the MD-CNN for benchmarking
+        if self.model_type == "MD-CNN":
+            return self.gene_encoder(
+                batch_genes_tensor.view(
+                    batch_size,
+                    n_channels,
+                    n_genes * seq_length,
+                )
+            )
         # reshape the input to allow the convolutional layer to work
         x = batch_genes_tensor.view(
             batch_size * n_genes, n_channels, seq_length

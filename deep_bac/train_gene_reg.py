@@ -27,7 +27,7 @@ def run(
     num_workers: int = None,
     test: bool = False,
     ckpt_path: Optional[str] = None,
-    use_drug_specific_genes: Literal["INH", "All"] = None,
+    use_drug_specific_genes: Literal["INH", "All", "MD-CNN"] = None,
     test_after_train: bool = False,
 ):
     selected_genes = get_selected_genes(use_drug_specific_genes)

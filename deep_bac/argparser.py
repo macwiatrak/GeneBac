@@ -15,7 +15,9 @@ class TrainArgumentParser(Tap):
     n_highly_variable_genes: int = 500
     # model arguments
     batch_size: int = 1
-    gene_encoder_type: Literal["conv_transformer", "scbasset"] = "scbasset"
+    gene_encoder_type: Literal[
+        "conv_transformer", "scbasset", "MD-CNN"
+    ] = "scbasset"
     graph_model_type: Literal["transformer", "dense"] = "dense"
     regression: bool = False
     use_drug_idx: int = None
@@ -48,5 +50,5 @@ class TrainArgumentParser(Tap):
         "val_r2",
         "val_spearman",
     ] = "val_loss"
-    use_drug_specific_genes: Literal["INH", "All"] = None
+    use_drug_specific_genes: Literal["INH", "All", "MD-CNN"] = None
     pos_encoder_type: Literal["learnable", "fixed"] = None

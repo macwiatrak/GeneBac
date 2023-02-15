@@ -116,7 +116,7 @@ def test_model_gene_reg_train_fake_data(tmpdir):
 
 def test_model_gene_reg_train_real_data(tmpdir):
     n_classes = 14
-    regression = True
+    regression = False
     n_bottleneck_layer = 64
     n_filters = 256
     max_epochs = 20
@@ -129,7 +129,7 @@ def test_model_gene_reg_train_real_data(tmpdir):
     )
 
     config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+        gene_encoder_type="MD-CNN",
         graph_model_type="dense",
         pos_encoder_type="fixed",
         lr=0.001,

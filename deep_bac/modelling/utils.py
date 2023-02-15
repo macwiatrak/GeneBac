@@ -5,6 +5,7 @@ from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
 from deep_bac.modelling.modules.graph_transformer import GraphTransformer
 from deep_bac.modelling.modules.layers import DenseLayer
+from deep_bac.modelling.modules.md_cnn import MDCNN
 from deep_bac.modelling.modules.positional_encodings import (
     IdentityPositionalEncoding,
     LearnablePositionalEncoding,
@@ -40,11 +41,19 @@ def get_gene_encoder(config: DeepBacConfig):
             n_filters_init=config.n_init_filters,
             n_bottleneck_layer=config.n_gene_bottleneck_layer,
         )
+
+    if config.gene_encoder_type == "MD-CNN":
+        return MDCNN(
+            seq_length=config.n_highly_variable_genes * config.max_gene_length,
+            n_output=config.n_output,
+        )
     raise ValueError(f"Unknown gene encoder type: {config.gene_encoder_type}")
 
 
 def get_graph_model(config: DeepBacConfig):
     """Get the graph model"""
+    if config.gene_encoder_type == "MD-CNN":
+        return None
     if config.graph_model_type == "transformer":
         return GraphTransformer(
             n_gene_bottleneck_layer=config.n_gene_bottleneck_layer,
