@@ -5,10 +5,10 @@ from deep_bac.modelling.modules.md_cnn import MDCNN
 
 def test_md_cnn():
     batch_size = 2
-    seq_length = 2048
+    seq_length = 2570
     in_channels = 4
     n_output = 14
-    n_genes = 5
+    n_genes = 4
 
     x = torch.rand(batch_size, n_genes, in_channels, seq_length)
     batch_size, n_genes, n_channels, seq_length = x.shape
