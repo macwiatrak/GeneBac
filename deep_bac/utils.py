@@ -37,6 +37,37 @@ DRUG_SPECIFIC_GENES_DICT = {
         "tlyA",
         "eis",
     ],
+    "MD-CNN": [
+        "acpM",
+        "kasA",
+        "rpsA",
+        "gid",
+        "clpC1",
+        "clpC2",
+        "embA",
+        "embB",
+        "embC",
+        "ethA",
+        "ethR",
+        "aftB",
+        "ubiA",
+        "rrs",
+        "rrl",
+        "oxyS",
+        "ahpC",
+        "tlyA",
+        "katG",
+        "rpsL",
+        "rpoB",
+        "rpoC",
+        "fabG1",
+        "inhA",
+        "eis",
+        "gyrA",
+        "gyrB",
+        "panD",
+        "pncA",
+    ],
     "INH": [
         "katG",
         "proA",
@@ -57,7 +88,9 @@ DRUG_SPECIFIC_GENES_DICT = {
 }
 
 
-def get_selected_genes(use_drug_specific_genes: Literal["INH"] = None):
+def get_selected_genes(
+    use_drug_specific_genes: Literal["INH", "All", "MD-CNN"] = None
+):
     if not use_drug_specific_genes:
         return None
     return DRUG_SPECIFIC_GENES_DICT[use_drug_specific_genes]
