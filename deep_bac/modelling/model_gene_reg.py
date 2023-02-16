@@ -149,7 +149,7 @@ class DeepBacGeneReg(pl.LightningModule):
         return self.eval_epoch_end(outputs=outputs, data_split="test")
 
     def configure_optimizers(self):
-        opt = torch.optim.Adam(
+        opt = torch.optim.AdamW(
             [p for p in self.parameters() if p.requires_grad],
             lr=self.config.lr,
         )
