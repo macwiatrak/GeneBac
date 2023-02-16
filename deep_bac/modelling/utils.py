@@ -69,11 +69,6 @@ def get_gene_reg_decoder_model(config: DeepBacConfig):
             DenseLayer(
                 in_features=config.n_gene_bottleneck_layer
                 * config.n_highly_variable_genes,
-                out_features=config.n_gene_bottleneck_layer * 4,
-                layer_norm=True,
-            ),
-            DenseLayer(
-                in_features=config.n_gene_bottleneck_layer * 4,
                 out_features=config.n_gene_bottleneck_layer,
                 layer_norm=True,
             ),
