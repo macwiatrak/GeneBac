@@ -1,5 +1,5 @@
 import itertools
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 import torch
 from torchmetrics.functional import (
@@ -10,13 +10,20 @@ from torchmetrics.functional import (
     pearson_corrcoef,
     auroc,
     accuracy,
+    roc,
 )
 from torchmetrics.functional.classification import (
-    binary_stat_scores,
     binary_f1_score,
 )
 
-BINARY_CLS_METRICS = ["accuracy", "f1", "auroc", "specificity", "sensitivity"]
+BINARY_CLS_METRICS = [
+    "accuracy",
+    "f1",
+    "auroc",
+    "spec",
+    "sens",
+    "gmean_spec_sens",
+]
 REGRESSION_METRICS = ["pearson", "spearman", "mse", "mae", "r2"]
 
 DRUG_TO_LABEL_IDX = {
@@ -67,6 +74,29 @@ def get_regression_metrics(
     }
 
 
+def choose_best_spec_sens_threshold(
+    logits: torch.Tensor, labels: torch.Tensor, ignore_index: int = -100
+) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    if labels[labels != -100].sum() == 0:
+        return (
+            torch.tensor(0.5),
+            torch.tensor(-100.0),
+            torch.tensor(-100.0),
+            torch.tensor(-100.0),
+        )
+    fpr, sens, thresholds = roc(
+        logits, labels, task="binary", ignore_index=ignore_index
+    )
+    spec = 1 - fpr
+    gmeans_spec_sens = torch.exp(torch.log(spec * sens + 1e-8) / 2)
+
+    thresh = thresholds[gmeans_spec_sens.argmax()]
+    max_gmean = gmeans_spec_sens.max()
+    spec = spec[gmeans_spec_sens.argmax()]
+    sens = sens[gmeans_spec_sens.argmax()]
+    return thresh, max_gmean, spec, sens
+
+
 def binary_cls_metrics(
     logits: torch.Tensor, labels: torch.Tensor, ignore_index: int
 ) -> Dict[str, torch.Tensor]:
@@ -75,8 +105,8 @@ def binary_cls_metrics(
     Returns:
         dict of metrics
     """
-    tp, fp, tn, fn, sup = binary_stat_scores(
-        logits, labels, ignore_index=ignore_index
+    thresh, max_gmean, spec, sens = choose_best_spec_sens_threshold(
+        logits, labels, ignore_index
     )
     if labels[labels != -100].sum() == 0:
         auroc_score = torch.tensor(-100.0)
@@ -86,16 +116,19 @@ def binary_cls_metrics(
         )
     return {
         "accuracy": accuracy(
-            logits, labels, task="binary", ignore_index=ignore_index
+            logits,
+            labels,
+            task="binary",
+            ignore_index=ignore_index,
+            threshold=thresh.item(),
         ),
         "auroc": auroc_score,
-        "f1": binary_f1_score(logits, labels, ignore_index=ignore_index),
-        "specificity": tn / (tn + fp),
-        "sensitivity": tp / (tp + fn),
-        # "tp": tp.type(torch.float32),
-        # "fp": fp.type(torch.float32),
-        # "tn": tn.type(torch.float32),
-        # "fn": fn.type(torch.float32),
+        "f1": binary_f1_score(
+            logits, labels, ignore_index=ignore_index, threshold=thresh.item()
+        ),
+        "spec": spec,
+        "sens": sens,
+        "gmean_spec_sens": max_gmean,
     }
 
 
