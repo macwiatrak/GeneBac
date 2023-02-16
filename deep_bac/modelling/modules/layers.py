@@ -11,14 +11,14 @@ import torch.nn.functional as F
 
 class ConvLayer(nn.Module):
     def __init__(
-            self,
-            in_channels: int,
-            out_channels: int,
-            kernel_size: int,
-            pool_size: int = None,
-            batch_norm: bool = True,
-            dropout: float = 0.,
-            activation_fn: Callable = nn.GELU()
+        self,
+        in_channels: int,
+        out_channels: int,
+        kernel_size: int,
+        pool_size: int = None,
+        batch_norm: bool = True,
+        dropout: float = 0.0,
+        activation_fn: Callable = nn.GELU(),
     ):
         super().__init__()
         self.conv = nn.Conv1d(
@@ -27,41 +27,60 @@ class ConvLayer(nn.Module):
             kernel_size=kernel_size,
             padding=kernel_size // 2,
         )
-        self.batch_norm = nn.BatchNorm1d(out_channels) if batch_norm else nn.Identity()
-        self.pool = nn.MaxPool1d(pool_size) if pool_size is not None else nn.Identity()
+        self.batch_norm = (
+            nn.BatchNorm1d(out_channels) if batch_norm else nn.Identity()
+        )
+        self.pool = (
+            nn.MaxPool1d(pool_size) if pool_size is not None else nn.Identity()
+        )
         self.activation_fn = activation_fn
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x: torch.Tensor):
         x = self.conv(x)
         x = self.batch_norm(x)
-        x = self.dropout(x)
         x = self.pool(x)
         x = self.activation_fn(x)
+        x = self.dropout(x)
         return x
 
 
 class DenseLayer(nn.Module):
     def __init__(
-            self,
-            in_features: int,
-            out_features: int,
-            use_bias: bool = True,
-            batch_norm: bool = True,
-            dropout: float = 0.2,
-            activation_fn: Callable = nn.GELU()
+        self,
+        in_features: int,
+        out_features: int,
+        use_bias: bool = True,
+        layer_norm: bool = True,
+        batch_norm: bool = False,
+        dropout: float = 0.1,
+        activation_fn: Callable = nn.ReLU(),
     ):
         super().__init__()
+        if layer_norm and batch_norm:
+            batch_norm = False
+            raise Warning(
+                "LayerNorm and BatchNorm both used in the dense layer, "
+                "defaulting to LayerNorm only"
+            )
         self.dense = nn.Linear(in_features, out_features, bias=use_bias)
-        self.batch_norm = nn.BatchNorm1d(out_features) if batch_norm else nn.Identity()
+        self.layer_norm = (
+            nn.LayerNorm(out_features, elementwise_affine=False)
+            if layer_norm
+            else nn.Identity()
+        )
+        self.batch_norm = (
+            nn.BatchNorm1d(out_features) if batch_norm else nn.Identity()
+        )
         self.activation_fn = activation_fn
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x: torch.Tensor):
         x = self.dense(x)
+        x = self.layer_norm(x)
         x = self.batch_norm(x)
-        x = self.dropout(x)
         x = self.activation_fn(x)
+        x = self.dropout(x)
         return x
 
 
@@ -70,13 +89,13 @@ def _round(x):
 
 
 def make_conv_tower(
-        n_repeat_blocks_tower: int,
-        in_channels: int,
-        filters_mult: float,
-        kernel_size: int,
-        pool_size: int,
-        dropout: float,
-        batch_norm: bool,
+    n_repeat_blocks_tower: int,
+    in_channels: int,
+    filters_mult: float,
+    kernel_size: int,
+    pool_size: int,
+    dropout: float,
+    batch_norm: bool,
 ) -> nn.Sequential:
     tower_layers = []
     curr_n_filters = in_channels
@@ -108,8 +127,8 @@ class AttentionPool(nn.Module):
     def __init__(self, dim: int, pool_size: int = 2):
         super().__init__()
         self.pool_size = pool_size
-        self.pool_fn = Rearrange('b d (n p) -> b d n p', p = pool_size)
-        self.to_attn_logits = nn.Conv2d(dim, dim, 1, bias = False)
+        self.pool_fn = Rearrange("b d (n p) -> b d n p", p=pool_size)
+        self.to_attn_logits = nn.Conv2d(dim, dim, 1, bias=False)
 
     def forward(self, x: torch.Tensor):
         b, _, n = x.shape
@@ -117,9 +136,9 @@ class AttentionPool(nn.Module):
         needs_padding = remainder > 0
 
         if needs_padding:
-            x = F.pad(x, (0, remainder), value = 0)
-            mask = torch.zeros((b, 1, n), dtype = torch.bool, device = x.device)
-            mask = F.pad(mask, (0, remainder), value = True)
+            x = F.pad(x, (0, remainder), value=0)
+            mask = torch.zeros((b, 1, n), dtype=torch.bool, device=x.device)
+            mask = F.pad(mask, (0, remainder), value=True)
 
         x = self.pool_fn(x)
         logits = self.to_attn_logits(x)
@@ -128,12 +147,14 @@ class AttentionPool(nn.Module):
             mask_value = -torch.finfo(logits.dtype).max
             logits = logits.masked_fill(self.pool_fn(mask), mask_value)
 
-        attn = logits.softmax(dim = -1)
+        attn = logits.softmax(dim=-1)
 
-        return (x * attn).sum(dim = -1)
+        return (x * attn).sum(dim=-1)
 
 
-def exponential_linspace_int(start: int, end: int, num: int, divisible_by: int = 1):
+def exponential_linspace_int(
+    start: int, end: int, num: int, divisible_by: int = 1
+):
     def _round(x):
         return int(round(x / divisible_by) * divisible_by)
 

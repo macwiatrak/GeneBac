@@ -50,7 +50,7 @@ def get_gene_encoder(config: DeepBacConfig):
     raise ValueError(f"Unknown gene encoder type: {config.gene_encoder_type}")
 
 
-def get_graph_model(config: DeepBacConfig):
+def get_gene_reg_decoder_model(config: DeepBacConfig):
     """Get the graph model"""
     if config.gene_encoder_type == "MD-CNN":
         return None
@@ -69,7 +69,13 @@ def get_graph_model(config: DeepBacConfig):
             DenseLayer(
                 in_features=config.n_gene_bottleneck_layer
                 * config.n_highly_variable_genes,
+                out_features=config.n_gene_bottleneck_layer * 4,
+                layer_norm=True,
+            ),
+            DenseLayer(
+                in_features=config.n_gene_bottleneck_layer * 4,
                 out_features=config.n_gene_bottleneck_layer,
+                layer_norm=True,
             ),
             nn.Linear(
                 in_features=config.n_gene_bottleneck_layer,
