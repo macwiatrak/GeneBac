@@ -149,10 +149,16 @@ class DeepBacGeneReg(pl.LightningModule):
         return self.eval_epoch_end(outputs=outputs, data_split="test")
 
     def configure_optimizers(self):
-        opt = torch.optim.AdamW(
-            [p for p in self.parameters() if p.requires_grad],
-            lr=self.config.lr,
-        )
+        if self.model_type == "MD-CNN":
+            opt = torch.optim.Adam(
+                [p for p in self.parameters() if p.requires_grad],
+                lr=self.config.lr,
+            )
+        else:
+            opt = torch.optim.AdamW(
+                [p for p in self.parameters() if p.requires_grad],
+                lr=self.config.lr,
+            )
         if (
             self.config.train_set_len is None
             or self.config.warmup_proportion is None
