@@ -129,7 +129,7 @@ def test_model_gene_reg_train_real_data(tmpdir):
     )
 
     config = DeepBacConfig(
-        gene_encoder_type="MD-CNN",
+        gene_encoder_type="scbasset",
         graph_model_type="dense",
         pos_encoder_type="fixed",
         lr=0.001,

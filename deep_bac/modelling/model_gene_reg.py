@@ -11,7 +11,7 @@ from deep_bac.modelling.metrics import compute_agg_stats
 from deep_bac.modelling.utils import (
     remove_ignore_index,
     get_gene_encoder,
-    get_graph_model,
+    get_gene_reg_decoder_model,
     get_pos_encoder,
 )
 
@@ -26,7 +26,7 @@ class DeepBacGeneReg(pl.LightningModule):
         self.model_type = config.gene_encoder_type
         self.n_bottleneck_layer = config.n_gene_bottleneck_layer
         self.gene_encoder = get_gene_encoder(config)
-        self.graph_model = get_graph_model(config)
+        self.graph_model = get_gene_reg_decoder_model(config)
         self.pos_encoder = get_pos_encoder(config)
 
         self.regression = config.regression
@@ -149,7 +149,7 @@ class DeepBacGeneReg(pl.LightningModule):
         return self.eval_epoch_end(outputs=outputs, data_split="test")
 
     def configure_optimizers(self):
-        opt = torch.optim.Adam(
+        opt = torch.optim.AdamW(
             [p for p in self.parameters() if p.requires_grad],
             lr=self.config.lr,
         )

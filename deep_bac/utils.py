@@ -12,7 +12,7 @@ from deep_bac.modelling.metrics import (
 )
 
 DRUG_SPECIFIC_GENES_DICT = {
-    "All": [
+    "Walker": [
         "ahpC",
         "fabG1",
         "inhA",
@@ -89,7 +89,7 @@ DRUG_SPECIFIC_GENES_DICT = {
 
 
 def get_selected_genes(
-    use_drug_specific_genes: Literal["INH", "All", "MD-CNN"] = None
+    use_drug_specific_genes: Literal["INH", "Walker", "MD-CNN"] = "MD-CNN"
 ):
     if not use_drug_specific_genes:
         return None

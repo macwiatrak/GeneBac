@@ -9,7 +9,7 @@ from deep_bac.modelling.modules.md_cnn import MDCNN
 from deep_bac.modelling.modules.positional_encodings import (
     IdentityPositionalEncoding,
     LearnablePositionalEncoding,
-    FixedPositionalEncoding,
+    FixedGeneExpressionPositionalEncoding,
 )
 from deep_bac.modelling.modules.scBasset_encoder import scBassetEncoder
 from deep_bac.modelling.modules.utils import Flatten
@@ -50,7 +50,7 @@ def get_gene_encoder(config: DeepBacConfig):
     raise ValueError(f"Unknown gene encoder type: {config.gene_encoder_type}")
 
 
-def get_graph_model(config: DeepBacConfig):
+def get_gene_reg_decoder_model(config: DeepBacConfig):
     """Get the graph model"""
     if config.gene_encoder_type == "MD-CNN":
         return None
@@ -70,6 +70,7 @@ def get_graph_model(config: DeepBacConfig):
                 in_features=config.n_gene_bottleneck_layer
                 * config.n_highly_variable_genes,
                 out_features=config.n_gene_bottleneck_layer,
+                layer_norm=True,
             ),
             nn.Linear(
                 in_features=config.n_gene_bottleneck_layer,
@@ -89,7 +90,7 @@ def get_pos_encoder(config: DeepBacConfig):
             n_genes=config.n_highly_variable_genes,
         )
     if config.pos_encoder_type == "fixed":
-        return FixedPositionalEncoding(
+        return FixedGeneExpressionPositionalEncoding(
             dim=config.n_gene_bottleneck_layer,
         )
     raise ValueError(f"Unknown pos encoder type: {config.pos_encoder_type}")

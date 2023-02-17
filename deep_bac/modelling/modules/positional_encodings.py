@@ -68,6 +68,8 @@ class FixedGeneExpressionPositionalEncoding(nn.Module):
         coef_linspace = (
             -torch.linspace(-start_coef, -self.min_range, dim) * scale / 1000
         )
+        # constant coef linspace
+        # coef_linspace = torch.ones(dim) * start_coef * scale / 1000
         self.register_buffer("coef_linspace", coef_linspace)
 
     def forward(
@@ -77,8 +79,14 @@ class FixedGeneExpressionPositionalEncoding(nn.Module):
         Args:
             x: Tensor, shape [batch_size, embedding_dim]
         """
-        # convert it to KBs
-        vals = tss_indexes.abs().unsqueeze(1) * self.coef_linspace.unsqueeze(0)
+        if len(tss_indexes.shape) == 1:
+            vals = tss_indexes.abs().unsqueeze(
+                1
+            ) * self.coef_linspace.unsqueeze(0)
+        else:
+            vals = tss_indexes.unsqueeze(-1).repeat(
+                1, 1, self.dim
+            ) * self.coef_linspace.unsqueeze(0)
         pe = torch.ones_like(vals) - vals
         x = x + pe
         return x
