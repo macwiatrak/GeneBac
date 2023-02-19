@@ -68,8 +68,6 @@ class FixedGeneExpressionPositionalEncoding(nn.Module):
         coef_linspace = (
             -torch.linspace(-start_coef, -self.min_range, dim) * scale / 1000
         )
-        # constant coef linspace
-        # coef_linspace = torch.ones(dim) * start_coef * scale / 1000
         self.register_buffer("coef_linspace", coef_linspace)
 
     def forward(
