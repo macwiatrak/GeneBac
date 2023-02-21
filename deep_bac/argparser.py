@@ -14,7 +14,7 @@ class DeepBacArgumentParser(Tap):
     output_dir: str = "/tmp/cryptic-model-output/"
     n_highly_variable_genes: int = 500
     # model arguments
-    batch_size: int = 1
+    batch_size: int = 128
     gene_encoder_type: Literal[
         "conv_transformer", "scbasset", "MD-CNN"
     ] = "scbasset"
@@ -50,6 +50,6 @@ class DeepBacArgumentParser(Tap):
         "val_gmean_spec_sens",
         "val_r2",
         "val_spearman",
-    ] = "val_loss"
+    ] = "val_r2"
     use_drug_specific_genes: Literal["INH", "Walker", "MD-CNN"] = "MD-CNN"
     pos_encoder_type: Literal["learnable", "fixed"] = None

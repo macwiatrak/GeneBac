@@ -132,6 +132,7 @@ def test_model_gene_expr_train_real_data(tmpdir):
         shuffle=False,
         num_workers=0,
         pin_memory=False,
+        mutate_promoter=True,
     )
     config.train_set_len = dataset_len
 
