@@ -172,8 +172,8 @@ class BacGenomeGeneExprDataset(Dataset):
         one_hot_seq = seq_to_one_hot(seq[: self.max_gene_length])
 
         if self.mutate_promoter:
-            start = random.randint(0, 75)
-            mutation_len = random.randint(5, 25)
+            start = random.randint(0, 25)
+            mutation_len = random.randint(100, 300)
             mutation_seq = F.one_hot(
                 torch.randint(0, 4, (mutation_len,)),
                 num_classes=4,
