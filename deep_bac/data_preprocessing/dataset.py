@@ -176,10 +176,12 @@ class BacGenomeGeneExprDataset(Dataset):
             max_mutation_len = min(gene_len, 300)
             start = random.randint(0, gene_len - max_mutation_len)
             mutation_len = random.randint(100, max_mutation_len)
-            mutation_seq = F.one_hot(
-                torch.randint(0, 4, (mutation_len,)),
-                num_classes=4,
-            ).type(torch.float32)
+            # mutation_seq = F.one_hot(
+            #     torch.randint(0, 4, (mutation_len,)),
+            #     num_classes=4,
+            # ).type(torch.float32)
+            seq = one_hot_seq[start : start + mutation_len]
+            mutation_seq = seq[torch.randperm(mutation_len)]
             one_hot_seq = torch.cat(
                 [
                     one_hot_seq[:start],
