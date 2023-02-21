@@ -167,7 +167,6 @@ def test_model_gene_reg_train_real_data(tmpdir):
     monitor = "val_loss"
     logger = BasicLogger()
     trainer = pl.Trainer(
-        default_root_dir=os.path.abspath(tmpdir),
         max_epochs=max_epochs,
         gradient_clip_val=1.0,
         logger=logger,
