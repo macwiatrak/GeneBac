@@ -24,27 +24,28 @@ def test_model_gene_reg_steps():
 
     x = torch.rand(batch_size, n_genes, in_channels, seq_length)
     labels = torch.empty(batch_size, n_output).random_(2)
+    tss_indexes = torch.randint(0, n_genes, (batch_size, n_genes))
 
     config = DeepBacConfig(
         gene_encoder_type="scbasset",
-        graph_model_type="transformer",
+        graph_model_type="dense",
         regression=False,
         n_gene_bottleneck_layer=n_bottleneck_layer,
         n_init_filters=n_filters,
         n_output=n_output,
+        n_highly_variable_genes=n_genes,
     )
 
     model = DeepBacGeneReg(config)
 
     # test forward
-    out = model(x)
+    out = model(x, tss_indexes=tss_indexes)
     assert out.shape == (batch_size, n_output)
 
     # test training step
     out = model.training_step(
         batch=BatchBacInputSample(
-            input_tensor=x,
-            labels=labels,
+            input_tensor=x, labels=labels, tss_indexes=tss_indexes
         ),
         batch_idx=0,
     )
