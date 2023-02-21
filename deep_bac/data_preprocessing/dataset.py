@@ -1,8 +1,9 @@
 import random
-from typing import Dict, List
+from typing import List
 
 import pandas as pd
 import torch
+import torch.nn.functional as F
 from pandas import DataFrame
 from torch.utils.data import Dataset
 
@@ -153,6 +154,7 @@ class BacGenomeGeneExprDataset(Dataset):
         shift_max: int = 3,
         pad_value: float = 0.25,
         reverse_complement_prob: float = 0.5,
+        mutate_promoter: bool = False,
     ):
         self.df = pd.read_parquet(bac_genes_df_file_path)
 
@@ -160,6 +162,7 @@ class BacGenomeGeneExprDataset(Dataset):
         self.shift_max = shift_max
         self.pad_value = pad_value
         self.reverse_complement_prob = reverse_complement_prob
+        self.mutate_promoter = mutate_promoter
 
     def __getitem__(self, idx):
         row = self.df.iloc[idx]
@@ -167,6 +170,22 @@ class BacGenomeGeneExprDataset(Dataset):
         seq = row["prom_gene_seq_w_variants"]
         # subset it to the max gene length
         one_hot_seq = seq_to_one_hot(seq[: self.max_gene_length])
+
+        if self.mutate_promoter:
+            start = random.randint(0, 75)
+            mutation_len = random.randint(5, 25)
+            mutation_seq = F.one_hot(
+                torch.randint(0, 4, (mutation_len,)),
+                num_classes=4,
+            ).type(torch.float32)
+            one_hot_seq = torch.cat(
+                [
+                    one_hot_seq[:start],
+                    mutation_seq,
+                    one_hot_seq[start + mutation_len :],
+                ],
+                dim=0,
+            )
         # stochastically do a reverse complement of the sequence
         if random.random() > self.reverse_complement_prob:
             # we can do reverse complement by flipping the one hot encoding

@@ -201,6 +201,7 @@ def get_gene_expr_dataloader(
     shuffle: bool = True,
     num_workers: int = 4,
     pin_memory: bool = True,
+    mutate_promoter: bool = False,
 ) -> Tuple[DataLoader, int]:
     dataset = BacGenomeGeneExprDataset(
         bac_genes_df_file_path=bac_genes_df_file_path,
@@ -208,6 +209,7 @@ def get_gene_expr_dataloader(
         shift_max=shift_max,
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
+        mutate_promoter=mutate_promoter,
     )
     dataloader = DataLoader(
         dataset=dataset,
@@ -229,6 +231,7 @@ def get_gene_expr_data(
     reverse_complement_prob: float = 0.5,
     num_workers: int = 8,
     test: bool = False,
+    mutate_promoter: bool = False,
 ) -> Tuple[DataReaderOutput, List[str]]:
 
     gene_std_dict = get_gene_std_expression(
@@ -246,6 +249,7 @@ def get_gene_expr_data(
         shuffle=True,
         num_workers=num_workers,
         pin_memory=True,
+        mutate_promoter=mutate_promoter,
     )
 
     val_dataloader, _ = get_gene_expr_dataloader(
@@ -257,6 +261,7 @@ def get_gene_expr_data(
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
+        mutate_promoter=mutate_promoter,
     )
     if not test:
         return (
@@ -276,6 +281,7 @@ def get_gene_expr_data(
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
+        mutate_promoter=mutate_promoter,
     )
 
     return (
