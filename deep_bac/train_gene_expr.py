@@ -36,6 +36,7 @@ def run(
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
         num_workers=num_workers if num_workers is not None else os.cpu_count(),
+        test=test,
     )
     logging.info("Finished loading data")
 
@@ -49,19 +50,22 @@ def run(
         ),
     )
 
-    results = None
     if test:
-        results = trainer.test(
-            model, dataloaders=data.test_dataloader, ckpt_path=ckpt_path
+        return trainer.test(
+            model,
+            dataloaders=data.test_dataloader,
+            ckpt_path=ckpt_path,
         )
-    else:
-        trainer.fit(model, data.train_dataloader, data.val_dataloader)
+
+    trainer.fit(model, data.train_dataloader, data.val_dataloader)
 
     if test_after_train:
-        results = trainer.test(
-            model, dataloaders=data.test_dataloader, ckpt_path="best"
+        return trainer.test(
+            model,
+            dataloaders=data.test_dataloader,
+            ckpt_path="best",
         )
-    return results
+    return None
 
 
 def main(args):
