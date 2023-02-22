@@ -37,6 +37,8 @@ class DeepBacGeneReg(pl.LightningModule):
             else nn.BCEWithLogitsLoss(reduction="none")
         )
 
+        self.save_hyperparameters(logger=False)
+
     def forward(
         self,
         batch_genes_tensor: torch.Tensor,
