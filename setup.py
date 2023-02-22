@@ -7,6 +7,7 @@ setup(
         "gene_set_discovery": ["py.typed", "**/*.json", "**/*.yaml"],
     },
     install_requires=[
+        "captum~=0.6.0",
         "dataclasses~=0.6",
         "dataclasses-json~=0.5.7",
         "einops~=0.6.0",

@@ -38,7 +38,9 @@ class DeepBacGeneReg(pl.LightningModule):
         )
 
     def forward(
-        self, batch_genes_tensor: torch.Tensor, tss_indexes: torch.Tensor
+        self,
+        batch_genes_tensor: torch.Tensor,
+        tss_indexes: torch.Tensor = None,
     ) -> torch.Tensor:
         # x: (batch_size, n_genes, in_channels, seq_length)
         batch_size, n_genes, n_channels, seq_length = batch_genes_tensor.shape
@@ -63,7 +65,8 @@ class DeepBacGeneReg(pl.LightningModule):
             batch_size, n_genes, self.n_bottleneck_layer
         )
         # add positional encodings
-        gene_encodings = self.pos_encoder(gene_encodings, tss_indexes)
+        if tss_indexes is not None:
+            gene_encodings = self.pos_encoder(gene_encodings, tss_indexes)
         # pass the genes through the graph encoder
         logits = self.graph_model(gene_encodings)
         return logits
