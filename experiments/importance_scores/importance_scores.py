@@ -14,7 +14,7 @@ def process_sample(
     seq: str = None,
 ) -> torch.Tensor:
     one_hot_seq = seq_to_one_hot(seq[:max_seq_length])
-    return pad_one_hot_seq(one_hot_seq, max_seq_length, pad_value)
+    return pad_one_hot_seq(one_hot_seq, max_seq_length, pad_value).T
 
 
 def batch_data(
@@ -64,6 +64,7 @@ def load_trained_model(ckpt_path: str) -> DeepBacGeneExpr:
         n_gene_bottleneck_layer=64,
         n_output=1,
         random_state=42,
+        max_gene_length=2048,
     )
     model = DeepBacGeneExpr.load_from_checkpoint(
         checkpoint_path=ckpt_path,
@@ -85,7 +86,7 @@ def get_importance_scores(
 
     output = dict()
     for attr_fn in attribution_fns:
-        output[str(attr_fn)] = compute_importance_scores(
+        output[attr_fn.get_name()] = compute_importance_scores(
             model=model,
             attribution_fn=attr_fn,
             alt_tensor=alt_batch,
