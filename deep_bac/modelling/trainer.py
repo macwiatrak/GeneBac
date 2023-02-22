@@ -28,7 +28,6 @@ def get_trainer(
     mode = "min" if "loss" in config.monitor_metric else "max"
     """Get the trainer"""
     return Trainer(
-        default_root_dir=output_dir,
         devices=devices,
         accelerator=accelerator,
         strategy=strategy,
