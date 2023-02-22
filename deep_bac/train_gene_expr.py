@@ -4,7 +4,7 @@ from typing import Optional, List
 
 from pytorch_lightning.utilities.seed import seed_everything
 
-from deep_bac.argparser import TrainArgumentParser
+from deep_bac.argparser import DeepBacArgumentParser
 from deep_bac.data_preprocessing.data_reader import get_gene_expr_data
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
@@ -26,6 +26,7 @@ def run(
     test: bool = False,
     ckpt_path: Optional[str] = None,
     gene_var_thresholds: List[float] = [0.1, 0.25, 0.5],
+    test_after_train: bool = False,
 ):
     data, most_variable_genes = get_gene_expr_data(
         input_dir=input_dir,
@@ -55,7 +56,11 @@ def run(
         )
     else:
         trainer.fit(model, data.train_dataloader, data.val_dataloader)
-    # in the future we could save the results
+
+    if test_after_train:
+        results = trainer.test(
+            model, dataloaders=data.test_dataloader, ckpt_path="best"
+        )
     return results
 
 
@@ -73,9 +78,10 @@ def main(args):
         num_workers=args.num_workers,
         test=args.test,
         ckpt_path=args.ckpt_path,
+        test_after_train=args.test_after_train,
     )
 
 
 if __name__ == "__main__":
-    args = TrainArgumentParser().parse_args()
+    args = DeepBacArgumentParser().parse_args()
     main(args)

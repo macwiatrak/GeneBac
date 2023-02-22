@@ -4,7 +4,7 @@ from typing import Optional, Literal
 
 from pytorch_lightning.utilities.seed import seed_everything
 
-from deep_bac.argparser import TrainArgumentParser
+from deep_bac.argparser import DeepBacArgumentParser
 from deep_bac.data_preprocessing.data_reader import get_gene_reg_data
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
@@ -83,9 +83,8 @@ def run(
 
     if test_after_train:
         results = trainer.test(
-            model, dataloaders=data.test_dataloader, ckpt_path=ckpt_path
+            model, dataloaders=data.test_dataloader, ckpt_path="best"
         )
-    # in the future we could save the results
     return results
 
 
@@ -115,5 +114,5 @@ def main(args):
 
 
 if __name__ == "__main__":
-    args = TrainArgumentParser().parse_args()
+    args = DeepBacArgumentParser().parse_args()
     main(args)
