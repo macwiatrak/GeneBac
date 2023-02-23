@@ -47,13 +47,18 @@ def compute_importance_scores(
     attribution_fn: Callable,
     alt_tensor: torch.Tensor,
     ref_tensor: torch.Tensor,
+    use_baseline: bool = False,
 ) -> np.ndarray:
     attr_model_fn = attribution_fn(model)
-    attributions, delta = attr_model_fn.attribute(
-        alt_tensor, ref_tensor, return_convergence_delta=True
-    )
-    scores = attributions.sum(dim=1).unsqueeze(1) * alt_tensor
-    # plot_weights(scores[0].detach().numpy(), subticks_frequency=100)
+    if use_baseline:
+        attributions, delta = attr_model_fn.attribute(
+            alt_tensor, ref_tensor, return_convergence_delta=True
+        )
+    else:
+        attributions, delta = attr_model_fn.attribute(
+            alt_tensor, return_convergence_delta=True
+        )
+    scores = attributions.sum(dim=1).unsqueeze(1) * ref_tensor
     return scores.detach().numpy()
 
 
@@ -80,6 +85,7 @@ def get_importance_scores(
     attribution_fns: List[Callable],
     max_seq_length: int = 2048,
     pad_value: float = 0.25,
+    use_baseline: bool = False,
 ) -> Dict[str, np.ndarray]:
     model = load_trained_model(ckpt_path)
     alt_batch, ref_batch = batch_data(seq_data, max_seq_length, pad_value)
@@ -91,5 +97,6 @@ def get_importance_scores(
             attribution_fn=attr_fn,
             alt_tensor=alt_batch,
             ref_tensor=ref_batch,
+            use_baseline=use_baseline,
         )
     return output
