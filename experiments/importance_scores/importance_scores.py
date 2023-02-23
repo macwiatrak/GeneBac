@@ -58,7 +58,7 @@ def compute_importance_scores(
         attributions, delta = attr_model_fn.attribute(
             alt_tensor, return_convergence_delta=True
         )
-    scores = attributions.sum(dim=1).unsqueeze(1) * ref_tensor
+    scores = attributions.sum(dim=1).unsqueeze(1) * alt_tensor
     return scores.detach().numpy()
 
 
