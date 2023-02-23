@@ -40,6 +40,8 @@ class DeepBacGeneExpr(pl.LightningModule):
         # get loss depending on whether we predict LOG2MIC or binary MIC
         self.loss_fn = nn.MSELoss(reduction="mean")
 
+        self.save_hyperparameters(logger=False)
+
     def forward(
         self, batch_genes_tensor: torch.Tensor, tss_indexes: torch.Tensor = None
     ) -> torch.Tensor:
