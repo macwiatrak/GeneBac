@@ -46,7 +46,7 @@ def compute_importance_scores(
     model: DeepBacGeneExpr,
     attribution_fn: Callable,
     alt_tensor: torch.Tensor,
-    ref_tensor: torch.Tensor,
+    ref_tensor: torch.Tensor = None,
     use_baseline: bool = False,
 ) -> np.ndarray:
     attr_model_fn = attribution_fn(model)
