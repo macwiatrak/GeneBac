@@ -6,15 +6,15 @@ from deep_bac.modelling.modules.layers import ConvLayer, DenseLayer, _round
 
 class scBassetEncoder(nn.Module):
     def __init__(
-            self,
-            input_dim: int = 4,
-            n_filters_init: int = 256,
-            n_repeat_blocks_tower: int = 5,
-            filters_mult: float = 1.122,
-            n_filters_pre_bottleneck: int = 227,
-            n_bottleneck_layer: int = 64,
-            batch_norm: bool = True,
-            dropout: float = 0.2,
+        self,
+        input_dim: int = 4,
+        n_filters_init: int = 256,
+        n_repeat_blocks_tower: int = 5,
+        filters_mult: float = 1.122,
+        n_filters_pre_bottleneck: int = 227,
+        n_bottleneck_layer: int = 64,
+        batch_norm: bool = True,
+        dropout: float = 0.2,
     ):
         super().__init__()
 
@@ -57,8 +57,8 @@ class scBassetEncoder(nn.Module):
             out_features=n_bottleneck_layer,
             use_bias=True,
             batch_norm=False,
-            dropout=0.0,
-            activation_fn=nn.Identity(),
+            dropout=0.2,
+            activation_fn=nn.GELU(),
         )
 
     def forward(self, x: torch.Tensor):
