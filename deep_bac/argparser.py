@@ -16,8 +16,8 @@ class DeepBacArgumentParser(Tap):
     # model arguments
     batch_size: int = 1
     gene_encoder_type: Literal[
-        "conv_transformer", "scbasset", "MD-CNN"
-    ] = "scbasset"
+        "conv_transformer", "scbasset", "MD-CNN", "enformer_like"
+    ] = "enformer_like"
     graph_model_type: Literal["transformer", "dense"] = "dense"
     regression: bool = False
     use_drug_idx: int = None

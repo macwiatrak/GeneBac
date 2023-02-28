@@ -109,7 +109,7 @@ def test_model_gene_expr_train_real_data(tmpdir):
     gene_var_thresholds = [0.1, 0.25, 0.5]
 
     config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+        gene_encoder_type="enformer_like",
         lr=0.001,
         batch_size=batch_size,
         n_gene_bottleneck_layer=n_bottleneck_layer,

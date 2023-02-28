@@ -3,6 +3,7 @@ from torch import nn
 
 from deep_bac.modelling.data_types import DeepBacConfig
 from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
+from deep_bac.modelling.modules.enformer_like_encoder import EnformerLikeEncoder
 from deep_bac.modelling.modules.graph_transformer import GraphTransformer
 from deep_bac.modelling.modules.layers import DenseLayer
 from deep_bac.modelling.modules.md_cnn import MDCNN
@@ -38,6 +39,12 @@ def get_gene_encoder(config: DeepBacConfig):
 
     if config.gene_encoder_type == "scbasset":
         return scBassetEncoder(
+            n_filters_init=config.n_init_filters,
+            n_bottleneck_layer=config.n_gene_bottleneck_layer,
+        )
+
+    if config.gene_encoder_type == "enformer_like":
+        return EnformerLikeEncoder(
             n_filters_init=config.n_init_filters,
             n_bottleneck_layer=config.n_gene_bottleneck_layer,
         )

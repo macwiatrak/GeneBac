@@ -8,8 +8,8 @@ from dataclasses import dataclass
 @dataclass
 class DeepBacConfig:
     gene_encoder_type: Literal[
-        "conv_transformer", "scbasset", "MD-CNN"
-    ] = "scbasset"
+        "conv_transformer", "scbasset", "MD-CNN", "enformer_like"
+    ] = "enformer_like"
     graph_model_type: Literal["transformer", "dense"] = "dense"
     regression: bool = False
     lr: float = 0.001

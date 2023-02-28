@@ -166,7 +166,7 @@ class BacGenomeGeneExprDataset(Dataset):
 
         seq = row["prom_gene_seq_w_variants"]
         # subset it to the max gene length
-        one_hot_seq = seq_to_one_hot(seq[200 : self.max_gene_length + 200])
+        one_hot_seq = seq_to_one_hot(seq[: self.max_gene_length])
         # stochastically do a reverse complement of the sequence
         if random.random() > self.reverse_complement_prob:
             # we can do reverse complement by flipping the one hot encoding
