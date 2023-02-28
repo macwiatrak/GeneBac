@@ -57,7 +57,7 @@ class scBassetEncoder(nn.Module):
             out_features=n_bottleneck_layer,
             use_bias=True,
             batch_norm=False,
-            dropout=0.2,
+            dropout=0.0,
             activation_fn=nn.GELU(),
         )
 
