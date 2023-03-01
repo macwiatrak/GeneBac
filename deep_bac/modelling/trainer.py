@@ -11,7 +11,10 @@ from deep_bac.modelling.data_types import DeepBacConfig
 
 
 def get_trainer(
-    config: DeepBacConfig, output_dir: str, refresh_rate: int = 200
+    config: DeepBacConfig,
+    output_dir: str,
+    resume_from_ckpt_path: str = None,
+    refresh_rate: int = 200,
 ) -> Trainer:
     if torch.cuda.is_available():
         devices = torch.cuda.device_count()
@@ -51,4 +54,5 @@ def get_trainer(
         ],
         logger=TensorBoardLogger(output_dir),
         accumulate_grad_batches=config.accumulate_grad_batches,
+        resume_from_checkpoint=resume_from_ckpt_path,
     )

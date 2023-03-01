@@ -27,6 +27,7 @@ def run(
     ckpt_path: Optional[str] = None,
     gene_var_thresholds: List[float] = [0.1, 0.25, 0.5],
     test_after_train: bool = False,
+    resume_from_ckpt_path: str = None,
 ):
     data, most_variable_genes = get_gene_expr_data(
         input_dir=input_dir,
@@ -42,7 +43,12 @@ def run(
 
     config.train_set_len = data.train_set_len
     # this should always be true for gene expression prediction
-    trainer = get_trainer(config, output_dir, refresh_rate=1000)
+    trainer = get_trainer(
+        config,
+        output_dir,
+        resume_from_ckpt_path=resume_from_ckpt_path,
+        refresh_rate=1000,
+    )
     model = DeepBacGeneExpr(
         config=config,
         gene_vars_w_thresholds=get_gene_var_thresholds(
@@ -83,6 +89,7 @@ def main(args):
         test=args.test,
         ckpt_path=args.ckpt_path,
         test_after_train=args.test_after_train,
+        resume_from_ckpt_path=args.resume_from_ckpt_path,
     )
 
 

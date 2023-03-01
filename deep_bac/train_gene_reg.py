@@ -29,6 +29,7 @@ def run(
     ckpt_path: Optional[str] = None,
     use_drug_specific_genes: Literal["INH", "Walker", "MD-CNN"] = "MD-CNN",
     test_after_train: bool = False,
+    resume_from_ckpt_path: str = None,
 ):
     selected_genes = get_selected_genes(use_drug_specific_genes)
     logging.info(f"Selected genes: {selected_genes}")
@@ -70,7 +71,9 @@ def run(
         len(selected_genes) if selected_genes else n_highly_variable_genes
     )
 
-    trainer = get_trainer(config, output_dir)
+    trainer = get_trainer(
+        config, output_dir, resume_from_ckpt_path=resume_from_ckpt_path
+    )
     model = DeepBacGeneReg(config)
 
     if test:
@@ -109,6 +112,7 @@ def main(args):
         use_drug_idx=args.use_drug_idx,
         use_drug_specific_genes=args.use_drug_specific_genes,
         test_after_train=args.test_after_train,
+        resume_from_ckpt_path=args.resume_from_ckpt_path,
     )
     format_and_write_results(
         results=results,
