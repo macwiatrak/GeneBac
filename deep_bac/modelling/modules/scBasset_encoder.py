@@ -1,7 +1,11 @@
 import torch
 import torch.nn as nn
 
-from deep_bac.modelling.modules.layers import ConvLayer, DenseLayer, _round
+from deep_bac.modelling.modules.layers import (
+    ConvLayer,
+    DenseLayer,
+    _round,
+)
 
 
 class scBassetEncoder(nn.Module):
@@ -9,7 +13,7 @@ class scBassetEncoder(nn.Module):
         self,
         input_dim: int = 4,
         n_filters_init: int = 256,
-        n_repeat_blocks_tower: int = 5,
+        n_repeat_blocks_tower: int = 6,
         filters_mult: float = 1.122,
         n_filters_pre_bottleneck: int = 227,
         n_bottleneck_layer: int = 64,
@@ -18,39 +22,48 @@ class scBassetEncoder(nn.Module):
     ):
         super().__init__()
 
-        seq_depth = 7
-        self.stem = ConvLayer(
-            in_channels=input_dim,
-            out_channels=n_filters_init,
-            kernel_size=17,
-            pool_size=3,
-            dropout=dropout,
-            batch_norm=batch_norm,
+        seq_depth = 8
+        self.stem = nn.Sequential(
+            ConvLayer(
+                in_channels=input_dim,
+                out_channels=n_filters_init,
+                kernel_size=17,
+                dropout=dropout,
+                batch_norm=batch_norm,
+                pool_size=2,
+                attention_pooling=True,
+            ),
         )
 
         tower_layers = []
         curr_n_filters = n_filters_init
         for i in range(n_repeat_blocks_tower):
             tower_layers.append(
-                ConvLayer(
-                    in_channels=curr_n_filters,
-                    out_channels=_round(curr_n_filters * filters_mult),
-                    kernel_size=5,
-                    pool_size=2,
-                    dropout=dropout,
-                    batch_norm=batch_norm,
+                nn.Sequential(
+                    ConvLayer(
+                        in_channels=curr_n_filters,
+                        out_channels=_round(curr_n_filters * filters_mult),
+                        kernel_size=5,
+                        pool_size=2,
+                        dropout=dropout,
+                        batch_norm=batch_norm,
+                        attention_pooling=True,
+                    ),
                 )
             )
             curr_n_filters = _round(curr_n_filters * filters_mult)
         self.tower = nn.Sequential(*tower_layers)
 
-        self.pre_bottleneck = ConvLayer(
-            in_channels=curr_n_filters,
-            out_channels=n_filters_pre_bottleneck,
-            kernel_size=1,
-            dropout=dropout,
-            batch_norm=batch_norm,
-            pool_size=3,  # change from 2
+        self.pre_bottleneck = nn.Sequential(
+            ConvLayer(
+                in_channels=curr_n_filters,
+                out_channels=n_filters_pre_bottleneck,
+                kernel_size=1,
+                dropout=dropout,
+                batch_norm=batch_norm,
+                pool_size=2,
+                attention_pooling=True,
+            ),
         )
         self.bottleneck = DenseLayer(
             in_features=n_filters_pre_bottleneck * seq_depth,

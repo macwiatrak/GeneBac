@@ -19,6 +19,7 @@ class ConvLayer(nn.Module):
         batch_norm: bool = True,
         dropout: float = 0.0,
         activation_fn: Callable = nn.GELU(),
+        attention_pooling: bool = False,
     ):
         super().__init__()
         self.conv = nn.Conv1d(
@@ -30,9 +31,15 @@ class ConvLayer(nn.Module):
         self.batch_norm = (
             nn.BatchNorm1d(out_channels) if batch_norm else nn.Identity()
         )
-        self.pool = (
-            nn.MaxPool1d(pool_size) if pool_size is not None else nn.Identity()
-        )
+        if pool_size:
+            self.pool = (
+                AttentionPool(out_channels, pool_size)
+                if attention_pooling
+                else nn.MaxPool1d(pool_size)
+            )
+        else:
+            self.pool = nn.Identity()
+
         self.activation_fn = activation_fn
         self.dropout = nn.Dropout(dropout)
 

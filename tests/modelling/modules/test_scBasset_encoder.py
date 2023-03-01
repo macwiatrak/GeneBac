@@ -1,6 +1,7 @@
 import torch
 
 from deep_bac.modelling.modules.scBasset_encoder import scBassetEncoder
+from deep_bac.modelling.modules.utils import count_parameters
 
 
 def test_scBasset_encoder():
@@ -8,7 +9,7 @@ def test_scBasset_encoder():
     seq_length = 2048
     in_channels = 4
     n_filters_init = 256
-    n_repeat_blocks_tower = 5
+    n_repeat_blocks_tower = 6
     filters_mult = 1.122
     n_filters_pre_bottleneck = 227
     n_bottleneck_layer = 64
@@ -23,5 +24,6 @@ def test_scBasset_encoder():
         n_bottleneck_layer=n_bottleneck_layer,
         batch_norm=True,
     )
+    print("Nr of params:", count_parameters(model))
     out = model(x)
     assert out.shape == (batch_size, n_bottleneck_layer)
