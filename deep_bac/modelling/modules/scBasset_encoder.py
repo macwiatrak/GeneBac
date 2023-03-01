@@ -5,6 +5,7 @@ from deep_bac.modelling.modules.layers import (
     ConvLayer,
     DenseLayer,
     _round,
+    ResidualConvLayer,
 )
 
 
@@ -23,16 +24,14 @@ class scBassetEncoder(nn.Module):
         super().__init__()
 
         seq_depth = 8
-        self.stem = nn.Sequential(
-            ConvLayer(
-                in_channels=input_dim,
-                out_channels=n_filters_init,
-                kernel_size=17,
-                dropout=dropout,
-                batch_norm=batch_norm,
-                pool_size=2,
-                attention_pooling=True,
-            ),
+        self.stem = ResidualConvLayer(
+            in_channels=input_dim,
+            out_channels=n_filters_init,
+            kernel_size=17,
+            dropout=dropout,
+            batch_norm=batch_norm,
+            pool_size=2,
+            attention_pooling=True,
         )
 
         tower_layers = []
@@ -40,7 +39,7 @@ class scBassetEncoder(nn.Module):
         for i in range(n_repeat_blocks_tower):
             tower_layers.append(
                 nn.Sequential(
-                    ConvLayer(
+                    ResidualConvLayer(
                         in_channels=curr_n_filters,
                         out_channels=_round(curr_n_filters * filters_mult),
                         kernel_size=5,
@@ -55,7 +54,7 @@ class scBassetEncoder(nn.Module):
         self.tower = nn.Sequential(*tower_layers)
 
         self.pre_bottleneck = nn.Sequential(
-            ConvLayer(
+            ResidualConvLayer(
                 in_channels=curr_n_filters,
                 out_channels=n_filters_pre_bottleneck,
                 kernel_size=1,

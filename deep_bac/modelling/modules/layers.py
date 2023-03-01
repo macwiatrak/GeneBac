@@ -159,6 +159,65 @@ class AttentionPool(nn.Module):
         return (x * attn).sum(dim=-1)
 
 
+class ResidualConvLayer(nn.Module):
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        kernel_size: int,
+        pool_size: int = None,
+        batch_norm: bool = True,
+        dropout: float = 0.0,
+        activation_fn: Callable = nn.GELU(),
+        attention_pooling: bool = True,
+    ):
+        super().__init__()
+
+        if pool_size:
+            self.pool = (
+                AttentionPool(out_channels, pool_size)
+                if attention_pooling
+                else nn.MaxPool1d(pool_size)
+            )
+        else:
+            self.pool = nn.Identity()
+
+        self.layer = nn.Sequential(
+            ConvLayer(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                batch_norm=batch_norm,
+                dropout=dropout,
+                activation_fn=activation_fn,
+                attention_pooling=False,
+                pool_size=None,
+            ),
+            Residual(
+                ConvLayer(
+                    in_channels=out_channels,
+                    out_channels=out_channels,
+                    kernel_size=1,
+                    batch_norm=batch_norm,
+                    dropout=dropout,
+                    activation_fn=nn.Identity(),
+                    attention_pooling=False,
+                    pool_size=None,
+                )
+            ),
+            self.pool,
+        )
+
+        self.activation_fn = activation_fn
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x: torch.Tensor):
+        x = self.layer(x)
+        x = self.activation_fn(x)
+        x = self.dropout(x)
+        return x
+
+
 def exponential_linspace_int(
     start: int, end: int, num: int, divisible_by: int = 1
 ):
