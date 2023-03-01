@@ -37,7 +37,7 @@ class EnformerLikeEncoder(nn.Module):
                     batch_norm=batch_norm,
                 )
             ),
-            AttentionPool(n_filters_init, pool_size=3),
+            AttentionPool(n_filters_init, pool_size=2),
         )
 
         filter_list = exponential_linspace_int(

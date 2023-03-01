@@ -65,7 +65,7 @@ def test_model_gene_expr_train_fake_data(tmpdir):
     batch_size = 10
 
     config = DeepBacConfig(
-        gene_encoder_type="enformer_like",
+        gene_encoder_type="scbasset",
         lr=0.0001,
         batch_size=batch_size,
         n_gene_bottleneck_layer=n_bottleneck_layer,
