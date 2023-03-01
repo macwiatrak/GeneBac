@@ -7,6 +7,7 @@ from deep_bac.modelling.modules.layers import (
     ConvLayer,
     exponential_linspace_int,
     DenseLayer,
+    ResidualConvLayer,
 )
 
 
@@ -22,22 +23,13 @@ class EnformerLikeEncoder(nn.Module):
     ):
         super().__init__()
 
-        self.stem = nn.Sequential(
-            ConvLayer(
-                in_channels=input_dim,
-                out_channels=n_filters_init,
-                kernel_size=15,
-                batch_norm=batch_norm,
-            ),
-            Residual(
-                ConvLayer(
-                    in_channels=n_filters_init,
-                    out_channels=n_filters_init,
-                    kernel_size=1,
-                    batch_norm=batch_norm,
-                )
-            ),
-            AttentionPool(n_filters_init, pool_size=2),
+        self.stem = ResidualConvLayer(
+            in_channels=input_dim,
+            out_channels=n_filters_init,
+            kernel_size=15,
+            batch_norm=batch_norm,
+            pool_size=2,
+            attention_pooling=True,
         )
 
         filter_list = exponential_linspace_int(
@@ -48,42 +40,26 @@ class EnformerLikeEncoder(nn.Module):
         for in_channels, out_channels in zip(filter_list[:-1], filter_list[1:]):
             conv_layers.append(
                 nn.Sequential(
-                    ConvLayer(
+                    ResidualConvLayer(
                         in_channels=in_channels,
                         out_channels=out_channels,
                         kernel_size=5,
                         batch_norm=batch_norm,
-                    ),
-                    Residual(
-                        ConvLayer(
-                            in_channels=out_channels,
-                            out_channels=out_channels,
-                            kernel_size=1,
-                            batch_norm=batch_norm,
-                        )
-                    ),
-                    AttentionPool(out_channels, pool_size=2),
+                        pool_size=2,
+                        attention_pooling=True,
+                    )
                 )
             )
 
         self.conv_tower = nn.Sequential(*conv_layers)
 
-        self.pre_bottleneck = nn.Sequential(
-            ConvLayer(
-                in_channels=out_channels,
-                out_channels=out_channels // 2,
-                kernel_size=5,
-                batch_norm=batch_norm,
-            ),
-            Residual(
-                ConvLayer(
-                    in_channels=out_channels // 2,
-                    out_channels=out_channels // 2,
-                    kernel_size=1,
-                    batch_norm=batch_norm,
-                )
-            ),
-            AttentionPool(out_channels // 2, pool_size=2),
+        self.pre_bottleneck = ResidualConvLayer(
+            in_channels=out_channels,
+            out_channels=out_channels // 2,
+            kernel_size=5,
+            batch_norm=batch_norm,
+            pool_size=2,
+            attention_pooling=True,
         )
 
         seq_depth = 16
