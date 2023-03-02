@@ -2,12 +2,11 @@ import torch
 from captum.attr import (
     IntegratedGradients,
     DeepLift,
-    InputXGradient,
     GradientShap,
     DeepLiftShap,
 )
 
-from deep_bac.modelling.data_types import DeepBacConfig
+from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
 from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
 
@@ -23,8 +22,8 @@ def test_model_gene_expr_captum():
     x = torch.rand(batch_size, in_channels, seq_length)
     baseline = torch.rand(batch_size, in_channels, seq_length)
 
-    config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
         n_gene_bottleneck_layer=n_bottleneck_layer,
         n_init_filters=n_filters,
         n_output=n_output,
@@ -74,8 +73,8 @@ def test_model_gene_reg_captum():
     baseline = torch.rand(batch_size, n_genes, in_channels, seq_length)
     labels = torch.empty(batch_size).random_(2).type(torch.int64)
 
-    config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
         graph_model_type="dense",
         regression=False,
         n_gene_bottleneck_layer=n_bottleneck_layer,

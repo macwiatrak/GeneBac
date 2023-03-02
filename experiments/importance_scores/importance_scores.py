@@ -4,7 +4,7 @@ import numpy as np
 import torch
 
 from deep_bac.data_preprocessing.utils import seq_to_one_hot, pad_one_hot_seq
-from deep_bac.modelling.data_types import DeepBacConfig
+from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
 
 
@@ -63,8 +63,8 @@ def compute_importance_scores(
 
 
 def load_trained_model(ckpt_path: str) -> DeepBacGeneExpr:
-    config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
         graph_model_type="dense",
         n_gene_bottleneck_layer=64,
         n_output=1,

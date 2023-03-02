@@ -7,11 +7,14 @@ from pytorch_lightning.callbacks import (
 )
 from pytorch_lightning.loggers import TensorBoardLogger
 
-from deep_bac.modelling.data_types import DeepBacConfig
+from deep_bac.modelling.data_types import DeepGeneBacConfig
 
 
 def get_trainer(
-    config: DeepBacConfig, output_dir: str, refresh_rate: int = 200
+    config: DeepGeneBacConfig,
+    output_dir: str,
+    resume_from_ckpt_path: str = None,
+    refresh_rate: int = 200,
 ) -> Trainer:
     if torch.cuda.is_available():
         devices = torch.cuda.device_count()
@@ -39,16 +42,17 @@ def get_trainer(
                 patience=config.early_stopping_patience,
                 mode=mode,
             ),
-            # ModelCheckpoint(
-            #     dirpath=output_dir,
-            #     filename="{epoch:02d}-{val_loss:.4f}",
-            #     monitor=monitor_metric,
-            #     mode=mode,
-            #     save_top_k=1,
-            #     save_last=True,
-            # ),
+            ModelCheckpoint(
+                dirpath=output_dir,
+                filename="{epoch:02d}-{val_loss:.4f}",
+                monitor=monitor_metric,
+                mode=mode,
+                save_top_k=1,
+                save_last=True,
+            ),
             TQDMProgressBar(refresh_rate=refresh_rate),
         ],
         logger=TensorBoardLogger(output_dir),
         accumulate_grad_batches=config.accumulate_grad_batches,
+        resume_from_checkpoint=resume_from_ckpt_path,
     )

@@ -1,8 +1,9 @@
 import torch
 from torch import nn
 
-from deep_bac.modelling.data_types import DeepBacConfig
+from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
+from deep_bac.modelling.modules.enformer_like_encoder import EnformerLikeEncoder
 from deep_bac.modelling.modules.graph_transformer import GraphTransformer
 from deep_bac.modelling.modules.layers import DenseLayer
 from deep_bac.modelling.modules.md_cnn import MDCNN
@@ -11,7 +12,7 @@ from deep_bac.modelling.modules.positional_encodings import (
     LearnablePositionalEncoding,
     FixedGeneExpressionPositionalEncoding,
 )
-from deep_bac.modelling.modules.scBasset_encoder import scBassetEncoder
+from deep_bac.modelling.modules.gene_bac_encoder import GeneBacEncoder
 from deep_bac.modelling.modules.utils import Flatten
 
 
@@ -27,7 +28,7 @@ def remove_ignore_index(
     return loss.sum() / mask.sum()
 
 
-def get_gene_encoder(config: DeepBacConfig):
+def get_gene_encoder(config: DeepGeneBacConfig):
     """Get the gene encoder"""
     if config.gene_encoder_type == "conv_transformer":
         return ConvTransformerEncoder(
@@ -36,8 +37,14 @@ def get_gene_encoder(config: DeepBacConfig):
             n_transformer_heads=config.n_transformer_heads,
         )
 
-    if config.gene_encoder_type == "scbasset":
-        return scBassetEncoder(
+    if config.gene_encoder_type == "gene_bac":
+        return GeneBacEncoder(
+            n_filters_init=config.n_init_filters,
+            n_bottleneck_layer=config.n_gene_bottleneck_layer,
+        )
+
+    if config.gene_encoder_type == "enformer_like":
+        return EnformerLikeEncoder(
             n_filters_init=config.n_init_filters,
             n_bottleneck_layer=config.n_gene_bottleneck_layer,
         )
@@ -50,7 +57,7 @@ def get_gene_encoder(config: DeepBacConfig):
     raise ValueError(f"Unknown gene encoder type: {config.gene_encoder_type}")
 
 
-def get_gene_reg_decoder_model(config: DeepBacConfig):
+def get_gene_reg_decoder_model(config: DeepGeneBacConfig):
     """Get the graph model"""
     if config.gene_encoder_type == "MD-CNN":
         return None
@@ -80,7 +87,7 @@ def get_gene_reg_decoder_model(config: DeepBacConfig):
     raise ValueError(f"Unknown graph model type: {config.graph_model_type}")
 
 
-def get_pos_encoder(config: DeepBacConfig):
+def get_pos_encoder(config: DeepGeneBacConfig):
     """Get the positional encoder"""
     if config.pos_encoder_type is None:
         return IdentityPositionalEncoding()

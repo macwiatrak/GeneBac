@@ -5,7 +5,7 @@ from tap import Tap
 INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data/"
 
 
-class DeepBacArgumentParser(Tap):
+class DeepGeneBacArgumentParser(Tap):
     def __init__(self):
         super().__init__(underscores_to_dashes=True)
 
@@ -16,8 +16,8 @@ class DeepBacArgumentParser(Tap):
     # model arguments
     batch_size: int = 1
     gene_encoder_type: Literal[
-        "conv_transformer", "scbasset", "MD-CNN"
-    ] = "scbasset"
+        "conv_transformer", "gene_bac", "MD-CNN", "enformer_like"
+    ] = "gene_bac"
     graph_model_type: Literal["transformer", "dense"] = "dense"
     regression: bool = False
     use_drug_idx: int = None
@@ -53,3 +53,4 @@ class DeepBacArgumentParser(Tap):
     ] = "val_loss"
     use_drug_specific_genes: Literal["INH", "Walker", "MD-CNN"] = "MD-CNN"
     pos_encoder_type: Literal["learnable", "fixed"] = None
+    resume_from_ckpt_path: str = None
