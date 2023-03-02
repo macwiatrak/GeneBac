@@ -28,7 +28,7 @@ class DeepGeneBacArgumentParser(Tap):
     n_graph_layers: int = 1
     n_output: int = 14  # nr of drugs in the cryptic dataset
     # data loader arguments
-    max_gene_length: int = 2560
+    max_gene_length: int = 3072
     shift_max: int = 3
     pad_value: float = 0.25
     reverse_complement_prob: float = 0.5
