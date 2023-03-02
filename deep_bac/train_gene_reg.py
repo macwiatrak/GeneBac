@@ -6,7 +6,7 @@ from pytorch_lightning.utilities.seed import seed_everything
 
 from deep_bac.argparser import DeepBacArgumentParser
 from deep_bac.data_preprocessing.data_reader import get_gene_reg_data
-from deep_bac.modelling.data_types import DeepBacConfig
+from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
 from deep_bac.modelling.trainer import get_trainer
 from deep_bac.utils import get_selected_genes, format_and_write_results
@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 def run(
-    config: DeepBacConfig,
+    config: DeepGeneBacConfig,
     input_dir: str,
     output_dir: str,
     n_highly_variable_genes: int = 500,
@@ -96,7 +96,7 @@ def run(
 
 def main(args):
     seed_everything(args.random_state)
-    config = DeepBacConfig.from_dict(args.as_dict())
+    config = DeepGeneBacConfig.from_dict(args.as_dict())
     results = run(
         config=config,
         input_dir=args.input_dir,

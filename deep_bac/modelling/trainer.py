@@ -7,11 +7,11 @@ from pytorch_lightning.callbacks import (
 )
 from pytorch_lightning.loggers import TensorBoardLogger
 
-from deep_bac.modelling.data_types import DeepBacConfig
+from deep_bac.modelling.data_types import DeepGeneBacConfig
 
 
 def get_trainer(
-    config: DeepBacConfig,
+    config: DeepGeneBacConfig,
     output_dir: str,
     resume_from_ckpt_path: str = None,
     refresh_rate: int = 200,

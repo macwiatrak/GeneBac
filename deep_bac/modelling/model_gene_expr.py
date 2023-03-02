@@ -7,7 +7,7 @@ from torch import nn
 from transformers import get_linear_schedule_with_warmup
 
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
-from deep_bac.modelling.data_types import DeepBacConfig
+from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.metrics import (
     get_regression_metrics,
     get_stats_for_thresholds,
@@ -23,7 +23,7 @@ from deep_bac.modelling.utils import (
 class DeepBacGeneExpr(pl.LightningModule):
     def __init__(
         self,
-        config: DeepBacConfig,
+        config: DeepGeneBacConfig,
         gene_vars_w_thresholds: Dict[float, List[str]] = None,
     ):
         super().__init__()
@@ -36,6 +36,7 @@ class DeepBacGeneExpr(pl.LightningModule):
             dim=config.n_gene_bottleneck_layer
         )
         self.dropout = nn.Dropout(0.2)
+        self.activation_fn = nn.ReLU()
 
         # get loss depending on whether we predict LOG2MIC or binary MIC
         self.loss_fn = nn.MSELoss(reduction="mean")
@@ -46,7 +47,9 @@ class DeepBacGeneExpr(pl.LightningModule):
         self, batch_genes_tensor: torch.Tensor, tss_indexes: torch.Tensor = None
     ) -> torch.Tensor:
         # encode each gene
-        gene_encodings = self.gene_encoder(batch_genes_tensor)
+        gene_encodings = self.activation_fn(
+            self.gene_encoder(batch_genes_tensor)
+        )
         if tss_indexes is not None:
             gene_encodings = self.pos_encoder(gene_encodings, tss_indexes)
         # pass the genes through the graph encoder

@@ -5,72 +5,60 @@ from deep_bac.modelling.modules.layers import (
     ConvLayer,
     DenseLayer,
     _round,
-    ResidualConvLayer,
 )
 
 
-class scBassetEncoder(nn.Module):
+class GeneBacEncoder(nn.Module):
     def __init__(
         self,
         input_dim: int = 4,
         n_filters_init: int = 256,
-        n_repeat_blocks_tower: int = 6,
+        n_repeat_blocks_tower: int = 5,
         filters_mult: float = 1.122,
         n_filters_pre_bottleneck: int = 227,
         n_bottleneck_layer: int = 64,
         batch_norm: bool = True,
-        dropout: float = 0.2,
     ):
         super().__init__()
 
-        seq_depth = 8
-        self.stem = ResidualConvLayer(
+        seq_depth = 7
+        self.stem = ConvLayer(
             in_channels=input_dim,
             out_channels=n_filters_init,
             kernel_size=17,
-            dropout=dropout,
+            pool_size=3,
             batch_norm=batch_norm,
-            pool_size=2,
-            attention_pooling=True,
         )
 
         tower_layers = []
         curr_n_filters = n_filters_init
         for i in range(n_repeat_blocks_tower):
             tower_layers.append(
-                nn.Sequential(
-                    ResidualConvLayer(
-                        in_channels=curr_n_filters,
-                        out_channels=_round(curr_n_filters * filters_mult),
-                        kernel_size=5,
-                        pool_size=2,
-                        dropout=dropout,
-                        batch_norm=batch_norm,
-                        attention_pooling=True,
-                    ),
+                ConvLayer(
+                    in_channels=curr_n_filters,
+                    out_channels=_round(curr_n_filters * filters_mult),
+                    kernel_size=5,
+                    pool_size=2,
+                    batch_norm=batch_norm,
                 )
             )
             curr_n_filters = _round(curr_n_filters * filters_mult)
         self.tower = nn.Sequential(*tower_layers)
 
-        self.pre_bottleneck = nn.Sequential(
-            ResidualConvLayer(
-                in_channels=curr_n_filters,
-                out_channels=n_filters_pre_bottleneck,
-                kernel_size=1,
-                dropout=dropout,
-                batch_norm=batch_norm,
-                pool_size=2,
-                attention_pooling=True,
-            ),
+        self.pre_bottleneck = ConvLayer(
+            in_channels=curr_n_filters,
+            out_channels=n_filters_pre_bottleneck,
+            kernel_size=1,
+            batch_norm=batch_norm,
+            pool_size=3,  # change from 2
         )
         self.bottleneck = DenseLayer(
             in_features=n_filters_pre_bottleneck * seq_depth,
             out_features=n_bottleneck_layer,
             use_bias=True,
             batch_norm=False,
-            dropout=0.0,
-            activation_fn=nn.GELU(),
+            dropout=0.0,  # we apply dropout in the main model
+            activation_fn=nn.Identity(),
         )
 
     def forward(self, x: torch.Tensor):

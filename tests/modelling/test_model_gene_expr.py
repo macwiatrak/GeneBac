@@ -5,7 +5,7 @@ import pytorch_lightning as pl
 from deep_bac.data_preprocessing.data_reader import get_gene_expr_dataloader
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
 from deep_bac.data_preprocessing.utils import get_gene_std_expression
-from deep_bac.modelling.data_types import DeepBacConfig
+from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
 from deep_bac.modelling.modules.utils import count_parameters
 from deep_bac.utils import get_gene_var_thresholds
@@ -24,8 +24,8 @@ def test_model_gene_expr_steps():
     labels = torch.rand(batch_size, n_output)
     tss_indexes = torch.randint(0, 1000000, (batch_size,))
 
-    config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
         n_gene_bottleneck_layer=n_bottleneck_layer,
         n_init_filters=n_filters,
         n_output=n_output,
@@ -64,8 +64,8 @@ def test_model_gene_expr_train_fake_data(tmpdir):
     max_epochs = 20
     batch_size = 10
 
-    config = DeepBacConfig(
-        gene_encoder_type="enformer_like",
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
         lr=0.0001,
         batch_size=batch_size,
         n_gene_bottleneck_layer=n_bottleneck_layer,
@@ -108,7 +108,7 @@ def test_model_gene_expr_train_real_data(tmpdir):
     )
     gene_var_thresholds = [0.1, 0.25, 0.5]
 
-    config = DeepBacConfig(
+    config = DeepGeneBacConfig(
         gene_encoder_type="enformer_like",
         lr=0.001,
         batch_size=batch_size,

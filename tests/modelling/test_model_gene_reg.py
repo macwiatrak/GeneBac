@@ -7,7 +7,7 @@ from pytorch_lightning.callbacks import TQDMProgressBar, ModelCheckpoint
 
 from deep_bac.data_preprocessing.data_reader import get_gene_reg_dataloader
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
-from deep_bac.modelling.data_types import DeepBacConfig
+from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
 from deep_bac.modelling.modules.utils import count_parameters
 from tests.modelling.helpers import get_test_gene_reg_dataloader, BasicLogger
@@ -26,8 +26,8 @@ def test_model_gene_reg_steps():
     labels = torch.empty(batch_size, n_output).random_(2)
     tss_indexes = torch.randint(0, n_genes, (batch_size, n_genes))
 
-    config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
         graph_model_type="dense",
         regression=False,
         n_gene_bottleneck_layer=n_bottleneck_layer,
@@ -72,8 +72,8 @@ def test_model_gene_reg_train_fake_data(tmpdir):
     max_epochs = 20
     batch_size = 10
 
-    config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
         graph_model_type="dense",
         lr=0.001,
         batch_size=batch_size,
@@ -129,8 +129,8 @@ def test_model_gene_reg_train_real_data(tmpdir):
         "../test_data/reference_gene_data.parquet"
     )
 
-    config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
         graph_model_type="dense",
         pos_encoder_type="fixed",
         lr=0.001,

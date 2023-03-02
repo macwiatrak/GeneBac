@@ -6,10 +6,10 @@ from dataclasses import dataclass
 
 @dataclass_json
 @dataclass
-class DeepBacConfig:
+class DeepGeneBacConfig:
     gene_encoder_type: Literal[
-        "conv_transformer", "scbasset", "MD-CNN", "enformer_like"
-    ] = "enformer_like"
+        "conv_transformer", "gene_bac", "MD-CNN", "enformer_like"
+    ] = "gene_bac"
     graph_model_type: Literal["transformer", "dense"] = "dense"
     regression: bool = False
     lr: float = 0.001
