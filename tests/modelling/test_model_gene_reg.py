@@ -122,7 +122,7 @@ def test_model_gene_reg_train_real_data(tmpdir):
     n_filters = 256
     max_epochs = 20
     batch_size = 2
-    max_gene_length = 2048
+    max_gene_length = 2560
     selected_genes = ["PE1", "Rv1716", "Rv2000", "pepC", "pepD"]
 
     reference_gene_data_df = pd.read_parquet(
