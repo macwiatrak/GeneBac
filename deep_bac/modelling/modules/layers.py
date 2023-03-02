@@ -1,3 +1,4 @@
+import logging
 import math
 from typing import Callable
 
@@ -7,6 +8,8 @@ import torch
 from einops.layers.torch import Rearrange
 from torch import nn
 import torch.nn.functional as F
+
+logging.basicConfig(level=logging.INFO)
 
 
 class ConvLayer(nn.Module):
@@ -60,16 +63,17 @@ class DenseLayer(nn.Module):
         use_bias: bool = True,
         layer_norm: bool = True,
         batch_norm: bool = False,
-        dropout: float = 0.1,
+        dropout: float = 0.2,
         activation_fn: Callable = nn.ReLU(),
     ):
         super().__init__()
         if layer_norm and batch_norm:
             batch_norm = False
-            raise Warning(
+            logging.info(
                 "LayerNorm and BatchNorm both used in the dense layer, "
                 "defaulting to LayerNorm only"
             )
+
         self.dense = nn.Linear(in_features, out_features, bias=use_bias)
         self.layer_norm = (
             nn.LayerNorm(out_features, elementwise_affine=False)
