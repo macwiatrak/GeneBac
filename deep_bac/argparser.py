@@ -5,7 +5,7 @@ from tap import Tap
 INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data/"
 
 
-class DeepBacArgumentParser(Tap):
+class DeepGeneBacArgumentParser(Tap):
     def __init__(self):
         super().__init__(underscores_to_dashes=True)
 

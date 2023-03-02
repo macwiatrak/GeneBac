@@ -4,7 +4,7 @@ from typing import Optional, List
 
 from pytorch_lightning.utilities.seed import seed_everything
 
-from deep_bac.argparser import DeepBacArgumentParser
+from deep_bac.argparser import DeepGeneBacArgumentParser
 from deep_bac.data_preprocessing.data_reader import get_gene_expr_data
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
@@ -94,5 +94,5 @@ def main(args):
 
 
 if __name__ == "__main__":
-    args = DeepBacArgumentParser().parse_args()
+    args = DeepGeneBacArgumentParser().parse_args()
     main(args)
