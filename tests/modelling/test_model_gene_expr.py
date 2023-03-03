@@ -59,7 +59,7 @@ def test_model_gene_expr_steps():
 
 def test_model_gene_expr_train_fake_data(tmpdir):
     n_samples = 100
-    seq_length = 2048
+    seq_length = 2560
     n_bottleneck_layer = 32
     max_epochs = 20
     batch_size = 10

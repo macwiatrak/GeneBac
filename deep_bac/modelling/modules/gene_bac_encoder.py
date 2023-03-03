@@ -21,7 +21,6 @@ class GeneBacEncoder(nn.Module):
     ):
         super().__init__()
 
-        seq_depth = 7
         self.stem = ConvLayer(
             in_channels=input_dim,
             out_channels=n_filters_init,
@@ -52,6 +51,8 @@ class GeneBacEncoder(nn.Module):
             batch_norm=batch_norm,
             pool_size=3,  # change from 2
         )
+
+        seq_depth = 8
         self.bottleneck = DenseLayer(
             in_features=n_filters_pre_bottleneck * seq_depth,
             out_features=n_bottleneck_layer,
