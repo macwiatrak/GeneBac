@@ -152,7 +152,7 @@ class BacGenomeGeneExprDataset(Dataset):
         max_gene_length: int = 2048,
         shift_max: int = 3,
         pad_value: float = 0.25,
-        reverse_complement_prob: float = 0.5,
+        reverse_complement_prob: float = 0.0,
     ):
         self.df = pd.read_parquet(bac_genes_df_file_path)
 
