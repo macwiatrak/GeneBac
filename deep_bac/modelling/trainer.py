@@ -44,7 +44,7 @@ def get_trainer(
             ),
             ModelCheckpoint(
                 dirpath=output_dir,
-                filename="{epoch:02d}-{val_r2:.4f}",
+                filename="{epoch:02d}-{val_gmean_spec_sens:.4f}",
                 monitor=monitor_metric,
                 mode=mode,
                 save_top_k=1,
