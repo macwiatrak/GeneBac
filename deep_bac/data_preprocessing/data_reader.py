@@ -64,7 +64,7 @@ def get_gene_reg_dataloader(
     use_drug_idx: int = None,
     shift_max: int = 3,
     pad_value: float = 0.25,
-    reverse_complement_prob: float = 0.5,
+    reverse_complement_prob: float = 0.0,
     shuffle: bool = True,
     num_workers: int = 4,
     pin_memory: bool = True,
@@ -107,7 +107,7 @@ def get_gene_reg_data(
     max_gene_length: int = 2048,
     shift_max: int = 3,
     pad_value: float = 0.25,
-    reverse_complement_prob: float = 0.5,
+    reverse_complement_prob: float = 0.0,
     num_workers: int = 8,
     test: bool = False,
 ):

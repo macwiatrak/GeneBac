@@ -26,7 +26,7 @@ class BacGenomeGeneRegDataset(Dataset):
         regression: bool = False,  # whether the task should be regression or binary classification
         shift_max: int = 3,
         pad_value: float = 0.25,
-        reverse_complement_prob: float = 0.5,
+        reverse_complement_prob: float = 0.0,
         use_drug_idx: int = None,
     ):
         self.genes_df = pd.read_parquet(bac_genes_df_file_path)
