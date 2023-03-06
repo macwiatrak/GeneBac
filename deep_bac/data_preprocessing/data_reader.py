@@ -14,7 +14,7 @@ from deep_bac.data_preprocessing.data_types import (
     DataReaderOutput,
 )
 from deep_bac.data_preprocessing.dataset import (
-    BacGenomeGeneRegDataset,
+    BacGenomeGenePhenoDataset,
     BacGenomeGeneExprDataset,
 )
 from deep_bac.data_preprocessing.utils import get_gene_std_expression
@@ -58,7 +58,7 @@ def get_gene_pheno_dataloader(
     reference_gene_data_df: DataFrame,
     unique_ids: List[str] = None,
     phenotype_dataframe_file_path: str = None,
-    max_gene_length: int = 2048,
+    max_gene_length: int = 2560,
     selected_genes: List = None,
     regression: bool = False,
     use_drug_idx: int = None,
@@ -69,7 +69,7 @@ def get_gene_pheno_dataloader(
     num_workers: int = 4,
     pin_memory: bool = True,
 ) -> DataLoader:
-    dataset = BacGenomeGeneRegDataset(
+    dataset = BacGenomeGenePhenoDataset(
         unique_ids=unique_ids,
         bac_genes_df_file_path=bac_genes_df_file_path,
         reference_gene_data_df=reference_gene_data_df,
@@ -104,7 +104,7 @@ def get_gene_pheno_data(
     regression: bool = False,
     use_drug_idx: int = None,
     batch_size: int = 8,
-    max_gene_length: int = 2048,
+    max_gene_length: int = 2560,
     shift_max: int = 3,
     pad_value: float = 0.25,
     reverse_complement_prob: float = 0.0,
@@ -194,7 +194,7 @@ def get_gene_pheno_data(
 def get_gene_expr_dataloader(
     batch_size: int,
     bac_genes_df_file_path: str,
-    max_gene_length: int = 2048,
+    max_gene_length: int = 2560,
     shift_max: int = 3,
     pad_value: float = 0.25,
     reverse_complement_prob: float = 0.0,
@@ -223,7 +223,7 @@ def get_gene_expr_dataloader(
 def get_gene_expr_data(
     input_dir: str,
     batch_size: int = 512,
-    max_gene_length: int = 2048,
+    max_gene_length: int = 2560,
     shift_max: int = 3,
     pad_value: float = 0.25,
     reverse_complement_prob: float = 0.0,
@@ -301,7 +301,7 @@ def main():
     # )
     # selected_genes = gene_variance_df["Gene"].tolist()[:1000]
     #
-    # max_gene_length = 2048
+    # max_gene_length = 2560
     # dl = get_gene_reg_dataloader(
     #     batch_size=32,
     #     unique_ids=None,
@@ -328,7 +328,7 @@ def main():
     data, most_var_genes = get_gene_expr_data(
         input_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/",
         batch_size=512,
-        max_gene_length=2048,
+        max_gene_length=2560,
         shift_max=3,
         pad_value=0.25,
         reverse_complement_prob=0.5,
