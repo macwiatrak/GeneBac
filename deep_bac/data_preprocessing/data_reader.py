@@ -52,7 +52,7 @@ def _collate_samples(data: List[BacInputSample]) -> BatchBacInputSample:
     )
 
 
-def get_gene_reg_dataloader(
+def get_gene_pheno_dataloader(
     batch_size: int,
     bac_genes_df_file_path: str,
     reference_gene_data_df: DataFrame,
@@ -93,7 +93,7 @@ def get_gene_reg_dataloader(
     return dataloader
 
 
-def get_gene_reg_data(
+def get_gene_pheno_data(
     input_df_file_path: str,
     reference_gene_data_df_path: str,
     phenotype_df_file_path: str,
@@ -124,7 +124,7 @@ def get_gene_reg_data(
     val_unique_ids = train_val_test_split_indices["val"]
     test_unique_ids = train_val_test_split_indices["test"]
 
-    train_dataloader = get_gene_reg_dataloader(
+    train_dataloader = get_gene_pheno_dataloader(
         batch_size=batch_size,
         unique_ids=train_unique_ids,
         bac_genes_df_file_path=input_df_file_path,
@@ -142,7 +142,7 @@ def get_gene_reg_data(
         pin_memory=True,
     )
 
-    val_dataloader = get_gene_reg_dataloader(
+    val_dataloader = get_gene_pheno_dataloader(
         batch_size=batch_size,
         unique_ids=val_unique_ids,
         bac_genes_df_file_path=input_df_file_path,
@@ -165,7 +165,7 @@ def get_gene_reg_data(
             val_dataloader=val_dataloader,
             train_set_len=len(train_unique_ids),
         )
-    test_dataloader = get_gene_reg_dataloader(
+    test_dataloader = get_gene_pheno_dataloader(
         batch_size=batch_size,
         unique_ids=test_unique_ids,
         bac_genes_df_file_path=input_df_file_path,

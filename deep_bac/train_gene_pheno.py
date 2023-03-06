@@ -5,9 +5,9 @@ from typing import Optional, Literal
 from pytorch_lightning.utilities.seed import seed_everything
 
 from deep_bac.argparser import DeepGeneBacArgumentParser
-from deep_bac.data_preprocessing.data_reader import get_gene_reg_data
+from deep_bac.data_preprocessing.data_reader import get_gene_pheno_data
 from deep_bac.modelling.data_types import DeepGeneBacConfig
-from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
+from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 from deep_bac.modelling.trainer import get_trainer
 from deep_bac.utils import get_selected_genes, format_and_write_results
 
@@ -34,7 +34,7 @@ def run(
     selected_genes = get_selected_genes(use_drug_specific_genes)
     logging.info(f"Selected genes: {selected_genes}")
 
-    data = get_gene_reg_data(
+    data = get_gene_pheno_data(
         input_df_file_path=os.path.join(
             input_dir, "processed_agg_variants.parquet"
         ),
@@ -74,7 +74,7 @@ def run(
     trainer = get_trainer(
         config, output_dir, resume_from_ckpt_path=resume_from_ckpt_path
     )
-    model = DeepBacGeneReg(config)
+    model = DeepBacGenePheno(config)
 
     if test:
         return trainer.test(
