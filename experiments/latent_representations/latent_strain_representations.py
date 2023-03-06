@@ -95,12 +95,15 @@ def run(
     val_df.to_parquet(
         os.path.join(output_dir, "val_strain_representations.parquet")
     )
+    logging.info("Finished saving val data")
 
     if test:
         test_df = collect_strain_reprs(model, data.test_dataloader)
+        logging.info("Finished collecting test data, saving it now...")
         test_df.to_parquet(
             os.path.join(output_dir, "test_strain_representations.parquet")
         )
+        logging.info("Finished saving test data")
 
 
 def main(args):
