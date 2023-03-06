@@ -6,7 +6,7 @@ from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
 def test_conv_transformer():
     batch_size = 2
     n_genes = 3
-    seq_length = 2048
+    seq_length = 2560
     in_channels = 4
     n_filters = 256
     n_bottleneck_layer = 128

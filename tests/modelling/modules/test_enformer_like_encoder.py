@@ -6,7 +6,7 @@ from deep_bac.modelling.modules.utils import count_parameters
 
 def test_enformer_like_encoder():
     batch_size = 2
-    seq_length = 2048
+    seq_length = 2560
     in_channels = 4
     n_bottleneck_layer = 64
 

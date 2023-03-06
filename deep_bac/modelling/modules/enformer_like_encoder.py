@@ -15,7 +15,7 @@ class EnformerLikeEncoder(nn.Module):
     def __init__(
         self,
         input_dim: int = 4,
-        seq_length: int = 2048,
+        seq_length: int = 2560,
         n_filters_init: int = 256,
         n_repeat_blocks_tower: int = 6,
         n_bottleneck_layer: int = 64,

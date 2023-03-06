@@ -14,14 +14,14 @@ from deep_bac.data_preprocessing.utils import (
 )
 
 
-class BacGenomeGeneRegDataset(Dataset):
+class BacGenomeGenePhenoDataset(Dataset):
     def __init__(
         self,
         bac_genes_df_file_path: str,
         reference_gene_data_df: DataFrame,
         unique_ids: List[str] = None,
         phenotype_dataframe_file_path: str = None,
-        max_gene_length: int = 2048,
+        max_gene_length: int = 2560,
         selected_genes: List = None,
         regression: bool = False,  # whether the task should be regression or binary classification
         shift_max: int = 3,
@@ -149,7 +149,7 @@ class BacGenomeGeneExprDataset(Dataset):
     def __init__(
         self,
         bac_genes_df_file_path: str,
-        max_gene_length: int = 2048,
+        max_gene_length: int = 2560,
         shift_max: int = 3,
         pad_value: float = 0.25,
         reverse_complement_prob: float = 0.0,

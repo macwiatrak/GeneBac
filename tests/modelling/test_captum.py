@@ -13,7 +13,7 @@ from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 
 def test_model_gene_expr_captum():
     batch_size = 2
-    seq_length = 2048
+    seq_length = 2560
     in_channels = 4
     n_filters = 256
     n_bottleneck_layer = 64
@@ -64,7 +64,7 @@ def test_model_gene_expr_captum():
 def test_model_gene_reg_captum():
     batch_size = 2
     n_genes = 3
-    seq_length = 2048
+    seq_length = 2560
     in_channels = 4
     n_bottleneck_layer = 64
     n_output = 5
