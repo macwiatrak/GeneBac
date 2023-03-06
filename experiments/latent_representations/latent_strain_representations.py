@@ -32,7 +32,9 @@ def collect_strain_reprs(model: DeepBacGenePheno, dataloader: DataLoader):
             out["embedding"] += [
                 item.cpu().numpy() for item in strain_embeddings
             ]  # a list of numpy arrays
-            out["labels"] += [batch.labels.cpu().tolist()]  # a list of lists
+            out["labels"] += [
+                item.cpu().numpy() for item in batch.labels
+            ]  # a list of lists
     max_len = max([len(val) for key, val in out.items()])
     for key, val in out.items():
         print(key, len(val))
