@@ -2,7 +2,9 @@ import logging
 import os
 from typing import Literal
 
+from pytorch_lightning.utilities.seed import seed_everything
 
+from deep_bac.argparser import DeepGeneBacArgumentParser
 from deep_bac.data_preprocessing.data_reader import get_gene_pheno_data
 from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 from deep_bac.utils import get_selected_genes
@@ -72,3 +74,26 @@ def run(
         test_df.to_parquet(
             os.path.join(output_dir, "test_strain_representations.parquet")
         )
+
+
+def main(args):
+    seed_everything(args.random_state)
+    run(
+        input_dir=args.input_dir,
+        output_dir=args.output_dir,
+        n_highly_variable_genes=args.n_highly_variable_genes,
+        max_gene_length=args.max_gene_length,
+        shift_max=args.shift_max,
+        pad_value=args.pad_value,
+        reverse_complement_prob=args.reverse_complement_prob,
+        num_workers=args.num_workers,
+        test=args.test,
+        ckpt_path=args.ckpt_path,
+        use_drug_idx=args.use_drug_idx,
+        use_drug_specific_genes=args.use_drug_specific_genes,
+    )
+
+
+if __name__ == "__main__":
+    args = DeepGeneBacArgumentParser().parse_args()
+    main(args)
