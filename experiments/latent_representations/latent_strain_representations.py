@@ -27,12 +27,14 @@ def collect_strain_reprs(model: DeepBacGenePheno, dataloader: DataLoader):
             )
             out["strain_id"] += batch.strain_ids  # one list
             out["logits"] += [
-                item.numpy() for item in logits
+                item.cpu().numpy() for item in logits
             ]  # a list of numpy arrays
             out["embedding"] += [
-                item.numpy() for item in strain_embeddings
+                item.cpu().numpy() for item in strain_embeddings
             ]  # a list of numpy arrays
-            out["labels"] += [batch.labels.view(-1).tolist()]  # a list of lists
+            out["labels"] += [
+                batch.labels.view(-1).cpu().tolist()
+            ]  # a list of lists
             if idx > 4:
                 break
 

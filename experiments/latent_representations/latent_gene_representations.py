@@ -24,9 +24,9 @@ def collect_gene_reprs(model: DeepBacGeneExpr, dataloader: DataLoader):
                 batch.tss_indexes.to(model.device),
             )
             out["strain_id"] += batch.strain_ids
-            out["logits"] += logits.view(-1).tolist()
-            out["embedding"] += [item.numpy() for item in gene_embeddings]
-            out["labels"] += batch.labels.view(-1).tolist()
+            out["logits"] += logits.view(-1).cpu().tolist()
+            out["embedding"] += [item.cpu().numpy() for item in gene_embeddings]
+            out["labels"] += batch.labels.view(-1).cpu().tolist()
             out["gene_name"] += batch.gene_names
 
     df = pd.DataFrame(out)
