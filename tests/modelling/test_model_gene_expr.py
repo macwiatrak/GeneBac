@@ -14,7 +14,7 @@ from tests.modelling.helpers import BasicLogger, get_test_gene_expr_dataloader
 
 def test_model_gene_expr_steps():
     batch_size = 2
-    seq_length = 2048
+    seq_length = 2560
     in_channels = 4
     n_filters = 256
     n_bottleneck_layer = 64
@@ -102,7 +102,7 @@ def test_model_gene_expr_train_real_data(tmpdir):
     n_filters = 256
     max_epochs = 10
     batch_size = 20
-    max_gene_length = 2048
+    max_gene_length = 2560
     bac_genes_df_file_path = (
         "../test_data/sample_genes_with_variants_and_expression.parquet"
     )

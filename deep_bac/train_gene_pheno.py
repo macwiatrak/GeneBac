@@ -20,7 +20,7 @@ def run(
     output_dir: str,
     n_highly_variable_genes: int = 500,
     use_drug_idx: int = None,
-    max_gene_length: int = 2048,
+    max_gene_length: int = 2560,
     shift_max: int = 3,
     pad_value: float = 0.25,
     reverse_complement_prob: float = 0.5,

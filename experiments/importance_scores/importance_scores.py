@@ -9,7 +9,7 @@ from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
 
 
 def process_sample(
-    max_seq_length: int = 2048,
+    max_seq_length: int = 2560,
     pad_value: float = 0.25,
     seq: str = None,
 ) -> torch.Tensor:
@@ -19,7 +19,7 @@ def process_sample(
 
 def batch_data(
     seq_data: List[Tuple[str, str]],
-    max_seq_length: int = 2048,
+    max_seq_length: int = 2560,
     pad_value: float = 0.25,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """
@@ -69,7 +69,7 @@ def load_trained_model(ckpt_path: str) -> DeepBacGeneExpr:
         n_gene_bottleneck_layer=64,
         n_output=1,
         random_state=42,
-        max_gene_length=2048,
+        max_gene_length=2560,
     )
     model = DeepBacGeneExpr.load_from_checkpoint(
         checkpoint_path=ckpt_path,
@@ -83,7 +83,7 @@ def get_importance_scores(
     ckpt_path: str,
     seq_data: List[Tuple[str, str]],
     attribution_fns: List[Callable],
-    max_seq_length: int = 2048,
+    max_seq_length: int = 2560,
     pad_value: float = 0.25,
     use_baseline: bool = False,
 ) -> Dict[str, np.ndarray]:

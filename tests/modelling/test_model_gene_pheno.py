@@ -13,10 +13,10 @@ from deep_bac.modelling.modules.utils import count_parameters
 from tests.modelling.helpers import get_test_gene_reg_dataloader, BasicLogger
 
 
-def test_model_gene_reg_steps():
+def test_model_gene_pheno_steps():
     batch_size = 2
     n_genes = 3
-    seq_length = 2048
+    seq_length = 2560
     in_channels = 4
     n_filters = 256
     n_bottleneck_layer = 64
@@ -61,11 +61,11 @@ def test_model_gene_reg_steps():
     assert out["loss"] > 0.0
 
 
-def test_model_gene_reg_train_fake_data(tmpdir):
+def test_model_gene_pheno_train_fake_data(tmpdir):
     n_samples = 100
     n_genes = 5
     n_classes = 1
-    seq_length = 2048
+    seq_length = 2560
     regression = False
     n_bottleneck_layer = 64
     n_filters = 256
@@ -115,7 +115,7 @@ def test_model_gene_reg_train_fake_data(tmpdir):
     )
 
 
-def test_model_gene_reg_train_real_data(tmpdir):
+def test_model_gene_pheno_train_real_data(tmpdir):
     n_classes = 14
     regression = False
     n_bottleneck_layer = 64

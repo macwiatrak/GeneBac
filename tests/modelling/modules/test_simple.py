@@ -5,7 +5,7 @@ from deep_bac.modelling.modules.simple_conv import SimpleConvEncoder
 
 def test_simple_encoder():
     batch_size = 1
-    seq_length = 2048
+    seq_length = 2560
     in_channels = 4
     n_filters_init = 256
     n_filters_pre_bottleneck = 64
