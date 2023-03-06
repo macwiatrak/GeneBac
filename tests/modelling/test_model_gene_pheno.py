@@ -64,11 +64,10 @@ def test_model_gene_pheno_steps():
 def test_model_gene_pheno_train_fake_data(tmpdir):
     n_samples = 100
     n_genes = 5
-    n_classes = 1
+    n_classes = 14
     seq_length = 2560
     regression = False
     n_bottleneck_layer = 64
-    n_filters = 256
     max_epochs = 20
     batch_size = 10
 
@@ -79,7 +78,6 @@ def test_model_gene_pheno_train_fake_data(tmpdir):
         batch_size=batch_size,
         regression=regression,
         n_gene_bottleneck_layer=n_bottleneck_layer,
-        n_init_filters=n_filters,
         n_output=n_classes,
         max_epochs=max_epochs,
         train_set_len=n_samples,
