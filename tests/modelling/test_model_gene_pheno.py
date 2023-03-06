@@ -5,10 +5,10 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import TQDMProgressBar, ModelCheckpoint
 
-from deep_bac.data_preprocessing.data_reader import get_gene_reg_dataloader
+from deep_bac.data_preprocessing.data_reader import get_gene_pheno_dataloader
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
 from deep_bac.modelling.data_types import DeepGeneBacConfig
-from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
+from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 from deep_bac.modelling.modules.utils import count_parameters
 from tests.modelling.helpers import get_test_gene_reg_dataloader, BasicLogger
 
@@ -36,7 +36,7 @@ def test_model_gene_reg_steps():
         n_highly_variable_genes=n_genes,
     )
 
-    model = DeepBacGeneReg(config)
+    model = DeepBacGenePheno(config)
 
     # test forward
     out = model(x, tss_indexes=tss_indexes)
@@ -96,7 +96,7 @@ def test_model_gene_reg_train_fake_data(tmpdir):
         regression=regression,
     )
 
-    model = DeepBacGeneReg(config)
+    model = DeepBacGenePheno(config)
     n_params = count_parameters(model)
     print("Number of trainable model parameters: ", n_params)
 
@@ -146,7 +146,7 @@ def test_model_gene_reg_train_real_data(tmpdir):
         n_highly_variable_genes=len(selected_genes),
     )
 
-    dataloader = get_gene_reg_dataloader(
+    dataloader = get_gene_pheno_dataloader(
         batch_size=batch_size,
         bac_genes_df_file_path="../test_data/sample_agg_variants.parquet",
         reference_gene_data_df=reference_gene_data_df,
@@ -162,7 +162,7 @@ def test_model_gene_reg_train_real_data(tmpdir):
         pin_memory=False,
     )
 
-    model = DeepBacGeneReg(config)
+    model = DeepBacGenePheno(config)
     n_params = count_parameters(model)
     print("Number of trainable model parameters: ", n_params)
     monitor = "val_loss"

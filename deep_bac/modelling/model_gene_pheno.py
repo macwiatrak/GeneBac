@@ -16,7 +16,7 @@ from deep_bac.modelling.utils import (
 )
 
 
-class DeepBacGeneReg(pl.LightningModule):
+class DeepBacGenePheno(pl.LightningModule):
     def __init__(
         self,
         config: DeepGeneBacConfig,

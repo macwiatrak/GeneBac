@@ -8,7 +8,7 @@ from captum.attr import (
 
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
-from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
+from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 
 
 def test_model_gene_expr_captum():
@@ -83,7 +83,7 @@ def test_model_gene_reg_captum():
         pos_encoder_type="fixed",
     )
 
-    model = DeepBacGeneReg(config)
+    model = DeepBacGenePheno(config)
 
     ig = IntegratedGradients(model)
     attributions, delta = ig.attribute(
