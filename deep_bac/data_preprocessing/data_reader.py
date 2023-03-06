@@ -154,7 +154,7 @@ def get_gene_pheno_data(
         use_drug_idx=use_drug_idx,
         shift_max=shift_max,
         pad_value=pad_value,
-        reverse_complement_prob=reverse_complement_prob,
+        reverse_complement_prob=0.0,  # set it to 0 during eval
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
@@ -177,7 +177,7 @@ def get_gene_pheno_data(
         use_drug_idx=use_drug_idx,
         shift_max=shift_max,
         pad_value=pad_value,
-        reverse_complement_prob=reverse_complement_prob,
+        reverse_complement_prob=0.0,  # set it to 0 during eval
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
@@ -254,7 +254,7 @@ def get_gene_expr_data(
         max_gene_length=max_gene_length,
         shift_max=shift_max,
         pad_value=pad_value,
-        reverse_complement_prob=reverse_complement_prob,
+        reverse_complement_prob=0.0,  # set it to 0 during eval
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
@@ -274,7 +274,7 @@ def get_gene_expr_data(
         shift_max=shift_max,
         max_gene_length=max_gene_length,
         pad_value=pad_value,
-        reverse_complement_prob=reverse_complement_prob,
+        reverse_complement_prob=0.0,  # set it to 0 during eval
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
