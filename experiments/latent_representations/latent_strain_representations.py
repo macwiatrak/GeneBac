@@ -1,16 +1,38 @@
 import logging
 import os
+from collections import defaultdict
 from typing import Literal
 
+import pandas as pd
+import torch
 from pytorch_lightning.utilities.seed import seed_everything
+from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from deep_bac.argparser import DeepGeneBacArgumentParser
 from deep_bac.data_preprocessing.data_reader import get_gene_pheno_data
 from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 from deep_bac.utils import get_selected_genes
-from experiments.latent_representations.utils import collect_strain_reprs
 
 logging.basicConfig(level=logging.INFO)
+
+
+def collect_strain_reprs(model: DeepBacGenePheno, dataloader: DataLoader):
+    out = defaultdict(list)
+    with torch.no_grad():
+        for batch in tqdm(dataloader, mininterval=5):
+            logits, strain_embeddings = model(batch)
+            out["strain_id"] += batch.strain_ids  # one list
+            out["logits"] += [
+                item.numpy() for item in logits
+            ]  # a list of numpy arrays
+            out["embedding"] += [
+                item.numpy() for item in strain_embeddings
+            ]  # a list of numpy arrays
+            out["labels"] += [batch.labels.view(-1).tolist()]  # a list of lists
+
+    df = pd.DataFrame(out)
+    return df
 
 
 def run(
