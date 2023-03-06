@@ -20,8 +20,10 @@ logging.basicConfig(level=logging.INFO)
 def collect_strain_reprs(model: DeepBacGenePheno, dataloader: DataLoader):
     out = defaultdict(list)
     with torch.no_grad():
-        for batch in tqdm(dataloader, mininterval=5):
-            logits, strain_embeddings = model(batch)
+        for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
+            logits, strain_embeddings = model(
+                batch.input_tensor, batch.tss_indexes
+            )
             out["strain_id"] += batch.strain_ids  # one list
             out["logits"] += [
                 item.numpy() for item in logits
@@ -30,6 +32,8 @@ def collect_strain_reprs(model: DeepBacGenePheno, dataloader: DataLoader):
                 item.numpy() for item in strain_embeddings
             ]  # a list of numpy arrays
             out["labels"] += [batch.labels.view(-1).tolist()]  # a list of lists
+            if idx > 4:
+                break
 
     df = pd.DataFrame(out)
     return df
@@ -48,9 +52,10 @@ def run(
     num_workers: int = None,
     test: bool = True,
     use_drug_specific_genes: Literal["INH", "Walker", "MD-CNN"] = "MD-CNN",
+    batch_size: int = 32,
 ):
 
-    model = DeepBacGenePheno.load_from_checkpoint(ckpt_path)
+    model = DeepBacGenePheno.load_from_checkpoint(ckpt_path, strict=False)
     model.eval()
 
     selected_genes = get_selected_genes(use_drug_specific_genes)
@@ -76,7 +81,7 @@ def run(
         n_highly_variable_genes=n_highly_variable_genes,
         regression=model.config.regression,
         use_drug_idx=use_drug_idx,
-        batch_size=model.config.batch_size,
+        batch_size=batch_size,
         shift_max=shift_max,
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
@@ -113,6 +118,7 @@ def main(args):
         ckpt_path=args.ckpt_path,
         use_drug_idx=args.use_drug_idx,
         use_drug_specific_genes=args.use_drug_specific_genes,
+        batch_size=args.batch_size,
     )
 
 
