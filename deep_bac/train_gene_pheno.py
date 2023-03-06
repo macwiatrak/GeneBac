@@ -23,7 +23,7 @@ def run(
     max_gene_length: int = 2560,
     shift_max: int = 3,
     pad_value: float = 0.25,
-    reverse_complement_prob: float = 0.0,
+    reverse_complement_prob: float = 0.5,
     num_workers: int = None,
     test: bool = False,
     ckpt_path: Optional[str] = None,
