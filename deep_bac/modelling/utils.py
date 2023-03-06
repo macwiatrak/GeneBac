@@ -57,14 +57,13 @@ def get_gene_encoder(config: DeepGeneBacConfig):
     raise ValueError(f"Unknown gene encoder type: {config.gene_encoder_type}")
 
 
-def get_gene_reg_decoder_model(config: DeepGeneBacConfig):
+def get_genes_to_strain_model(config: DeepGeneBacConfig):
     """Get the graph model"""
     if config.gene_encoder_type == "MD-CNN":
         return None
     if config.graph_model_type == "transformer":
         return GraphTransformer(
             n_gene_bottleneck_layer=config.n_gene_bottleneck_layer,
-            n_output=config.n_output,
             n_genes=config.n_highly_variable_genes,
             n_layers=config.n_graph_layers,
             n_heads=config.n_transformer_heads,
@@ -78,10 +77,6 @@ def get_gene_reg_decoder_model(config: DeepGeneBacConfig):
                 * config.n_highly_variable_genes,
                 out_features=config.n_gene_bottleneck_layer,
                 layer_norm=True,
-            ),
-            nn.Linear(
-                in_features=config.n_gene_bottleneck_layer,
-                out_features=config.n_output,
             ),
         )
     raise ValueError(f"Unknown graph model type: {config.graph_model_type}")

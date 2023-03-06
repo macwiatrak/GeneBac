@@ -21,7 +21,7 @@ class DeepGeneBacArgumentParser(Tap):
     graph_model_type: Literal["transformer", "dense"] = "dense"
     regression: bool = False
     use_drug_idx: int = None
-    lr: float = 1e-3
+    lr: float = 0.001
     n_gene_bottleneck_layer: int = 64
     n_init_filters: int = 256
     n_transformer_heads: int = 2
@@ -34,8 +34,8 @@ class DeepGeneBacArgumentParser(Tap):
     reverse_complement_prob: float = 0.0
     num_workers: int = None
     # trainer arguments
-    max_epochs: int = 100
-    early_stopping_patience: int = 20
+    max_epochs: int = 150
+    early_stopping_patience: int = 100
     test: bool = False
     test_after_train: bool = False
     ckpt_path: str = None
@@ -52,5 +52,5 @@ class DeepGeneBacArgumentParser(Tap):
         "val_spearman",
     ] = "val_loss"
     use_drug_specific_genes: Literal["INH", "Walker", "MD-CNN"] = "MD-CNN"
-    pos_encoder_type: Literal["learnable", "fixed"] = None
+    pos_encoder_type: Literal["learnable", "fixed"] = "fixed"
     resume_from_ckpt_path: str = None

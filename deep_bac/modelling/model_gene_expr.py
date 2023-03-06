@@ -1,5 +1,5 @@
 import itertools
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 import pytorch_lightning as pl
 import torch
@@ -45,7 +45,7 @@ class DeepBacGeneExpr(pl.LightningModule):
 
     def forward(
         self, batch_genes_tensor: torch.Tensor, tss_indexes: torch.Tensor = None
-    ) -> torch.Tensor:
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         # encode each gene
         gene_encodings = self.activation_fn(
             self.gene_encoder(batch_genes_tensor)
@@ -54,12 +54,12 @@ class DeepBacGeneExpr(pl.LightningModule):
             gene_encodings = self.pos_encoder(gene_encodings, tss_indexes)
         # pass the genes through the graph encoder
         logits = self.decoder(self.dropout(gene_encodings))
-        return logits.view(-1)
+        return logits.view(-1), gene_encodings
 
     def training_step(
         self, batch: BatchBacInputSample, batch_idx: int
     ) -> torch.Tensor:
-        logits = self(batch.input_tensor, batch.tss_indexes)
+        logits, _ = self(batch.input_tensor, batch.tss_indexes)
         # get loss with reduction="none" to compute loss per sample
         loss = self.loss_fn(logits, batch.labels) + 1e-8
         self.log(
@@ -74,7 +74,7 @@ class DeepBacGeneExpr(pl.LightningModule):
         return loss
 
     def eval_step(self, batch: BatchBacInputSample):
-        logits = self(batch.input_tensor, batch.tss_indexes)
+        logits, _ = self(batch.input_tensor, batch.tss_indexes)
         loss = self.loss_fn(logits, batch.labels) + 1e-4
         return dict(
             loss=loss,

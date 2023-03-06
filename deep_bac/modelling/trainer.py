@@ -29,6 +29,11 @@ def get_trainer(
         config.monitor_metric if config.monitor_metric else "val_loss"
     )
     mode = "min" if "loss" in config.monitor_metric else "max"
+    filename = (
+        "{epoch:02d}-{val_r2:.4f}"
+        if "r2" in config.monitor_metric
+        else "{epoch:02d}-{val_gmean_spec_sens:.4f}"
+    )
     """Get the trainer"""
     return Trainer(
         devices=devices,
@@ -44,7 +49,7 @@ def get_trainer(
             ),
             ModelCheckpoint(
                 dirpath=output_dir,
-                filename="{epoch:02d}-{val_gmean_spec_sens:.4f}",
+                filename=filename,
                 monitor=monitor_metric,
                 mode=mode,
                 save_top_k=1,
