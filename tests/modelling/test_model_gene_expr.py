@@ -99,7 +99,6 @@ def test_model_gene_expr_train_fake_data(tmpdir):
 
 def test_model_gene_expr_train_real_data(tmpdir):
     n_bottleneck_layer = 32
-    n_filters = 256
     max_epochs = 10
     batch_size = 20
     max_gene_length = 2560
@@ -109,11 +108,10 @@ def test_model_gene_expr_train_real_data(tmpdir):
     gene_var_thresholds = [0.1, 0.25, 0.5]
 
     config = DeepGeneBacConfig(
-        gene_encoder_type="enformer_like",
+        gene_encoder_type="gene_bac",
         lr=0.001,
         batch_size=batch_size,
         n_gene_bottleneck_layer=n_bottleneck_layer,
-        n_init_filters=n_filters,
         max_epochs=max_epochs,
     )
 
