@@ -32,9 +32,7 @@ def collect_strain_reprs(model: DeepBacGenePheno, dataloader: DataLoader):
             out["embedding"] += [
                 item.cpu().numpy() for item in strain_embeddings
             ]  # a list of numpy arrays
-            out["labels"] += [
-                batch.labels.view(-1).cpu().tolist()
-            ]  # a list of lists
+            out["labels"] += [batch.labels.cpu().tolist()]  # a list of lists
             if idx > 4:
                 break
 
@@ -104,11 +102,16 @@ def run(
 
     if test:
         test_df = collect_strain_reprs(model, data.test_dataloader)
-        logging.info("Finished collecting test data, saving it now...")
         test_df.to_parquet(
             os.path.join(output_dir, "test_strain_representations.parquet")
         )
         logging.info("Finished saving test data")
+
+    train_df = collect_strain_reprs(model, data.train_dataloader)
+    train_df.to_parquet(
+        os.path.join(output_dir, "train_strain_representations.parquet")
+    )
+    logging.info("Finished saving train data")
 
 
 def main(args):
