@@ -20,7 +20,8 @@ def collect_gene_reprs(model: DeepBacGeneExpr, dataloader: DataLoader):
     with torch.no_grad():
         for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
             logits, gene_embeddings = model(
-                batch.input_tensor, batch.tss_indexes
+                batch.input_tensor.to(model.device),
+                batch.tss_indexes.to(model.device),
             )
             out["strain_id"] += batch.strain_ids
             out["logits"] += logits.view(-1).tolist()
@@ -44,7 +45,10 @@ def run(
     test: bool = False,
     batch_size: int = 128,
 ):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    logging.info(f"Using device {device}")
     model = DeepBacGeneExpr.load_from_checkpoint(ckpt_path)
+    model.to(device)
     model.eval()
 
     data, most_variable_genes = get_gene_expr_data(

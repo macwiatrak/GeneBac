@@ -22,7 +22,8 @@ def collect_strain_reprs(model: DeepBacGenePheno, dataloader: DataLoader):
     with torch.no_grad():
         for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
             logits, strain_embeddings = model(
-                batch.input_tensor, batch.tss_indexes
+                batch.input_tensor.to(model.device),
+                batch.tss_indexes.to(model.device),
             )
             out["strain_id"] += batch.strain_ids  # one list
             out["logits"] += [
@@ -54,8 +55,10 @@ def run(
     use_drug_specific_genes: Literal["INH", "Walker", "MD-CNN"] = "MD-CNN",
     batch_size: int = 32,
 ):
-
-    model = DeepBacGenePheno.load_from_checkpoint(ckpt_path, strict=False)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    logging.info(f"Using device {device}")
+    model = DeepBacGenePheno.load_from_checkpoint(ckpt_path).to(device)
+    model.to(device)
     model.eval()
 
     selected_genes = get_selected_genes(use_drug_specific_genes)
