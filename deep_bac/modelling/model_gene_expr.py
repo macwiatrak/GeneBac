@@ -47,11 +47,13 @@ class DeepBacGeneExpr(pl.LightningModule):
         self, batch_genes_tensor: torch.Tensor, tss_indexes: torch.Tensor = None
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         # encode each gene
-        gene_encodings = self.gene_encoder(batch_genes_tensor)
+        gene_encodings = self.activation_fn(
+            self.gene_encoder(batch_genes_tensor)
+        )
         if tss_indexes is not None:
             gene_encodings = self.pos_encoder(gene_encodings, tss_indexes)
         # pass the genes through the graph encoder
-        logits = self.decoder(self.dropout(self.activation_fn(gene_encodings)))
+        logits = self.decoder(self.dropout(gene_encodings))
         return logits.view(-1), gene_encodings
 
     def training_step(
