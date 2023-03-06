@@ -35,11 +35,6 @@ def collect_strain_reprs(model: DeepBacGenePheno, dataloader: DataLoader):
             out["labels"] += [
                 item.cpu().numpy() for item in batch.labels
             ]  # a list of lists
-    max_len = max([len(val) for key, val in out.items()])
-    for key, val in out.items():
-        print(key, len(val))
-        if len(val) < max_len:
-            out[key] += [None] * (max_len - len(val))
 
     df = pd.DataFrame(out)
     return df
