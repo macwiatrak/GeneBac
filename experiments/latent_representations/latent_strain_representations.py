@@ -33,8 +33,6 @@ def collect_strain_reprs(model: DeepBacGenePheno, dataloader: DataLoader):
                 item.cpu().numpy() for item in strain_embeddings
             ]  # a list of numpy arrays
             out["labels"] += [batch.labels.cpu().tolist()]  # a list of lists
-            if idx > 4:
-                break
 
     df = pd.DataFrame(out)
     return df
