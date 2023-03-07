@@ -35,9 +35,8 @@ def run(
 
     data = get_mdcnn_data(
         input_df_file_path=os.path.join(
-            input_dir, "processed_agg_variants.parquet"
+            input_dir, "processed_agg_variants_md_cnn.parquet"
         ),
-        # TODO: add this data
         reference_loci_data_df_path=os.path.join(
             input_dir, "reference_loci_data.parquet"
         ),
