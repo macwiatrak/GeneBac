@@ -5,7 +5,7 @@ from deep_bac.modelling.modules.md_cnn import MDCNN
 
 def test_md_cnn():
     batch_size = 2
-    seq_length = 2570
+    seq_length = 2560
     in_channels = 4
     n_output = 14
     n_genes = 4

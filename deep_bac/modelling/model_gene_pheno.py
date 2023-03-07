@@ -56,13 +56,15 @@ class DeepBacGenePheno(pl.LightningModule):
 
         # if using the MD-CNN for benchmarking
         if self.model_type == "MD-CNN":
-            return self.gene_encoder(
+            logits = self.gene_encoder(
                 batch_genes_tensor.view(
                     batch_size,
                     n_channels,
                     n_genes * seq_length,
                 )
             )
+            # add dummy torch tensor for compatibility with other models
+            return logits, torch.Tensor([])
         # reshape the input to allow the convolutional layer to work
         x = batch_genes_tensor.view(
             batch_size * n_genes, n_channels, seq_length
