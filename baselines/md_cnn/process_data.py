@@ -85,7 +85,16 @@ def apply_variants_to_a_loci(
     end: int,
     row: Dict,
 ) -> Dict:
-    return dict()
+    seq_w_variants = ""
+    ref_correct = 0
+    n_nucleotide_change = 0
+
+    ref_correct_ratio = ref_correct / len(row["REF"])
+    return dict(
+        seq_w_variants=seq_w_variants,
+        ref_correct_ratio=ref_correct_ratio,
+        n_nucleotide_change=n_nucleotide_change,
+    )
 
 
 def postprocess_agg_variants(agg_variants_df: pd.DataFrame) -> pd.DataFrame:
