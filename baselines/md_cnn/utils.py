@@ -19,3 +19,13 @@ MD_CNN_GENOMIC_LOCI = {
     "panD": (4043041, 4045210, "-"),
     "pncA": (2287883, 2289599, "-"),
 }
+
+
+VARIANTS_COLS_TO_USE = [
+    "UNIQUEID",
+    "REF",
+    "ALT",
+    "GENE",
+    "GENOME_INDEX",
+    "IS_INDEL",
+]
