@@ -5,7 +5,7 @@ from baselines.md_cnn.md_cnn import MDCNN
 
 def test_md_cnn():
     batch_size = 2
-    seq_length = 2570
+    seq_length = 4051
     in_channels = 4
     n_output = 14
     n_genes = 4

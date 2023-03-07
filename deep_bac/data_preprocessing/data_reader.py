@@ -14,7 +14,7 @@ from deep_bac.data_preprocessing.data_types import (
     DataReaderOutput,
 )
 from deep_bac.data_preprocessing.dataset import (
-    BacGenomeGeneRegDataset,
+    BacGenomeGenePhenoDataset,
     BacGenomeGeneExprDataset,
 )
 from deep_bac.data_preprocessing.utils import get_gene_std_expression
@@ -52,24 +52,24 @@ def _collate_samples(data: List[BacInputSample]) -> BatchBacInputSample:
     )
 
 
-def get_gene_reg_dataloader(
+def get_gene_pheno_dataloader(
     batch_size: int,
     bac_genes_df_file_path: str,
     reference_gene_data_df: DataFrame,
     unique_ids: List[str] = None,
     phenotype_dataframe_file_path: str = None,
-    max_gene_length: int = 2048,
+    max_gene_length: int = 2560,
     selected_genes: List = None,
     regression: bool = False,
     use_drug_idx: int = None,
     shift_max: int = 3,
     pad_value: float = 0.25,
-    reverse_complement_prob: float = 0.5,
+    reverse_complement_prob: float = 0.0,
     shuffle: bool = True,
     num_workers: int = 4,
     pin_memory: bool = True,
 ) -> DataLoader:
-    dataset = BacGenomeGeneRegDataset(
+    dataset = BacGenomeGenePhenoDataset(
         unique_ids=unique_ids,
         bac_genes_df_file_path=bac_genes_df_file_path,
         reference_gene_data_df=reference_gene_data_df,
@@ -93,7 +93,7 @@ def get_gene_reg_dataloader(
     return dataloader
 
 
-def get_gene_reg_data(
+def get_gene_pheno_data(
     input_df_file_path: str,
     reference_gene_data_df_path: str,
     phenotype_df_file_path: str,
@@ -104,10 +104,10 @@ def get_gene_reg_data(
     regression: bool = False,
     use_drug_idx: int = None,
     batch_size: int = 8,
-    max_gene_length: int = 2048,
+    max_gene_length: int = 2560,
     shift_max: int = 3,
     pad_value: float = 0.25,
-    reverse_complement_prob: float = 0.5,
+    reverse_complement_prob: float = 0.0,
     num_workers: int = 8,
     test: bool = False,
 ):
@@ -124,7 +124,7 @@ def get_gene_reg_data(
     val_unique_ids = train_val_test_split_indices["val"]
     test_unique_ids = train_val_test_split_indices["test"]
 
-    train_dataloader = get_gene_reg_dataloader(
+    train_dataloader = get_gene_pheno_dataloader(
         batch_size=batch_size,
         unique_ids=train_unique_ids,
         bac_genes_df_file_path=input_df_file_path,
@@ -142,7 +142,7 @@ def get_gene_reg_data(
         pin_memory=True,
     )
 
-    val_dataloader = get_gene_reg_dataloader(
+    val_dataloader = get_gene_pheno_dataloader(
         batch_size=batch_size,
         unique_ids=val_unique_ids,
         bac_genes_df_file_path=input_df_file_path,
@@ -154,7 +154,7 @@ def get_gene_reg_data(
         use_drug_idx=use_drug_idx,
         shift_max=shift_max,
         pad_value=pad_value,
-        reverse_complement_prob=reverse_complement_prob,
+        reverse_complement_prob=0.0,  # set it to 0 during eval
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
@@ -165,7 +165,7 @@ def get_gene_reg_data(
             val_dataloader=val_dataloader,
             train_set_len=len(train_unique_ids),
         )
-    test_dataloader = get_gene_reg_dataloader(
+    test_dataloader = get_gene_pheno_dataloader(
         batch_size=batch_size,
         unique_ids=test_unique_ids,
         bac_genes_df_file_path=input_df_file_path,
@@ -177,7 +177,7 @@ def get_gene_reg_data(
         use_drug_idx=use_drug_idx,
         shift_max=shift_max,
         pad_value=pad_value,
-        reverse_complement_prob=reverse_complement_prob,
+        reverse_complement_prob=0.0,  # set it to 0 during eval
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
@@ -194,10 +194,10 @@ def get_gene_reg_data(
 def get_gene_expr_dataloader(
     batch_size: int,
     bac_genes_df_file_path: str,
-    max_gene_length: int = 2048,
+    max_gene_length: int = 2560,
     shift_max: int = 3,
     pad_value: float = 0.25,
-    reverse_complement_prob: float = 0.5,
+    reverse_complement_prob: float = 0.0,
     shuffle: bool = True,
     num_workers: int = 4,
     pin_memory: bool = True,
@@ -223,10 +223,10 @@ def get_gene_expr_dataloader(
 def get_gene_expr_data(
     input_dir: str,
     batch_size: int = 512,
-    max_gene_length: int = 2048,
+    max_gene_length: int = 2560,
     shift_max: int = 3,
     pad_value: float = 0.25,
-    reverse_complement_prob: float = 0.5,
+    reverse_complement_prob: float = 0.0,
     num_workers: int = 8,
     test: bool = False,
 ) -> Tuple[DataReaderOutput, List[str]]:
@@ -251,9 +251,10 @@ def get_gene_expr_data(
     val_dataloader, _ = get_gene_expr_dataloader(
         batch_size=batch_size,
         bac_genes_df_file_path=os.path.join(input_dir, "val.parquet"),
+        max_gene_length=max_gene_length,
         shift_max=shift_max,
         pad_value=pad_value,
-        reverse_complement_prob=reverse_complement_prob,
+        reverse_complement_prob=0.0,  # set it to 0 during eval
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
@@ -271,8 +272,9 @@ def get_gene_expr_data(
         batch_size=batch_size,
         bac_genes_df_file_path=os.path.join(input_dir, "test.parquet"),
         shift_max=shift_max,
+        max_gene_length=max_gene_length,
         pad_value=pad_value,
-        reverse_complement_prob=reverse_complement_prob,
+        reverse_complement_prob=0.0,  # set it to 0 during eval
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
@@ -299,7 +301,7 @@ def main():
     # )
     # selected_genes = gene_variance_df["Gene"].tolist()[:1000]
     #
-    # max_gene_length = 2048
+    # max_gene_length = 2560
     # dl = get_gene_reg_dataloader(
     #     batch_size=32,
     #     unique_ids=None,
@@ -326,7 +328,7 @@ def main():
     data, most_var_genes = get_gene_expr_data(
         input_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/",
         batch_size=512,
-        max_gene_length=2048,
+        max_gene_length=2560,
         shift_max=3,
         pad_value=0.25,
         reverse_complement_prob=0.5,

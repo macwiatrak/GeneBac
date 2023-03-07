@@ -9,7 +9,6 @@ class GraphTransformer(nn.Module):
     def __init__(
         self,
         n_gene_bottleneck_layer: int,
-        n_output: int,
         n_genes: int,
         n_layers: int = 1,
         n_heads: int = 2,
@@ -30,10 +29,8 @@ class GraphTransformer(nn.Module):
             DenseLayer(
                 in_features=n_gene_bottleneck_layer * n_genes,
                 out_features=n_gene_bottleneck_layer,
-            ),
-            nn.Linear(
-                in_features=n_gene_bottleneck_layer,
-                out_features=n_output,
+                dropout=0.2,
+                layer_norm=True,
             ),
         )
 

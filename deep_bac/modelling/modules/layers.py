@@ -1,3 +1,4 @@
+import logging
 import math
 from typing import Callable
 
@@ -7,6 +8,8 @@ import torch
 from einops.layers.torch import Rearrange
 from torch import nn
 import torch.nn.functional as F
+
+logging.basicConfig(level=logging.INFO)
 
 
 class ConvLayer(nn.Module):
@@ -19,6 +22,7 @@ class ConvLayer(nn.Module):
         batch_norm: bool = True,
         dropout: float = 0.0,
         activation_fn: Callable = nn.GELU(),
+        attention_pooling: bool = False,
     ):
         super().__init__()
         self.conv = nn.Conv1d(
@@ -30,9 +34,15 @@ class ConvLayer(nn.Module):
         self.batch_norm = (
             nn.BatchNorm1d(out_channels) if batch_norm else nn.Identity()
         )
-        self.pool = (
-            nn.MaxPool1d(pool_size) if pool_size is not None else nn.Identity()
-        )
+        if pool_size:
+            self.pool = (
+                AttentionPool(out_channels, pool_size)
+                if attention_pooling
+                else nn.MaxPool1d(pool_size)
+            )
+        else:
+            self.pool = nn.Identity()
+
         self.activation_fn = activation_fn
         self.dropout = nn.Dropout(dropout)
 
@@ -53,16 +63,17 @@ class DenseLayer(nn.Module):
         use_bias: bool = True,
         layer_norm: bool = True,
         batch_norm: bool = False,
-        dropout: float = 0.1,
+        dropout: float = 0.2,
         activation_fn: Callable = nn.ReLU(),
     ):
         super().__init__()
         if layer_norm and batch_norm:
             batch_norm = False
-            raise Warning(
+            logging.info(
                 "LayerNorm and BatchNorm both used in the dense layer, "
                 "defaulting to LayerNorm only"
             )
+
         self.dense = nn.Linear(in_features, out_features, bias=use_bias)
         self.layer_norm = (
             nn.LayerNorm(out_features, elementwise_affine=False)
@@ -150,6 +161,65 @@ class AttentionPool(nn.Module):
         attn = logits.softmax(dim=-1)
 
         return (x * attn).sum(dim=-1)
+
+
+class ResidualConvLayer(nn.Module):
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        kernel_size: int,
+        pool_size: int = None,
+        batch_norm: bool = True,
+        dropout: float = 0.0,
+        activation_fn: Callable = nn.GELU(),
+        attention_pooling: bool = True,
+    ):
+        super().__init__()
+
+        if pool_size:
+            self.pool = (
+                AttentionPool(out_channels, pool_size)
+                if attention_pooling
+                else nn.MaxPool1d(pool_size)
+            )
+        else:
+            self.pool = nn.Identity()
+
+        self.layer = nn.Sequential(
+            ConvLayer(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                batch_norm=batch_norm,
+                dropout=dropout,
+                activation_fn=activation_fn,
+                attention_pooling=False,
+                pool_size=None,
+            ),
+            Residual(
+                ConvLayer(
+                    in_channels=out_channels,
+                    out_channels=out_channels,
+                    kernel_size=1,
+                    batch_norm=batch_norm,
+                    dropout=dropout,
+                    activation_fn=nn.Identity(),
+                    attention_pooling=False,
+                    pool_size=None,
+                )
+            ),
+            self.pool,
+        )
+
+        self.activation_fn = activation_fn
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x: torch.Tensor):
+        x = self.layer(x)
+        x = self.activation_fn(x)
+        x = self.dropout(x)
+        return x
 
 
 def exponential_linspace_int(

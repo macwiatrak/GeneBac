@@ -4,9 +4,9 @@ from typing import Optional, List
 
 from pytorch_lightning.utilities.seed import seed_everything
 
-from deep_bac.argparser import DeepBacArgumentParser
+from deep_bac.argparser import DeepGeneBacArgumentParser
 from deep_bac.data_preprocessing.data_reader import get_gene_expr_data
-from deep_bac.modelling.data_types import DeepBacConfig
+from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
 from deep_bac.modelling.trainer import get_trainer
 from deep_bac.utils import get_gene_var_thresholds
@@ -15,18 +15,19 @@ logging.basicConfig(level=logging.INFO)
 
 
 def run(
-    config: DeepBacConfig,
+    config: DeepGeneBacConfig,
     input_dir: str,
     output_dir: str,
-    max_gene_length: int = 2048,
+    max_gene_length: int = 2560,
     shift_max: int = 3,
     pad_value: float = 0.25,
-    reverse_complement_prob: float = 0.5,
+    reverse_complement_prob: float = 0.0,
     num_workers: int = None,
     test: bool = False,
     ckpt_path: Optional[str] = None,
     gene_var_thresholds: List[float] = [0.1, 0.25, 0.5],
     test_after_train: bool = False,
+    resume_from_ckpt_path: str = None,
 ):
     data, most_variable_genes = get_gene_expr_data(
         input_dir=input_dir,
@@ -42,7 +43,12 @@ def run(
 
     config.train_set_len = data.train_set_len
     # this should always be true for gene expression prediction
-    trainer = get_trainer(config, output_dir, refresh_rate=1000)
+    trainer = get_trainer(
+        config,
+        output_dir,
+        resume_from_ckpt_path=resume_from_ckpt_path,
+        refresh_rate=1000,
+    )
     model = DeepBacGeneExpr(
         config=config,
         gene_vars_w_thresholds=get_gene_var_thresholds(
@@ -70,7 +76,7 @@ def run(
 
 def main(args):
     seed_everything(args.random_state)
-    config = DeepBacConfig.from_dict(args.as_dict())
+    config = DeepGeneBacConfig.from_dict(args.as_dict())
     _ = run(
         config=config,
         input_dir=args.input_dir,
@@ -83,9 +89,10 @@ def main(args):
         test=args.test,
         ckpt_path=args.ckpt_path,
         test_after_train=args.test_after_train,
+        resume_from_ckpt_path=args.resume_from_ckpt_path,
     )
 
 
 if __name__ == "__main__":
-    args = DeepBacArgumentParser().parse_args()
+    args = DeepGeneBacArgumentParser().parse_args()
     main(args)

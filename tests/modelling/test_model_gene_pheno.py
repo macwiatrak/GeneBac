@@ -5,18 +5,18 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import TQDMProgressBar, ModelCheckpoint
 
-from deep_bac.data_preprocessing.data_reader import get_gene_reg_dataloader
+from deep_bac.data_preprocessing.data_reader import get_gene_pheno_dataloader
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
-from deep_bac.modelling.data_types import DeepBacConfig
-from deep_bac.modelling.model_gene_reg import DeepBacGeneReg
+from deep_bac.modelling.data_types import DeepGeneBacConfig
+from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 from deep_bac.modelling.modules.utils import count_parameters
 from tests.modelling.helpers import get_test_gene_reg_dataloader, BasicLogger
 
 
-def test_model_gene_reg_steps():
+def test_model_gene_pheno_steps():
     batch_size = 2
     n_genes = 3
-    seq_length = 2048
+    seq_length = 2560
     in_channels = 4
     n_filters = 256
     n_bottleneck_layer = 64
@@ -26,8 +26,8 @@ def test_model_gene_reg_steps():
     labels = torch.empty(batch_size, n_output).random_(2)
     tss_indexes = torch.randint(0, n_genes, (batch_size, n_genes))
 
-    config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
         graph_model_type="dense",
         regression=False,
         n_gene_bottleneck_layer=n_bottleneck_layer,
@@ -36,7 +36,7 @@ def test_model_gene_reg_steps():
         n_highly_variable_genes=n_genes,
     )
 
-    model = DeepBacGeneReg(config)
+    model = DeepBacGenePheno(config)
 
     # test forward
     out = model(x, tss_indexes=tss_indexes)
@@ -61,31 +61,30 @@ def test_model_gene_reg_steps():
     assert out["loss"] > 0.0
 
 
-def test_model_gene_reg_train_fake_data(tmpdir):
+def test_model_gene_pheno_train_fake_data(tmpdir):
     n_samples = 100
     n_genes = 5
-    n_classes = 1
-    seq_length = 2048
+    n_classes = 14
+    seq_length = 2560
     regression = False
     n_bottleneck_layer = 64
-    n_filters = 256
     max_epochs = 20
     batch_size = 10
 
-    config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
         graph_model_type="dense",
         lr=0.001,
         batch_size=batch_size,
         regression=regression,
         n_gene_bottleneck_layer=n_bottleneck_layer,
-        n_init_filters=n_filters,
         n_output=n_classes,
         max_epochs=max_epochs,
         train_set_len=n_samples,
         n_graph_layers=2,
         n_transformer_heads=4,
         n_highly_variable_genes=n_genes,
+        max_gene_length=seq_length,
     )
 
     dataloader = get_test_gene_reg_dataloader(
@@ -96,7 +95,7 @@ def test_model_gene_reg_train_fake_data(tmpdir):
         regression=regression,
     )
 
-    model = DeepBacGeneReg(config)
+    model = DeepBacGenePheno(config)
     n_params = count_parameters(model)
     print("Number of trainable model parameters: ", n_params)
 
@@ -115,22 +114,22 @@ def test_model_gene_reg_train_fake_data(tmpdir):
     )
 
 
-def test_model_gene_reg_train_real_data(tmpdir):
+def test_model_gene_pheno_train_real_data(tmpdir):
     n_classes = 14
     regression = False
     n_bottleneck_layer = 64
     n_filters = 256
     max_epochs = 20
     batch_size = 2
-    max_gene_length = 2048
+    max_gene_length = 2560
     selected_genes = ["PE1", "Rv1716", "Rv2000", "pepC", "pepD"]
 
     reference_gene_data_df = pd.read_parquet(
         "../test_data/reference_gene_data.parquet"
     )
 
-    config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
         graph_model_type="dense",
         pos_encoder_type="fixed",
         lr=0.001,
@@ -144,9 +143,10 @@ def test_model_gene_reg_train_real_data(tmpdir):
         n_graph_layers=1,
         n_transformer_heads=2,
         n_highly_variable_genes=len(selected_genes),
+        max_gene_length=max_gene_length,
     )
 
-    dataloader = get_gene_reg_dataloader(
+    dataloader = get_gene_pheno_dataloader(
         batch_size=batch_size,
         bac_genes_df_file_path="../test_data/sample_agg_variants.parquet",
         reference_gene_data_df=reference_gene_data_df,
@@ -162,7 +162,7 @@ def test_model_gene_reg_train_real_data(tmpdir):
         pin_memory=False,
     )
 
-    model = DeepBacGeneReg(config)
+    model = DeepBacGenePheno(config)
     n_params = count_parameters(model)
     print("Number of trainable model parameters: ", n_params)
     monitor = "val_loss"

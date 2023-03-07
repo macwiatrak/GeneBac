@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 import pytorch_lightning as pl
 import torch
@@ -6,31 +6,38 @@ from torch import nn
 from transformers import get_linear_schedule_with_warmup
 
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
-from deep_bac.modelling.data_types import DeepBacConfig
+from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.metrics import compute_agg_stats
 from deep_bac.modelling.utils import (
     remove_ignore_index,
     get_gene_encoder,
-    get_gene_reg_decoder_model,
+    get_genes_to_strain_model,
     get_pos_encoder,
 )
 
 
-class DeepBacGeneReg(pl.LightningModule):
+class DeepBacGenePheno(pl.LightningModule):
     def __init__(
         self,
-        config: DeepBacConfig,
+        config: DeepGeneBacConfig,
     ):
         super().__init__()
         self.config = config
         self.model_type = config.gene_encoder_type
         self.n_bottleneck_layer = config.n_gene_bottleneck_layer
         self.gene_encoder = get_gene_encoder(config)
-        self.graph_model = get_gene_reg_decoder_model(config)
+        self.graph_model = get_genes_to_strain_model(config)
         self.pos_encoder = get_pos_encoder(config)
+        self.decoder = nn.Linear(
+            in_features=config.n_gene_bottleneck_layer,
+            out_features=config.n_output,
+        )
 
         self.regression = config.regression
         # get loss depending on whether we predict LOG2MIC or binary MIC
+        self.dropout = nn.Dropout(0.2)
+        self.activation_fn = nn.ReLU()
+
         self.loss_fn = (
             nn.MSELoss(reduction="none")
             if self.regression
@@ -43,19 +50,21 @@ class DeepBacGeneReg(pl.LightningModule):
         self,
         batch_genes_tensor: torch.Tensor,
         tss_indexes: torch.Tensor = None,
-    ) -> torch.Tensor:
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         # x: (batch_size, n_genes, in_channels, seq_length)
         batch_size, n_genes, n_channels, seq_length = batch_genes_tensor.shape
 
         # if using the MD-CNN for benchmarking
         if self.model_type == "MD-CNN":
-            return self.gene_encoder(
+            logits = self.gene_encoder(
                 batch_genes_tensor.view(
                     batch_size,
                     n_channels,
                     n_genes * seq_length,
                 )
             )
+            # add dummy torch tensor for compatibility with other models
+            return logits, torch.Tensor([])
         # reshape the input to allow the convolutional layer to work
         x = batch_genes_tensor.view(
             batch_size * n_genes, n_channels, seq_length
@@ -70,13 +79,16 @@ class DeepBacGeneReg(pl.LightningModule):
         if tss_indexes is not None:
             gene_encodings = self.pos_encoder(gene_encodings, tss_indexes)
         # pass the genes through the graph encoder
-        logits = self.graph_model(gene_encodings)
-        return logits
+        strain_encodings = self.graph_model(
+            self.dropout(self.activation_fn(gene_encodings))
+        )
+        logits = self.decoder(strain_encodings)
+        return logits, strain_encodings
 
     def training_step(
         self, batch: BatchBacInputSample, batch_idx: int
     ) -> torch.Tensor:
-        logits = self(batch.input_tensor, batch.tss_indexes)
+        logits, _ = self(batch.input_tensor, batch.tss_indexes)
         # get loss with reduction="none" to compute loss per sample
         loss = self.loss_fn(logits.view(-1), batch.labels.view(-1))
         # remove loss for samples with no label and compute mean
@@ -92,7 +104,7 @@ class DeepBacGeneReg(pl.LightningModule):
         return loss
 
     def eval_step(self, batch: BatchBacInputSample):
-        logits = self(batch.input_tensor, batch.tss_indexes)
+        logits, _ = self(batch.input_tensor, batch.tss_indexes)
         loss = self.loss_fn(logits.view(-1), batch.labels.view(-1))
         # remove loss for samples with no label and compute mean
         loss = remove_ignore_index(loss, batch.labels.view(-1))

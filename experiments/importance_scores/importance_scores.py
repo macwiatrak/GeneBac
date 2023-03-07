@@ -4,12 +4,12 @@ import numpy as np
 import torch
 
 from deep_bac.data_preprocessing.utils import seq_to_one_hot, pad_one_hot_seq
-from deep_bac.modelling.data_types import DeepBacConfig
+from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
 
 
 def process_sample(
-    max_seq_length: int = 2048,
+    max_seq_length: int = 2560,
     pad_value: float = 0.25,
     seq: str = None,
 ) -> torch.Tensor:
@@ -19,7 +19,7 @@ def process_sample(
 
 def batch_data(
     seq_data: List[Tuple[str, str]],
-    max_seq_length: int = 2048,
+    max_seq_length: int = 2560,
     pad_value: float = 0.25,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """
@@ -63,13 +63,13 @@ def compute_importance_scores(
 
 
 def load_trained_model(ckpt_path: str) -> DeepBacGeneExpr:
-    config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
         graph_model_type="dense",
         n_gene_bottleneck_layer=64,
         n_output=1,
         random_state=42,
-        max_gene_length=2048,
+        max_gene_length=2560,
     )
     model = DeepBacGeneExpr.load_from_checkpoint(
         checkpoint_path=ckpt_path,
@@ -83,7 +83,7 @@ def get_importance_scores(
     ckpt_path: str,
     seq_data: List[Tuple[str, str]],
     attribution_fns: List[Callable],
-    max_seq_length: int = 2048,
+    max_seq_length: int = 2560,
     pad_value: float = 0.25,
     use_baseline: bool = False,
 ) -> Dict[str, np.ndarray]:

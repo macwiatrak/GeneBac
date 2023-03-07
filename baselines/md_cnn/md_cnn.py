@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from deep_bac.modelling.modules.layers import ConvLayer, DenseLayer, _round
+from deep_bac.modelling.modules.layers import ConvLayer, DenseLayer
 from deep_bac.modelling.modules.utils import Flatten
 
 
@@ -65,7 +65,7 @@ class MDCNN(nn.Module):
                 nn.Linear(in_features=256, out_features=n_output),
             ]
         )
-        # max gene length of the MD-CNN genes is 4051 (rpoC gene)
+        # max gene length of the MD-CNN genes is 4051
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.conv_tower(x)

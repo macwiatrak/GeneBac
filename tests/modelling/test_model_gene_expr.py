@@ -5,7 +5,7 @@ import pytorch_lightning as pl
 from deep_bac.data_preprocessing.data_reader import get_gene_expr_dataloader
 from deep_bac.data_preprocessing.data_types import BatchBacInputSample
 from deep_bac.data_preprocessing.utils import get_gene_std_expression
-from deep_bac.modelling.data_types import DeepBacConfig
+from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
 from deep_bac.modelling.modules.utils import count_parameters
 from deep_bac.utils import get_gene_var_thresholds
@@ -14,7 +14,7 @@ from tests.modelling.helpers import BasicLogger, get_test_gene_expr_dataloader
 
 def test_model_gene_expr_steps():
     batch_size = 2
-    seq_length = 2048
+    seq_length = 2560
     in_channels = 4
     n_filters = 256
     n_bottleneck_layer = 64
@@ -24,8 +24,8 @@ def test_model_gene_expr_steps():
     labels = torch.rand(batch_size, n_output)
     tss_indexes = torch.randint(0, 1000000, (batch_size,))
 
-    config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
         n_gene_bottleneck_layer=n_bottleneck_layer,
         n_init_filters=n_filters,
         n_output=n_output,
@@ -59,13 +59,13 @@ def test_model_gene_expr_steps():
 
 def test_model_gene_expr_train_fake_data(tmpdir):
     n_samples = 100
-    seq_length = 2048
+    seq_length = 2560
     n_bottleneck_layer = 32
     max_epochs = 20
     batch_size = 10
 
-    config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
         lr=0.0001,
         batch_size=batch_size,
         n_gene_bottleneck_layer=n_bottleneck_layer,
@@ -99,21 +99,19 @@ def test_model_gene_expr_train_fake_data(tmpdir):
 
 def test_model_gene_expr_train_real_data(tmpdir):
     n_bottleneck_layer = 32
-    n_filters = 256
     max_epochs = 10
     batch_size = 20
-    max_gene_length = 2048
+    max_gene_length = 2560
     bac_genes_df_file_path = (
         "../test_data/sample_genes_with_variants_and_expression.parquet"
     )
     gene_var_thresholds = [0.1, 0.25, 0.5]
 
-    config = DeepBacConfig(
-        gene_encoder_type="scbasset",
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
         lr=0.001,
         batch_size=batch_size,
         n_gene_bottleneck_layer=n_bottleneck_layer,
-        n_init_filters=n_filters,
         max_epochs=max_epochs,
     )
 
