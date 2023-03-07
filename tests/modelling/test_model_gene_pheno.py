@@ -84,6 +84,7 @@ def test_model_gene_pheno_train_fake_data(tmpdir):
         n_graph_layers=2,
         n_transformer_heads=4,
         n_highly_variable_genes=n_genes,
+        max_gene_length=seq_length,
     )
 
     dataloader = get_test_gene_reg_dataloader(
@@ -142,6 +143,7 @@ def test_model_gene_pheno_train_real_data(tmpdir):
         n_graph_layers=1,
         n_transformer_heads=2,
         n_highly_variable_genes=len(selected_genes),
+        max_gene_length=max_gene_length,
     )
 
     dataloader = get_gene_pheno_dataloader(
