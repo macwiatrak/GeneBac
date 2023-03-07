@@ -72,7 +72,7 @@ def apply_variants_to_a_gene(
     ref_prom_seq: str,
     strand: str,
     row: Dict[str, Optional[List]],
-) -> Dict[str, float]:
+) -> Dict:
     prom_gene_seq_w_variants = ""
 
     ref_seq = ref_prom_seq + ref_gene_seq
