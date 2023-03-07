@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List
+from typing import Dict
 
 import gffpandas.gffpandas as gffpd
 import pandas as pd
@@ -48,7 +48,7 @@ def get_complement(seq):
     complement_dict = {"a": "t", "t": "a", "g": "c", "c": "g"}
     out = ""
     for item in seq:
-        out += complement_dict[item.lower()]
+        out += complement_dict.get(item.lower(), item.lower())
     assert len(out) == len(seq)
     return out
 

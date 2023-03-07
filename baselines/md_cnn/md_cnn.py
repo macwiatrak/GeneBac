@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from deep_bac.modelling.modules.layers import ConvLayer, DenseLayer, _round
+from deep_bac.modelling.modules.layers import ConvLayer, DenseLayer
 from deep_bac.modelling.modules.utils import Flatten
 
 

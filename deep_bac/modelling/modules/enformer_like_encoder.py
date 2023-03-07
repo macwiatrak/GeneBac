@@ -2,9 +2,6 @@ import torch
 from torch import nn
 
 from deep_bac.modelling.modules.layers import (
-    Residual,
-    AttentionPool,
-    ConvLayer,
     exponential_linspace_int,
     DenseLayer,
     ResidualConvLayer,
