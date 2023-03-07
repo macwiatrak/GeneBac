@@ -21,7 +21,7 @@ class MDCNNDataset(Dataset):
         reference_loci_data_df: DataFrame,
         unique_ids: List[str] = None,
         phenotype_dataframe_file_path: str = None,
-        max_gene_length: int = 10147,
+        max_loci_length: int = 10147,
         regression: bool = False,  # whether the task should be regression or binary classification
         shift_max: int = 0,
         pad_value: float = 0.25,
@@ -52,7 +52,7 @@ class MDCNNDataset(Dataset):
             ]
             self.unique_ids = [idx for idx in self.unique_ids if idx in unq_ids]
 
-        self.max_gene_length = max_gene_length
+        self.max_gene_length = max_loci_length
         self.shift_max = shift_max
         self.pad_value = pad_value
         self.reverse_complement_prob = reverse_complement_prob
