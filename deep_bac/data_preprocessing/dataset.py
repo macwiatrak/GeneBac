@@ -1,5 +1,5 @@
 import random
-from typing import Dict, List
+from typing import List
 
 import pandas as pd
 import torch
