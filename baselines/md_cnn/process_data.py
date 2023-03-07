@@ -6,7 +6,10 @@ from typing import Dict, Tuple, List, Set, Union, Optional
 
 import pandas as pd
 
-from baselines.md_cnn.utils import MD_CNN_GENOMIC_LOCI
+from baselines.md_cnn.utils import (
+    MD_CNN_GENOMIC_LOCI,
+    VARIANTS_COLS_TO_USE_MD_CNN,
+)
 from deep_bac.data_preprocessing.run_variants_to_strains_genomes import (
     REF_GENOME_FILE_NAME,
     get_strain_w_phenotype_ids,
@@ -18,7 +21,6 @@ from deep_bac.data_preprocessing.utils import (
     get_complement,
 )
 from deep_bac.data_preprocessing.variants_to_strains_genomes import (
-    VARIANTS_COLS_TO_USE,
     retrieve_variant_idxs,
 )
 
@@ -29,8 +31,11 @@ def get_genomic_loci_dict(
 ) -> Dict[str, Dict]:
     out = defaultdict(dict)
     for loci_name, (start, end, strand) in genomic_loci.items():
+        seq = ref_genome[start - 1 : end - 1].lower()
+        if strand == "-":
+            seq = get_complement(seq)[::-1]
         out[loci_name] = {
-            "ref_seq": ref_genome[start - 1 : end - 1],
+            "ref_seq": seq,
             "strand": strand,
             "len_seq": end - start,
             "start": start,
@@ -54,13 +59,13 @@ def get_loci_nucleotide_nr(row: Dict):
         # add 1 for compatibility with 1-indexing
         return genome_index - MD_CNN_GENOMIC_LOCI[loci][0] + 1
     # add 1 for compatibility with 1-indexing
-    return MD_CNN_GENOMIC_LOCI[loci][1] - genome_index + 1
+    return MD_CNN_GENOMIC_LOCI[loci][1] - genome_index
 
 
 def get_and_filter_variants_to_loci_df(
     file_path: str,
     unique_ids_to_use: Set[str],
-    cols_to_use: List[str] = VARIANTS_COLS_TO_USE,
+    cols_to_use: List[str] = VARIANTS_COLS_TO_USE_MD_CNN,
 ) -> pd.DataFrame:
     # filter cols
     df = pd.read_csv(
@@ -226,3 +231,14 @@ def run(
     agg_variants_df.to_parquet(
         os.path.join(output_dir, "agg_variants_md_cnn.parquet")
     )
+
+
+def main():
+    run(
+        input_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/",
+        output_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/processed-genome-per-strain-md-cnn/",
+    )
+
+
+if __name__ == "__main__":
+    main()
