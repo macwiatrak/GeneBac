@@ -67,7 +67,6 @@ class MDCNNDataset(Dataset):
         unq_id_subset = self.loci_df.xs(unq_id, level="UNIQUEID")
         unq_id_loci = unq_id_subset["loci"].tolist()
 
-        loci_tensor = []
         loci_to_seq_dict = dict()
         for idx, loci in enumerate(self.loci_to_id.keys()):
             if loci in unq_id_loci:

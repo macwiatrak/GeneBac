@@ -50,6 +50,8 @@ def get_gene_encoder(config: DeepGeneBacConfig):
         )
 
     if config.gene_encoder_type == "MD-CNN":
+        print("Max gene len:", config.max_gene_length)
+        print("N highly var genes:", config.n_highly_variable_genes)
         return MDCNN(
             seq_length=config.n_highly_variable_genes * config.max_gene_length,
             n_output=config.n_output,

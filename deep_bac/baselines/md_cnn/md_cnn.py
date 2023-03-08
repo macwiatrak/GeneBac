@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from deep_bac.modelling.modules.layers import ConvLayer, DenseLayer
+from deep_bac.modelling.modules.layers import ConvLayer, DenseLayer, _round
 from deep_bac.modelling.modules.utils import Flatten
 
 
@@ -49,7 +49,7 @@ class MDCNN(nn.Module):
             *[
                 Flatten(),
                 DenseLayer(
-                    in_features=int(int(seq_length / 3) / 3) * 32,
+                    in_features=_round(_round(seq_length / 3) / 3) * 32,
                     out_features=256,
                     activation_fn=nn.ReLU(),
                     dropout=0.0,

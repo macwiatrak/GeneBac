@@ -9,7 +9,7 @@ from deep_bac.argparser import DeepGeneBacArgumentParser
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 from deep_bac.modelling.trainer import get_trainer
-from deep_bac.utils import get_selected_genes, format_and_write_results
+from deep_bac.utils import format_and_write_results
 
 logging.basicConfig(level=logging.INFO)
 
@@ -30,8 +30,8 @@ def run(
     test_after_train: bool = False,
     resume_from_ckpt_path: str = None,
 ):
-    selected_genes = get_selected_genes(use_drug_specific_genes)
-    logging.info(f"Selected genes: {selected_genes}")
+    # selected_genes = get_selected_genes(use_drug_specific_genes)
+    # logging.info(f"Selected genes: {selected_genes}")
 
     data = get_mdcnn_data(
         input_df_file_path=os.path.join(
@@ -61,7 +61,7 @@ def run(
     config.train_set_len = data.train_set_len
     if use_drug_idx is not None:
         config.n_output = 1
-    config.n_highly_variable_genes = len(selected_genes)
+    config.n_highly_variable_genes = 18  # len(selected_genes)
 
     trainer = get_trainer(
         config, output_dir, resume_from_ckpt_path=resume_from_ckpt_path
@@ -93,7 +93,7 @@ def main(args):
         config=config,
         input_dir=args.input_dir,
         output_dir=args.output_dir,
-        # max_loci_length=args.max_gene_length,
+        max_loci_length=args.max_gene_length,
         # shift_max=args.shift_max,
         pad_value=args.pad_value,
         # reverse_complement_prob=args.reverse_complement_prob,
