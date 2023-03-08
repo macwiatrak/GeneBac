@@ -1,12 +1,12 @@
 import torch
 from torch import nn
 
+from deep_bac.baselines.md_cnn.md_cnn import MDCNN
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
 from deep_bac.modelling.modules.enformer_like_encoder import EnformerLikeEncoder
 from deep_bac.modelling.modules.graph_transformer import GraphTransformer
 from deep_bac.modelling.modules.layers import DenseLayer
-from baselines.md_cnn.md_cnn import MDCNN
 from deep_bac.modelling.modules.positional_encodings import (
     IdentityPositionalEncoding,
     LearnablePositionalEncoding,

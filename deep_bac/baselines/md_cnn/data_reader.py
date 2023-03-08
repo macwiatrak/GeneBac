@@ -1,11 +1,13 @@
 import json
+import os
 from typing import List
 
 import pandas as pd
 from pandas import DataFrame
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
-from baselines.md_cnn.dataset import MDCNNDataset
+from deep_bac.baselines.md_cnn.dataset import MDCNNDataset
 from deep_bac.data_preprocessing.data_reader import _collate_samples
 from deep_bac.data_preprocessing.data_types import DataReaderOutput
 
@@ -134,3 +136,44 @@ def get_mdcnn_data(
         test_dataloader=test_dataloader,
         train_set_len=len(train_unique_ids),
     )
+
+
+def main():
+    input_dir = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/processed-genome-per-strain-md-cnn/"
+    data = get_mdcnn_data(
+        input_df_file_path=os.path.join(
+            input_dir, "processed_agg_variants_md_cnn.parquet"
+        ),
+        reference_loci_data_df_path=os.path.join(
+            input_dir, "reference_loci_data.parquet"
+        ),
+        phenotype_df_file_path=os.path.join(
+            input_dir, "phenotype_labels_with_binary_labels.parquet"
+        ),
+        train_val_test_split_indices_file_path=os.path.join(
+            input_dir, "train_val_test_split_unq_ids.json"
+        ),
+        regression=False,
+        use_drug_idx=None,
+        batch_size=8,
+        max_loci_length=10147,
+        shift_max=0,
+        pad_value=0.25,
+        reverse_complement_prob=0.0,
+        num_workers=8,
+        test=True,
+    )
+    for _ in tqdm(data.val_dataloader):
+        pass
+    print("Val dataloader done")
+    for _ in tqdm(data.test_dataloader):
+        pass
+    print("test dataloader done")
+
+    for _ in tqdm(data.train_dataloader):
+        pass
+    print("train dataloader done")
+
+
+if __name__ == "__main__":
+    main()

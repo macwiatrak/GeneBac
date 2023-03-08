@@ -1,14 +1,14 @@
 import torch
 
-from baselines.md_cnn.md_cnn import MDCNN
+from deep_bac.baselines.md_cnn.md_cnn import MDCNN
 
 
 def test_md_cnn():
     batch_size = 2
-    seq_length = 4051
+    seq_length = 10147
     in_channels = 4
     n_output = 14
-    n_genes = 4
+    n_genes = 18
 
     x = torch.rand(batch_size, n_genes, in_channels, seq_length)
     batch_size, n_genes, n_channels, seq_length = x.shape

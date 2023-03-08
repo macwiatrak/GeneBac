@@ -67,20 +67,24 @@ class MDCNNDataset(Dataset):
         unq_id_subset = self.loci_df.xs(unq_id, level="UNIQUEID")
         unq_id_loci = unq_id_subset["loci"].tolist()
 
-        loci_tensor = []
-        variants_in_loci = []
-        loci_names = []
+        loci_to_seq_dict = dict()
         for idx, loci in enumerate(self.loci_to_id.keys()):
-            # append gene name
-            loci_names.append(loci)
-
             if loci in unq_id_loci:
                 idx = unq_id_loci.index(loci)
                 seq = unq_id_subset.iloc[idx]["seq_w_variants"]
-                variants_in_loci.append(1)
             else:
                 seq = self.reference_loci_data_df.iloc[idx]["seq"]
-                variants_in_loci.append(0)
+            loci_to_seq_dict[loci] = seq
+
+        # dirty fix to make it directly comparable to results in MD-CNN paper
+        loci_to_seq_dict["ethAR"] = (
+            loci_to_seq_dict["ethA"] + loci_to_seq_dict["ethR"]
+        )
+        del loci_to_seq_dict["ethA"]
+        del loci_to_seq_dict["ethR"]
+
+        loci_tensor = []
+        for loci_name, seq in loci_to_seq_dict.items():
             # subset it to the max gene length
             one_hot_seq = seq_to_one_hot(seq[: self.max_gene_length])
             # stochastically do a reverse complement of the sequence
@@ -103,7 +107,6 @@ class MDCNNDataset(Dataset):
             loci_tensor.append(padded_one_hot_seq.T)
 
         loci_tensor = torch.stack(loci_tensor)
-        variants_in_loci = torch.tensor(variants_in_loci, dtype=torch.long)
 
         labels = None
         if self.id_to_labels_df is not None:
@@ -122,10 +125,9 @@ class MDCNNDataset(Dataset):
 
         return BacInputSample(
             input_tensor=loci_tensor,
-            variants_in_gene=variants_in_loci,
             labels=labels,
             strain_id=unq_id,
-            gene_name=loci_names,
+            gene_name=list(loci_to_seq_dict.keys()),
         )
 
     def __len__(self):
