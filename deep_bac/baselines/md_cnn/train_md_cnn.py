@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Optional, Literal
+from typing import Optional
 
 from pytorch_lightning.utilities.seed import seed_everything
 
@@ -26,7 +26,6 @@ def run(
     num_workers: int = None,
     test: bool = False,
     ckpt_path: Optional[str] = None,
-    use_drug_specific_genes: Literal["INH", "Walker", "MD-CNN"] = "MD-CNN",
     test_after_train: bool = False,
     resume_from_ckpt_path: str = None,
 ):
@@ -101,7 +100,6 @@ def main(args):
         test=args.test,
         ckpt_path=args.ckpt_path,
         use_drug_idx=args.use_drug_idx,
-        use_drug_specific_genes=args.use_drug_specific_genes,
         test_after_train=args.test_after_train,
         resume_from_ckpt_path=args.resume_from_ckpt_path,
     )
