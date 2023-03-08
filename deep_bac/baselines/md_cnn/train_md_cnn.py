@@ -4,7 +4,7 @@ from typing import Optional, Literal
 
 from pytorch_lightning.utilities.seed import seed_everything
 
-from baselines.md_cnn.data_reader import get_mdcnn_data
+from deep_bac.baselines.md_cnn.data_reader import get_mdcnn_data
 from deep_bac.argparser import DeepGeneBacArgumentParser
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
@@ -19,7 +19,7 @@ def run(
     input_dir: str,
     output_dir: str,
     use_drug_idx: int = None,
-    max_loci_length: int = 2560,
+    max_loci_length: int = 10147,
     shift_max: int = 0,
     pad_value: float = 0.25,
     reverse_complement_prob: float = 0.0,
@@ -93,10 +93,10 @@ def main(args):
         config=config,
         input_dir=args.input_dir,
         output_dir=args.output_dir,
-        max_loci_length=args.max_gene_length,
-        shift_max=args.shift_max,
+        # max_loci_length=args.max_gene_length,
+        # shift_max=args.shift_max,
         pad_value=args.pad_value,
-        reverse_complement_prob=args.reverse_complement_prob,
+        # reverse_complement_prob=args.reverse_complement_prob,
         num_workers=args.num_workers,
         test=args.test,
         ckpt_path=args.ckpt_path,
