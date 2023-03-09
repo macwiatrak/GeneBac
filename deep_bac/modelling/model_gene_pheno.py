@@ -175,7 +175,7 @@ class DeepBacGenePheno(pl.LightningModule):
         else:
             opt = torch.optim.AdamW(
                 [p for p in self.parameters() if p.requires_grad],
-                lr=np.exp(-1.0 * 9),
+                lr=self.config.lr,
             )
         if (
             self.config.train_set_len is None
