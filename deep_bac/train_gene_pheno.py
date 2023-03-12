@@ -29,7 +29,7 @@ def run(
     ckpt_path: Optional[str] = None,
     use_drug_specific_genes: Literal[
         "INH", "Walker", "MD-CNN", "cryptic"
-    ] = "MD-CNN",
+    ] = "cryptic",
     test_after_train: bool = False,
     resume_from_ckpt_path: str = None,
 ):
