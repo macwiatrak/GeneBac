@@ -13,7 +13,8 @@ from deep_bac.modelling.metrics import (
 
 DRUG_SPECIFIC_GENES_DICT = {
     "Walker": [
-        "ahpC",
+        "ahpC",  # Isoniazid
+        "gid",  # Streptomycin
         "fabG1",
         "inhA",
         "katG",
@@ -38,45 +39,84 @@ DRUG_SPECIFIC_GENES_DICT = {
         "eis",
     ],
     "MD-CNN": [
-        "acpM",
-        "kasA",
+        "acpM",  # Isoniazid
+        "kasA",  # Isoniazid
         # Rv3920c,
-        "rpsA",
-        "PE_PGRS59",
-        "clpC1",
-        "embC",
-        "embA",
-        "embB",
-        "aftB",
-        "ubiA",
-        "mcr3",
-        "rrs",
-        "rrl",
-        "rrf",
-        "ethA",
-        "ethR",
-        "ahpC",
-        "tlyA",
-        "Rv1907c",
-        "katG",
-        "furA",
+        # "gid",  # Streptomycin
+        # "rpsA",  # Pyrazinamide
+        # "PE_PGRS59",  # Pyrazinamide
+        # "clpC1",  # Pyrazinamide
+        "embC",  # Ethambutol
+        "embA",  # Ethambutol
+        "embB",  # Ethambutol
+        "aftB",  # Ethambutol
+        "ubiA",  # Ethambutol
+        "mcr3",  # Streptomycin, Amikacin, Capreomycin, Kanamycin
+        "rrs",  # Streptomycin, Amikacin, Capreomycin, Kanamycin
+        "rrl",  # Streptomycin, Amikacin, Capreomycin, Kanamycin
+        "rrf",  # Streptomycin, Amikacin, Capreomycin, Kanamycin
+        "ethA",  # Ethionamide
+        "ethR",  # Ethionamide
+        "ahpC",  # Isoniazid
+        # "tlyA",  # Capreomycin
+        "Rv1907c",  # Isoniazid
+        "katG",  # Isoniazid
+        "furA",  # Isoniazid
         # "Rv1910c",
-        "rpsL",
-        "rpoB",
-        "rpoC",
-        "Rv1482c",
-        "fabG1",
-        "inhA",
-        "eis",
-        "Rv2417c",
-        "gyrB",
-        "gyrA",
-        "Rv3600c",
-        "panD",
-        "panC",
-        "Rv2042c",
-        "pncA",
-        "Rv2044c",
+        # "rpsL",  # Streptomycin
+        "rpoB",  # Rifampicin
+        "rpoC",  # Rifampicin
+        "Rv1482c",  # Isoniazid, Ethionamide
+        "fabG1",  # Isoniazid, Ethionamide
+        "inhA",  # Isoniazid, Ethionamide
+        "eis",  # Kanamycin, Amikacin
+        "Rv2417c",  # Ciprofloxacin, Levofloxacin, Moxifloxacin, Ofloxacin
+        "gyrB",  # Ciprofloxacin, Levofloxacin, Moxifloxacin, Ofloxacin
+        "gyrA",  # Ciprofloxacin, Levofloxacin, Moxifloxacin, Ofloxacin
+        # "Rv3600c",  # Pyrazinamide
+        # "panD",  # Pyrazinamide
+        # "panC",  # Pyrazinamide
+        # "Rv2042c",  # Pyrazinamide
+        # "pncA",  # Pyrazinamide
+        # "Rv2044c",  # Pyrazinamide
+    ],
+    # take 5 top loci for each drug
+    "cryptic": [
+        "embB",  # EMB, RIF, LEV, MOX, RFB
+        "embA",  # EMB
+        "rpoB ",  # EMB, INH, RIF, AMI, ETH, KAN, LEV, MOX, RFB, BDQ, LZD
+        "katG",  # EMB, INH, RIF, RFB
+        "pncA",  # EMB
+        "ahpC",  # INH
+        "fabG1",  # INH, ETH, CLF
+        "inhA",  # INH, ETH
+        "Rv1565c",  # RIF
+        "guaA",  # RIF
+        "rrs",  # AMI, KAN, LEV, MOX, BDQ
+        "gyrA",  # AMI, ETH, KAN, LEV, MOX
+        "echA8",  # AMI
+        "Rv2896c",  # AMI
+        "ethA",  # ETH, KAN
+        "eis",  # KAN
+        "gyrB",  # LEV, MOX
+        "rpoC",  # RFB
+        "Rv0810c",  # RFB,
+        # New and repurposed drugs
+        # "Rv0678",  # BDQ, CLF
+        # "atpE",  # BDQ
+        # "pgi",  # BDQ,
+        # "cyp142",  # CLF
+        # "Rv3188",  # CLF,
+        # "Rv3327",  # CLF
+        # "ddn",  # DLM
+        # "fadE22",  # DLM
+        # "fba",  # DLM
+        # "Rv2180c",  # DLM
+        # "gap",  # DLM
+        # "rplC",  # LZD
+        # "emrB",  # LZD
+        # "Rv3552",  # LZD
+        # "add",  # LZD
     ],
     "INH": [
         "katG",
