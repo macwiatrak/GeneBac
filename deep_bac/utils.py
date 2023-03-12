@@ -84,7 +84,7 @@ DRUG_SPECIFIC_GENES_DICT = {
     "cryptic": [
         "embB",  # EMB, RIF, LEV, MOX, RFB
         "embA",  # EMB
-        "rpoB ",  # EMB, INH, RIF, AMI, ETH, KAN, LEV, MOX, RFB, BDQ, LZD
+        "rpoB",  # EMB, INH, RIF, AMI, ETH, KAN, LEV, MOX, RFB, BDQ, LZD
         "katG",  # EMB, INH, RIF, RFB
         "pncA",  # EMB
         "ahpC",  # INH
