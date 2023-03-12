@@ -102,21 +102,21 @@ DRUG_SPECIFIC_GENES_DICT = {
         "rpoC",  # RFB
         "Rv0810c",  # RFB,
         # New and repurposed drugs
-        # "Rv0678",  # BDQ, CLF
-        # "atpE",  # BDQ
-        # "pgi",  # BDQ,
-        # "cyp142",  # CLF
-        # "Rv3188",  # CLF,
-        # "Rv3327",  # CLF
-        # "ddn",  # DLM
-        # "fadE22",  # DLM
-        # "fba",  # DLM
-        # "Rv2180c",  # DLM
-        # "gap",  # DLM
-        # "rplC",  # LZD
-        # "emrB",  # LZD
-        # "Rv3552",  # LZD
-        # "add",  # LZD
+        "Rv0678",  # BDQ, CLF
+        "atpE",  # BDQ
+        "pgi",  # BDQ,
+        "cyp142",  # CLF
+        "Rv3188",  # CLF,
+        "Rv3327",  # CLF
+        "ddn",  # DLM
+        "fadE22",  # DLM
+        "fba",  # DLM
+        "Rv2180c",  # DLM
+        "gap",  # DLM
+        "rplC",  # LZD
+        "emrB",  # LZD
+        "Rv3552",  # LZD
+        "add",  # LZD
     ],
     "INH": [
         "katG",
