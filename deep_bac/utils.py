@@ -13,8 +13,7 @@ from deep_bac.modelling.metrics import (
 
 DRUG_SPECIFIC_GENES_DICT = {
     "Walker": [
-        "ahpC",  # Isoniazid
-        "gid",  # Streptomycin
+        "ahpC",
         "fabG1",
         "inhA",
         "katG",
@@ -82,6 +81,7 @@ DRUG_SPECIFIC_GENES_DICT = {
     ],
     # take 5 top loci for each drug
     "cryptic": [
+        # First-line drugs
         "embB",  # EMB, RIF, LEV, MOX, RFB
         "embA",  # EMB
         "rpoB",  # EMB, INH, RIF, AMI, ETH, KAN, LEV, MOX, RFB, BDQ, LZD
@@ -92,6 +92,7 @@ DRUG_SPECIFIC_GENES_DICT = {
         "inhA",  # INH, ETH
         "Rv1565c",  # RIF
         "guaA",  # RIF
+        # Second-line drugs
         "rrs",  # AMI, KAN, LEV, MOX, BDQ
         "gyrA",  # AMI, ETH, KAN, LEV, MOX
         "echA8",  # AMI
@@ -101,6 +102,7 @@ DRUG_SPECIFIC_GENES_DICT = {
         "gyrB",  # LEV, MOX
         "rpoC",  # RFB
         "Rv0810c",  # RFB,
+        # New and repurposed druga
         "Rv0678",  # BDQ, CLF
         "atpE",  # BDQ
         "pgi",  # BDQ,
