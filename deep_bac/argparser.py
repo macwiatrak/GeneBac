@@ -51,6 +51,8 @@ class DeepGeneBacArgumentParser(Tap):
         "val_r2",
         "val_spearman",
     ] = "val_loss"
-    use_drug_specific_genes: Literal["INH", "Walker", "MD-CNN"] = "MD-CNN"
+    use_drug_specific_genes: Literal[
+        "INH", "Walker", "MD-CNN", "cryptic"
+    ] = "cryptic"
     pos_encoder_type: Literal["learnable", "fixed"] = "fixed"
     resume_from_ckpt_path: str = None

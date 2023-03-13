@@ -1,5 +1,6 @@
 from typing import List, Dict, Tuple
 
+import numpy as np
 import pytorch_lightning as pl
 import torch
 from torch import nn
@@ -169,7 +170,7 @@ class DeepBacGenePheno(pl.LightningModule):
         if self.model_type == "MD-CNN":
             opt = torch.optim.Adam(
                 [p for p in self.parameters() if p.requires_grad],
-                lr=self.config.lr,
+                lr=np.exp(-1.0 * 9),
             )
         else:
             opt = torch.optim.AdamW(
