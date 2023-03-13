@@ -101,7 +101,6 @@ DRUG_SPECIFIC_GENES_DICT = {
         "gyrB",  # LEV, MOX
         "rpoC",  # RFB
         "Rv0810c",  # RFB,
-        # New and repurposed drugs
         "Rv0678",  # BDQ, CLF
         "atpE",  # BDQ
         "pgi",  # BDQ,
