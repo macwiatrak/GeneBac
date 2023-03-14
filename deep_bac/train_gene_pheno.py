@@ -80,7 +80,7 @@ def run(
     model = DeepBacGenePheno(config)
 
     if test:
-        drug_thresholds = get_drug_thresholds(model, data.val_dataloader)
+        drug_thresholds = get_drug_thresholds(model, data.train_dataloader)
         model.drug_thresholds = drug_thresholds
         return trainer.test(
             model,
@@ -88,13 +88,13 @@ def run(
             ckpt_path=ckpt_path,
         )
 
-    trainer.fit(model, data.train_dataloader, data.val_dataloader)
+    trainer.fit(model, data.train_dataloader, data.train_dataloader)
 
     if test_after_train:
         model = DeepBacGenePheno.load_from_checkpoint(
             trainer.checkpoint_callback.best_model_path
         )
-        drug_thresholds = get_drug_thresholds(model, data.val_dataloader)
+        drug_thresholds = get_drug_thresholds(model, data.train_dataloader)
         model.drug_thresholds = drug_thresholds
         return trainer.test(
             model,
