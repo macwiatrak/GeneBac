@@ -86,7 +86,6 @@ def run(
         return trainer.test(
             model,
             dataloaders=data.test_dataloader,
-            ckpt_path=ckpt_path,
         )
 
     trainer.fit(model, data.train_dataloader, data.train_dataloader)
