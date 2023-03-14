@@ -99,7 +99,6 @@ def run(
         return trainer.test(
             model,
             dataloaders=data.test_dataloader,
-            ckpt_path="best",
         )
     return None
 
