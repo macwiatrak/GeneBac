@@ -21,11 +21,11 @@ class DeepBacGenePheno(pl.LightningModule):
     def __init__(
         self,
         config: DeepGeneBacConfig,
-        thresholds: torch.Tensor = None,
+        drug_thresholds: torch.Tensor = None,
     ):
         super().__init__()
         self.config = config
-        self.thresholds = thresholds
+        self.thresholds = drug_thresholds
 
         self.model_type = config.gene_encoder_type
         self.n_bottleneck_layer = config.n_gene_bottleneck_layer

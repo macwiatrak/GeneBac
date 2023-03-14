@@ -9,6 +9,7 @@ from deep_bac.data_preprocessing.data_reader import get_gene_pheno_data
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 from deep_bac.modelling.trainer import get_trainer
+from deep_bac.modelling.utils import get_drug_thresholds
 from deep_bac.utils import get_selected_genes, format_and_write_results
 
 logging.basicConfig(level=logging.INFO)
@@ -79,6 +80,8 @@ def run(
     model = DeepBacGenePheno(config)
 
     if test:
+        drug_thresholds = get_drug_thresholds(model, data.val_dataloader)
+        model.drug_thresholds = drug_thresholds
         return trainer.test(
             model,
             dataloaders=data.test_dataloader,
@@ -88,6 +91,11 @@ def run(
     trainer.fit(model, data.train_dataloader, data.val_dataloader)
 
     if test_after_train:
+        model = DeepBacGenePheno.load_from_checkpoint(
+            trainer.checkpoint_callback.best_model_path
+        )
+        drug_thresholds = get_drug_thresholds(model, data.val_dataloader)
+        model.drug_thresholds = drug_thresholds
         return trainer.test(
             model,
             dataloaders=data.test_dataloader,
