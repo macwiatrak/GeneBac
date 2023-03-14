@@ -123,7 +123,7 @@ def binary_cls_metrics(
     logits: torch.Tensor,
     labels: torch.Tensor,
     ignore_index: int,
-    thresh: float = None,
+    thresh: torch.Tensor = None,
 ) -> Dict[str, torch.Tensor]:
     """
     Get metrics for binary classification task.
@@ -135,7 +135,9 @@ def binary_cls_metrics(
             logits, labels, ignore_index
         )
     else:
-        gmean, spec, sens = get_spec_sens(logits, labels, thresh, ignore_index)
+        gmean, spec, sens = get_spec_sens(
+            logits, labels, thresh.item(), ignore_index
+        )
     if labels[labels != -100].sum() == 0:
         auroc_score = torch.tensor(-100.0)
     else:
@@ -191,9 +193,7 @@ def compute_agg_stats(
         for drug_idx in range(labels.shape[1]):
             drug_labels = labels[:, drug_idx]
             drug_logits = logits[:, drug_idx]
-            thresh = (
-                thresholds[drug_idx].item() if thresholds is not None else None
-            )
+            thresh = thresholds[drug_idx] if thresholds is not None else None
             drug_m = binary_cls_metrics(
                 drug_logits, drug_labels, ignore_index, thresh
             )

@@ -25,7 +25,7 @@ class DeepBacGenePheno(pl.LightningModule):
     ):
         super().__init__()
         self.config = config
-        self.thresholds = drug_thresholds
+        self.drug_thresholds = drug_thresholds
 
         self.model_type = config.gene_encoder_type
         self.n_bottleneck_layer = config.n_gene_bottleneck_layer
@@ -122,7 +122,7 @@ class DeepBacGenePheno(pl.LightningModule):
         self, outputs: List[Dict[str, torch.tensor]], data_split: str
     ) -> Dict[str, float]:
         agg_stats = compute_agg_stats(
-            outputs, regression=self.regression, thresholds=self.thresholds
+            outputs, regression=self.regression, thresholds=self.drug_thresholds
         )
         agg_stats = {f"{data_split}_{k}": v for k, v in agg_stats.items()}
         self.log_dict(
