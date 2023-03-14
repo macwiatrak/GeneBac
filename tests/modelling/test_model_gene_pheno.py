@@ -120,7 +120,7 @@ def test_model_gene_pheno_train_real_data(tmpdir):
     regression = False
     n_bottleneck_layer = 64
     n_filters = 256
-    max_epochs = 20
+    max_epochs = 5
     batch_size = 2
     max_gene_length = 2560
     selected_genes = ["PE1", "Rv1716", "Rv2000", "pepC", "pepD"]
