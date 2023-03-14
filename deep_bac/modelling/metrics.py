@@ -13,6 +13,7 @@ from torchmetrics.functional import (
 )
 from torchmetrics.functional.classification import (
     binary_f1_score,
+    binary_stat_scores,
 )
 
 BINARY_CLS_METRICS = [
@@ -96,17 +97,45 @@ def choose_best_spec_sens_threshold(
     return thresh, max_gmean, spec, sens
 
 
+def get_spec_sens(
+    logits: torch.Tensor,
+    labels: torch.Tensor,
+    thresh: float = 0.5,
+    ignore_index: int = -100,
+) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    if labels[labels != -100].sum() == 0:
+        return (
+            torch.tensor(-100.0),
+            torch.tensor(-100.0),
+            torch.tensor(-100.0),
+        )
+    tp, fp, tn, fn, sup = binary_stat_scores(
+        logits, labels, threshold=thresh, ignore_index=ignore_index
+    )
+    spec = tn / (tn + fp)
+    sens = tp / (tp + fn)
+
+    gmean_spec_sens = torch.exp(torch.log(spec * sens + 1e-8) / 2)
+    return gmean_spec_sens, spec, sens
+
+
 def binary_cls_metrics(
-    logits: torch.Tensor, labels: torch.Tensor, ignore_index: int
+    logits: torch.Tensor,
+    labels: torch.Tensor,
+    ignore_index: int,
+    thresh: float = None,
 ) -> Dict[str, torch.Tensor]:
     """
     Get metrics for binary classification task.
     Returns:
         dict of metrics
     """
-    thresh, max_gmean, spec, sens = choose_best_spec_sens_threshold(
-        logits, labels, ignore_index
-    )
+    if not thresh:
+        thresh, gmean, spec, sens = choose_best_spec_sens_threshold(
+            logits, labels, ignore_index
+        )
+    else:
+        gmean, spec, sens = get_spec_sens(logits, labels, thresh, ignore_index)
     if labels[labels != -100].sum() == 0:
         auroc_score = torch.tensor(-100.0)
     else:
@@ -127,7 +156,7 @@ def binary_cls_metrics(
         ),
         "spec": spec,
         "sens": sens,
-        "gmean_spec_sens": max_gmean,
+        "gmean_spec_sens": gmean,
     }
 
 
@@ -135,6 +164,7 @@ def compute_agg_stats(
     outputs: List[Dict[str, torch.tensor]],
     regression: bool,
     ignore_index: int = -100,
+    thresholds: torch.Tensor = None,
 ) -> Dict[str, torch.Tensor]:
     """
     Compute aggregate statistics from model outputs.
@@ -151,14 +181,21 @@ def compute_agg_stats(
     metrics = {"loss": loss}
     if not regression:
         if len(labels.shape) == 1:
-            bin_cls_metrics = binary_cls_metrics(logits, labels, ignore_index)
+            bin_cls_metrics = binary_cls_metrics(
+                logits, labels, ignore_index, thresholds
+            )
             metrics.update(bin_cls_metrics)
             return metrics
         drug_metrics = {}
         for drug_idx in range(labels.shape[1]):
             drug_labels = labels[:, drug_idx]
             drug_logits = logits[:, drug_idx]
-            drug_m = binary_cls_metrics(drug_logits, drug_labels, ignore_index)
+            thresh = (
+                thresholds[drug_idx].item() if thresholds is not None else None
+            )
+            drug_m = binary_cls_metrics(
+                drug_logits, drug_labels, ignore_index, thresh
+            )
             drug_metrics.update(
                 {f"drug_{drug_idx}_{k}": v for k, v in drug_m.items()}
             )
