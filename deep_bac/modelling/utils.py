@@ -1,8 +1,10 @@
 import torch
 from torch import nn
+from torch.utils.data import DataLoader
 
 from deep_bac.baselines.md_cnn.md_cnn import MDCNN
 from deep_bac.modelling.data_types import DeepGeneBacConfig
+from deep_bac.modelling.metrics import compute_drug_thresholds
 from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
 from deep_bac.modelling.modules.enformer_like_encoder import EnformerLikeEncoder
 from deep_bac.modelling.modules.graph_transformer import GraphTransformer
@@ -96,3 +98,10 @@ def get_pos_encoder(config: DeepGeneBacConfig):
             dim=config.n_gene_bottleneck_layer,
         )
     raise ValueError(f"Unknown pos encoder type: {config.pos_encoder_type}")
+
+
+def get_drug_thresholds(model, dataloader: DataLoader):
+    model.eval()
+    stats = [model.eval_step(batch) for batch in dataloader]
+    drug_thresholds = compute_drug_thresholds(stats)
+    return drug_thresholds

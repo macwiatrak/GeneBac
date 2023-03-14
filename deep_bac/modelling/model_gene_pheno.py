@@ -21,9 +21,12 @@ class DeepBacGenePheno(pl.LightningModule):
     def __init__(
         self,
         config: DeepGeneBacConfig,
+        thresholds: torch.Tensor = None,
     ):
         super().__init__()
         self.config = config
+        self.thresholds = thresholds
+
         self.model_type = config.gene_encoder_type
         self.n_bottleneck_layer = config.n_gene_bottleneck_layer
         self.gene_encoder = get_gene_encoder(config)
@@ -118,7 +121,9 @@ class DeepBacGenePheno(pl.LightningModule):
     def eval_epoch_end(
         self, outputs: List[Dict[str, torch.tensor]], data_split: str
     ) -> Dict[str, float]:
-        agg_stats = compute_agg_stats(outputs, regression=self.regression)
+        agg_stats = compute_agg_stats(
+            outputs, regression=self.regression, thresholds=self.thresholds
+        )
         agg_stats = {f"{data_split}_{k}": v for k, v in agg_stats.items()}
         self.log_dict(
             agg_stats,

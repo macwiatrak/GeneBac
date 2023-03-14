@@ -172,6 +172,7 @@ def compute_agg_stats(
         outputs: list of model outputs
         regression: bool indicating if the task is regression or classification
         ignore_index: index to ignore in the labels
+        thresholds: a torch tensor of thresholds to use for each drug
     Returns:
         dict of aggregate statistics
     """
@@ -282,3 +283,28 @@ def get_stats_for_thresholds(
         }
         output.update(thresh_stats)
     return output
+
+
+def compute_drug_thresholds(
+    outputs: List[Dict[str, torch.tensor]],
+    ignore_index: int = -100,
+) -> torch.Tensor:
+
+    logits = torch.cat([x["logits"] for x in outputs]).squeeze(-1)
+    labels = torch.cat([x["labels"] for x in outputs])
+
+    if len(labels.shape) == 1:
+        thresh, _, _, _ = choose_best_spec_sens_threshold(
+            logits, labels, ignore_index
+        )
+        return torch.tensor(thresh)
+
+    drug_thresholds = []
+    for drug_idx in range(labels.shape[1]):
+        drug_labels = labels[:, drug_idx]
+        drug_logits = logits[:, drug_idx]
+        thresh, _, _, _ = choose_best_spec_sens_threshold(
+            drug_logits, drug_labels, ignore_index
+        )
+        drug_thresholds.append(thresh)
+    return torch.tensor(drug_thresholds)
