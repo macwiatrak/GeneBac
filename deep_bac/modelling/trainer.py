@@ -60,4 +60,5 @@ def get_trainer(
         logger=TensorBoardLogger(output_dir),
         accumulate_grad_batches=config.accumulate_grad_batches,
         resume_from_checkpoint=resume_from_ckpt_path,
+        move_metrics_to_cpu=True,
     )
