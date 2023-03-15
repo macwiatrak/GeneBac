@@ -47,6 +47,12 @@ FIRST_LINE_DRUGS = ["INH", "RIF", "EMB"]
 
 SECOND_LINE_DRUGS = ["AMI", "ETH", "KAN", "LEV", "MXF", "RFB"]
 
+NEW_AND_REPURPOSED_DRUGS = ["BDQ", "CFZ", "DLM", "LZD"]
+
+DRUGS_OF_INTEREST = (
+    FIRST_LINE_DRUGS + SECOND_LINE_DRUGS + NEW_AND_REPURPOSED_DRUGS
+)
+
 
 def get_regression_metrics(
     logits: torch.Tensor, labels: torch.Tensor
@@ -205,10 +211,7 @@ def compute_agg_stats(
                 metrics_dict=drug_metrics,
                 metric=metric,
                 # use only first line drugs for macro metrics
-                drug_idxs=list(DRUG_TO_LABEL_IDX.values()),  # [
-                #     DRUG_TO_LABEL_IDX[idx]
-                #     for idx in FIRST_LINE_DRUGS + SECOND_LINE_DRUGS
-                # ],
+                drug_idxs=[DRUG_TO_LABEL_IDX[idx] for idx in DRUGS_OF_INTEREST],
             )
         metrics.update(drug_metrics)
         return metrics
@@ -239,10 +242,7 @@ def compute_agg_stats(
             metrics_dict=drug_metrics,
             metric=metric,
             # use only first & second line drugs for macro metrics
-            drug_idxs=list(DRUG_TO_LABEL_IDX.values()),  # [
-            #     DRUG_TO_LABEL_IDX[idx]
-            #     for idx in FIRST_LINE_DRUGS + SECOND_LINE_DRUGS
-            # ],
+            drug_idxs=[DRUG_TO_LABEL_IDX[idx] for idx in DRUGS_OF_INTEREST],
         )
     metrics.update(drug_metrics)
     return metrics

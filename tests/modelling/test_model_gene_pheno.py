@@ -69,7 +69,7 @@ def test_model_gene_pheno_train_fake_data(tmpdir):
     seq_length = 2560
     regression = False
     n_bottleneck_layer = 64
-    max_epochs = 3
+    max_epochs = 5
     batch_size = 10
 
     config = DeepGeneBacConfig(
