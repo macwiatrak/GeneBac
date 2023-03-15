@@ -124,8 +124,6 @@ def get_gene_pheno_data(
     val_unique_ids = train_val_test_split_indices["val"]
     test_unique_ids = train_val_test_split_indices["test"]
 
-    train_unique_ids = train_unique_ids + val_unique_ids
-
     train_dataloader = get_gene_pheno_dataloader(
         batch_size=batch_size,
         unique_ids=train_unique_ids,
