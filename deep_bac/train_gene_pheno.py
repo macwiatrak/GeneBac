@@ -81,7 +81,7 @@ def run(
 
     if test:
         model = model.load_from_checkpoint(ckpt_path)
-        drug_thresholds = get_drug_thresholds(model, data.val_dataloader)
+        drug_thresholds = get_drug_thresholds(model, data.train_dataloader)
         model.drug_thresholds = drug_thresholds
         return trainer.test(
             model,
@@ -94,7 +94,7 @@ def run(
         model = model.load_from_checkpoint(
             trainer.checkpoint_callback.best_model_path
         )
-        drug_thresholds = get_drug_thresholds(model, data.val_dataloader)
+        drug_thresholds = get_drug_thresholds(model, data.train_dataloader)
         model.drug_thresholds = drug_thresholds
         return trainer.test(
             model,
