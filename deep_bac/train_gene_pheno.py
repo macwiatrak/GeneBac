@@ -90,6 +90,7 @@ def run(
             dataloaders=data.val_dataloader,
         )
         drug_thresholds = get_drug_thresholds(model, data.val_dataloader)
+        print("drug thresholds:", drug_thresholds)
         model.drug_thresholds = drug_thresholds
         print("Val set results with thresholds tuned on val:")
         _ = trainer.test(

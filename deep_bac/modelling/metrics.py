@@ -150,6 +150,7 @@ def binary_cls_metrics(
         auroc_score = auroc(
             logits, labels, task="binary", ignore_index=ignore_index
         )
+    print("Threshold: ", thresh.item())
     return {
         "accuracy": accuracy(
             logits,
@@ -197,6 +198,7 @@ def compute_agg_stats(
             return metrics
         drug_metrics = {}
         for drug_idx in range(labels.shape[1]):
+            print(drug_idx)
             drug_labels = labels[:, drug_idx]
             drug_logits = logits[:, drug_idx]
             thresh = thresholds[drug_idx] if thresholds is not None else None
