@@ -108,8 +108,8 @@ def test_model_gene_pheno_train_fake_data(tmpdir):
         gradient_clip_val=1.0,
         logger=logger,
     )
-    trainer.fit(model, train_dataloaders=dataloader, val_dataloaders=dataloader)
-    assert logger.val_logs[-1]["val_loss"] < logger.val_logs[0]["val_loss"]
+    trainer.fit(model, train_dataloaders=dataloader)
+    # assert logger.val_logs[-1]["val_loss"] < logger.val_logs[0]["val_loss"]
     assert (
         logger.train_logs[-1]["train_loss"] < logger.train_logs[0]["train_loss"]
     )
@@ -120,7 +120,7 @@ def test_model_gene_pheno_train_real_data(tmpdir):
     regression = False
     n_bottleneck_layer = 64
     n_filters = 256
-    max_epochs = 5
+    max_epochs = 10
     batch_size = 2
     max_gene_length = 2560
     selected_genes = ["PE1", "Rv1716", "Rv2000", "pepC", "pepD"]
@@ -166,7 +166,7 @@ def test_model_gene_pheno_train_real_data(tmpdir):
     model = DeepBacGenePheno(config)
     n_params = count_parameters(model)
     print("Number of trainable model parameters: ", n_params)
-    monitor = "val_loss"
+    monitor = "train_loss"
     logger = BasicLogger()
     trainer = pl.Trainer(
         default_root_dir=os.path.abspath(tmpdir),
@@ -178,7 +178,7 @@ def test_model_gene_pheno_train_real_data(tmpdir):
             TQDMProgressBar(refresh_rate=2),
             ModelCheckpoint(
                 dirpath=os.path.abspath(tmpdir),
-                filename="{epoch:02d}-{val_loss:.4f}",
+                filename="{epoch:02d}-{train_loss:.4f}",
                 monitor=monitor,
                 mode="min",
                 save_top_k=1,
@@ -186,8 +186,8 @@ def test_model_gene_pheno_train_real_data(tmpdir):
             ),
         ],
     )
-    trainer.fit(model, train_dataloaders=dataloader, val_dataloaders=dataloader)
-    assert logger.val_logs[-1]["val_loss"] < logger.val_logs[0]["val_loss"]
+    trainer.fit(model, train_dataloaders=dataloader)
+    assert logger.val_logs[-1]["train_loss"] < logger.val_logs[0]["train_loss"]
 
 
 def test_model_gene_pheno_test_drug_thresh_real_data(tmpdir):
@@ -220,6 +220,7 @@ def test_model_gene_pheno_test_drug_thresh_real_data(tmpdir):
         n_transformer_heads=2,
         n_highly_variable_genes=len(selected_genes),
         max_gene_length=max_gene_length,
+        use_validation_set=False,
     )
 
     dataloader = get_gene_pheno_dataloader(
@@ -241,7 +242,7 @@ def test_model_gene_pheno_test_drug_thresh_real_data(tmpdir):
     model = DeepBacGenePheno(config)
     n_params = count_parameters(model)
     print("Number of trainable model parameters: ", n_params)
-    monitor = "val_loss"
+    monitor = "train_loss"
     logger = BasicLogger()
     trainer = pl.Trainer(
         default_root_dir=os.path.abspath(tmpdir),
@@ -253,7 +254,7 @@ def test_model_gene_pheno_test_drug_thresh_real_data(tmpdir):
             TQDMProgressBar(refresh_rate=2),
             ModelCheckpoint(
                 dirpath=os.path.abspath(tmpdir),
-                filename="{epoch:02d}-{val_loss:.4f}",
+                filename="{epoch:02d}-{train_loss:.4f}",
                 monitor=monitor,
                 mode="min",
                 save_top_k=1,
@@ -261,7 +262,7 @@ def test_model_gene_pheno_test_drug_thresh_real_data(tmpdir):
             ),
         ],
     )
-    trainer.fit(model, train_dataloaders=dataloader, val_dataloaders=dataloader)
+    trainer.fit(model, train_dataloaders=dataloader)
 
     model = DeepBacGenePheno.load_from_checkpoint(
         trainer.checkpoint_callback.best_model_path

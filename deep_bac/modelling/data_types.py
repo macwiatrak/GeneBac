@@ -34,6 +34,9 @@ class DeepGeneBacConfig:
         "val_gmean_spec_sens",
         "val_r2",
         "val_spearman",
-    ] = "val_loss"
+        "train_loss",
+        "train_gmean_spec_sens",
+    ] = "train_gmean_spec_sens"
     n_highly_variable_genes: int = 500
     pos_encoder_type: Literal["learnable", "fixed"] = None
+    use_validation_set: bool = False
