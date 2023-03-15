@@ -83,6 +83,12 @@ def run(
         model = model.load_from_checkpoint(ckpt_path)
         drug_thresholds = get_drug_thresholds(model, data.val_dataloader)
         model.drug_thresholds = drug_thresholds
+        print("Val set results with thresholds tuned on val:")
+        _ = trainer.test(
+            model,
+            dataloaders=data.val_dataloader,
+        )
+        print("Test set results with thresholds tuned on val:")
         return trainer.test(
             model,
             dataloaders=data.test_dataloader,
