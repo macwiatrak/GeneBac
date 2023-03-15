@@ -88,7 +88,7 @@ def run(
             dataloaders=data.test_dataloader,
         )
 
-    trainer.fit(model, data.train_dataloader, data.val_dataloader)
+    trainer.fit(model, data.train_dataloader)
 
     if test_after_train:
         model = model.load_from_checkpoint(
