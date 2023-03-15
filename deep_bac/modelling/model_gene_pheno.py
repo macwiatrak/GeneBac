@@ -113,9 +113,9 @@ class DeepBacGenePheno(pl.LightningModule):
         # remove loss for samples with no label and compute mean
         loss = remove_ignore_index(loss, batch.labels.view(-1))
         return dict(
-            loss=loss,
-            logits=logits,
-            labels=batch.labels,
+            loss=loss.cpu(),
+            logits=logits.cpu(),
+            labels=batch.labels.cpu(),
         )
 
     def eval_epoch_end(

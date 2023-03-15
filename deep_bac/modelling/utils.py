@@ -102,6 +102,7 @@ def get_pos_encoder(config: DeepGeneBacConfig):
 
 def get_drug_thresholds(model, dataloader: DataLoader):
     model.eval()
-    stats = [model.eval_step(batch) for batch in dataloader]
+    with torch.no_grad():
+        stats = [model.eval_step(batch) for batch in dataloader]
     drug_thresholds = compute_drug_thresholds(stats)
     return drug_thresholds
