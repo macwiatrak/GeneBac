@@ -38,7 +38,7 @@ def get_and_filter_variants_df(
         file_path,
         usecols=cols_to_use,
         compression="gzip",
-        error_bad_lines=False,
+        on_bad_lines=False,
     )
     # filter unique ids
     df = df[df["UNIQUEID"].isin(unique_ids_to_use)]
@@ -93,6 +93,8 @@ def run(
         "INH", "Walker", "MD-CNN", "cryptic"
     ] = None,
 ):
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
     # get unique ids to use
     strain_w_phenotype_ids = get_strain_w_phenotype_ids(
         os.path.join(input_dir, PHENOTYPE_FILE_NAME)
@@ -101,7 +103,9 @@ def run(
     logging.info("Reading variants")
     # get variants
     variants_df = get_and_filter_variants_df(
-        file_path=os.path.join(input_dir, VARIANTS_FILE_NAME),
+        file_path=os.path.join(
+            input_dir, VARIANTS_FILE_NAME
+        ),  # "VARIANTS_SAMPLE.csv.gz"),
         unique_ids_to_use=strain_w_phenotype_ids,
         genes_to_use=get_selected_genes(use_drug_specific_genes),
     )
@@ -123,12 +127,25 @@ def run(
 
     # save data
     logging.info("Saving data")
-    with open(os.path.join(output_dir, "var_to_idx.json"), "r") as f:
-        json.dump(var_to_idx, f)
+    with open(os.path.join(output_dir, "var_to_idx.json"), "w") as f:
+        # revert the order as the key in a dict cannot be a tuple
+        json.dump({idx: var for var, idx in var_to_idx.items()}, f)
 
-    with open(os.path.join(output_dir, "unique_id_to_idx.json"), "r") as f:
+    with open(os.path.join(output_dir, "unique_id_to_idx.json"), "w") as f:
         json.dump(
             {unqid: idx for idx, unqid in enumerate(unqid_var_dict.keys())}, f
         )
 
     save_npz(os.path.join(output_dir, "var_matrix.npz"), var_matrix)
+
+
+def main():
+    run(
+        input_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/",
+        output_dir="/tmp/var-matrix/",
+        # use_drug_specific_genes="cryptic",
+    )
+
+
+if __name__ == "__main__":
+    main()

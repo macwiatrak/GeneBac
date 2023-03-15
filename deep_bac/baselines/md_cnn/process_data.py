@@ -72,7 +72,7 @@ def get_and_filter_variants_to_loci_df(
         file_path,
         usecols=cols_to_use,
         compression="gzip",
-        error_bad_lines=False,
+        on_bad_lines=False,
     )
     # filter unique ids
     df = df[df["UNIQUEID"].isin(unique_ids_to_use)]
