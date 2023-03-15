@@ -205,10 +205,10 @@ def compute_agg_stats(
                 metrics_dict=drug_metrics,
                 metric=metric,
                 # use only first line drugs for macro metrics
-                drug_idxs=[
-                    DRUG_TO_LABEL_IDX[idx]
-                    for idx in FIRST_LINE_DRUGS + SECOND_LINE_DRUGS
-                ],
+                drug_idxs=list(DRUG_TO_LABEL_IDX.values()),  # [
+                #     DRUG_TO_LABEL_IDX[idx]
+                #     for idx in FIRST_LINE_DRUGS + SECOND_LINE_DRUGS
+                # ],
             )
         metrics.update(drug_metrics)
         return metrics
