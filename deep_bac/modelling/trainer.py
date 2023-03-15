@@ -32,7 +32,7 @@ def get_trainer(
     filename = (
         "{epoch:02d}-{val_r2:.4f}"
         if "r2" in config.monitor_metric
-        else "{epoch:02d}-{val_gmean_spec_sens:.4f}"
+        else "{epoch:02d}-{train_gmean_spec_sens:.4f}"
     )
     """Get the trainer"""
     return Trainer(
