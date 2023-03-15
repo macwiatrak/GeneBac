@@ -170,6 +170,9 @@ class DeepBacGenePheno(pl.LightningModule):
         if self.model_type == "MD-CNN":
             opt = torch.optim.Adam(
                 [p for p in self.parameters() if p.requires_grad],
+                # this particular lr has been recommended in the initial paper
+                # and has been empirically found to work the best on the data
+                # used in this project
                 lr=np.exp(-1.0 * 9),
             )
         else:
