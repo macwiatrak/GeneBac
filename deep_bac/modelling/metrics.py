@@ -286,13 +286,10 @@ def get_stats_for_thresholds(
 
 
 def compute_drug_thresholds(
-    outputs: List[Dict[str, torch.tensor]],
+    logits: torch.Tensor,
+    labels: torch.Tensor,
     ignore_index: int = -100,
 ) -> torch.Tensor:
-
-    logits = torch.cat([x["logits"] for x in outputs]).squeeze(-1)
-    labels = torch.cat([x["labels"] for x in outputs])
-
     if len(labels.shape) == 1:
         thresh, _, _, _ = choose_best_spec_sens_threshold(
             logits, labels, ignore_index
