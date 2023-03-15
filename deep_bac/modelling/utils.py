@@ -109,7 +109,7 @@ def get_drug_thresholds(model, dataloader: DataLoader):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Using device {device}")
     model.to(device)
-    model.eval()
+    # model.eval()
     logits_list = []
     labels_list = []
     logging.info(f"Calculating optimal thresholds.")

@@ -128,7 +128,7 @@ def get_spec_sens(
 def binary_cls_metrics(
     logits: torch.Tensor,
     labels: torch.Tensor,
-    ignore_index: int,
+    ignore_index: int = -100,
     thresh: torch.Tensor = None,
 ) -> Dict[str, torch.Tensor]:
     """
