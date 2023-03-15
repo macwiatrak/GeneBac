@@ -103,7 +103,7 @@ def run(
         )
         print("Test set results with 0.5 thresholds:")
         model.drug_thresholds = torch.ones(14) * 0.5
-        _ = trainer.test(
+        return trainer.test(
             model,
             dataloaders=data.test_dataloader,
         )
