@@ -119,6 +119,8 @@ def run(
     # get var matrix
     var_matrix = get_unqid_var_matrix(unqid_var_dict, var_to_idx)
 
+    logging.info(f"Nr of unique strains and variants: {var_matrix.shape}")
+
     # save data
     logging.info("Saving data")
     with open(os.path.join(output_dir, "var_to_idx.json"), "r") as f:
