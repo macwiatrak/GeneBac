@@ -2,6 +2,7 @@ import logging
 import os
 from typing import Optional, Literal
 
+import torch
 from pytorch_lightning.utilities.seed import seed_everything
 
 from deep_bac.argparser import DeepGeneBacArgumentParser
@@ -89,7 +90,13 @@ def run(
             dataloaders=data.val_dataloader,
         )
         print("Test set results with thresholds tuned on val:")
-        return trainer.test(
+        _ = trainer.test(
+            model,
+            dataloaders=data.test_dataloader,
+        )
+        print("Test set results with 0.5 thresholds:")
+        model.drug_thresholds = torch.ones(14) * 0.5
+        _ = trainer.test(
             model,
             dataloaders=data.test_dataloader,
         )
