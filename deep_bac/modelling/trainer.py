@@ -1,4 +1,7 @@
+import signal
+
 import torch.cuda
+from lightning_lite.plugins.environments import SLURMEnvironment
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import (
     EarlyStopping,
@@ -61,4 +64,7 @@ def get_trainer(
         accumulate_grad_batches=config.accumulate_grad_batches,
         resume_from_checkpoint=resume_from_ckpt_path,
         move_metrics_to_cpu=True,
+        plugins=[
+            SLURMEnvironment(auto_requeue=True, requeue_signal=signal.SIGHUP)
+        ],
     )
