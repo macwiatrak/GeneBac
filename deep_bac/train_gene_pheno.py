@@ -82,28 +82,8 @@ def run(
 
     if test:
         model = model.load_from_checkpoint(ckpt_path)
-        # drug_thresholds = get_drug_thresholds(model, data.val_dataloader)
-        # model.drug_thresholds = drug_thresholds
-        print("Val set results with thresholds not tuned:")
-        _ = trainer.test(
-            model,
-            dataloaders=data.val_dataloader,
-        )
         drug_thresholds = get_drug_thresholds(model, data.val_dataloader)
-        print("drug thresholds:", drug_thresholds)
         model.drug_thresholds = drug_thresholds
-        print("Val set results with thresholds tuned on val:")
-        _ = trainer.test(
-            model,
-            dataloaders=data.val_dataloader,
-        )
-        print("Test set results with thresholds tuned on val:")
-        _ = trainer.test(
-            model,
-            dataloaders=data.test_dataloader,
-        )
-        print("Test set results with 0.5 thresholds:")
-        model.drug_thresholds = torch.ones(14) * 0.5
         return trainer.test(
             model,
             dataloaders=data.test_dataloader,
