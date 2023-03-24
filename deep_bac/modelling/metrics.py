@@ -150,7 +150,6 @@ def binary_cls_metrics(
         auroc_score = auroc(
             logits, labels, task="binary", ignore_index=ignore_index
         )
-    print("Threshold: ", thresh.item())
     return {
         "accuracy": accuracy(
             logits,
