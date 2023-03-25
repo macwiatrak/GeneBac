@@ -33,6 +33,7 @@ def run(
     ] = "cryptic",
     test_after_train: bool = False,
     resume_from_ckpt_path: str = None,
+    fold_idx: int = None,
 ):
     selected_genes = get_selected_genes(use_drug_specific_genes)
     logging.info(f"Selected genes: {selected_genes}")
@@ -48,7 +49,7 @@ def run(
             input_dir, "phenotype_labels_with_binary_labels.parquet"
         ),
         train_val_test_split_indices_file_path=os.path.join(
-            input_dir, "train_val_test_split_unq_ids.json"
+            input_dir, "train_test_cv_split_unq_ids.json"
         ),
         variance_per_gene_file_path=os.path.join(
             input_dir, "unnormalised_variance_per_gene.csv"
@@ -64,6 +65,7 @@ def run(
         num_workers=num_workers if num_workers is not None else os.cpu_count(),
         selected_genes=selected_genes,
         test=any([test, test_after_train]),
+        fold_idx=fold_idx,
     )
     logging.info("Finished loading data")
 
@@ -122,6 +124,7 @@ def main(args):
         use_drug_specific_genes=args.use_drug_specific_genes,
         test_after_train=args.test_after_train,
         resume_from_ckpt_path=args.resume_from_ckpt_path,
+        fold_idx=args.fold_idx,
     )
     format_and_write_results(
         results=results,

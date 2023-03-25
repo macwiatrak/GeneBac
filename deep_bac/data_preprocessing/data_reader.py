@@ -110,6 +110,7 @@ def get_gene_pheno_data(
     reverse_complement_prob: float = 0.0,
     num_workers: int = 8,
     test: bool = False,
+    fold_idx: int = None,
 ):
     reference_gene_data_df = pd.read_parquet(reference_gene_data_df_path)
 
@@ -120,8 +121,16 @@ def get_gene_pheno_data(
 
     with open(train_val_test_split_indices_file_path, "r") as f:
         train_val_test_split_indices = json.load(f)
-    train_unique_ids = train_val_test_split_indices["train"]
-    val_unique_ids = train_val_test_split_indices["val"]
+    if fold_idx:
+        train_unique_ids = train_val_test_split_indices[
+            f"train_fold_{fold_idx}"
+        ]
+        val_unique_ids = train_val_test_split_indices[f"val_fold_{fold_idx}"]
+    else:
+        train_unique_ids = train_val_test_split_indices["train"]
+        # compute the metrics on the train anyway
+        val_unique_ids = train_val_test_split_indices["train"]
+
     test_unique_ids = train_val_test_split_indices["test"]
 
     train_dataloader = get_gene_pheno_dataloader(
