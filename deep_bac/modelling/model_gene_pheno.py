@@ -95,14 +95,6 @@ class DeepBacGenePheno(pl.LightningModule):
         loss = self.loss_fn(logits.view(-1), batch.labels.view(-1))
         # remove loss for samples with no label and compute mean
         loss = remove_ignore_index(loss, batch.labels.view(-1))
-        # self.log(
-        #     "train_loss",
-        #     loss,
-        #     prog_bar=True,
-        #     logger=True,
-        #     on_step=False,
-        #     on_epoch=True,
-        # )
         return dict(
             loss=loss,
             logits=logits.cpu(),
@@ -112,9 +104,12 @@ class DeepBacGenePheno(pl.LightningModule):
     def training_epoch_end(self, outputs: List[Dict[str, torch.tensor]]):
         if self.config.use_validation_set:
             return None
-        agg_stats = compute_agg_stats(
-            outputs, regression=self.regression, thresholds=self.drug_thresholds
+        agg_stats, thresholds = compute_agg_stats(
+            outputs,
+            regression=self.regression,
+            thresholds=None,
         )
+        self.drug_thresholds = thresholds
         agg_stats = {f"train_{k}": v for k, v in agg_stats.items()}
         self.log_dict(
             agg_stats,
@@ -137,7 +132,7 @@ class DeepBacGenePheno(pl.LightningModule):
     def eval_epoch_end(
         self, outputs: List[Dict[str, torch.tensor]], data_split: str
     ) -> Dict[str, float]:
-        agg_stats = compute_agg_stats(
+        agg_stats, _ = compute_agg_stats(
             outputs, regression=self.regression, thresholds=self.drug_thresholds
         )
         agg_stats = {f"{data_split}_{k}": v for k, v in agg_stats.items()}

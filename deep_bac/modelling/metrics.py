@@ -130,7 +130,7 @@ def binary_cls_metrics(
     labels: torch.Tensor,
     ignore_index: int,
     thresh: torch.Tensor = None,
-) -> Dict[str, torch.Tensor]:
+) -> Tuple[Dict[str, torch.Tensor], float]:
     """
     Get metrics for binary classification task.
     Returns:
@@ -165,7 +165,7 @@ def binary_cls_metrics(
         "spec": spec,
         "sens": sens,
         "gmean_spec_sens": gmean,
-    }
+    }, thresh.item()
 
 
 def compute_agg_stats(
@@ -173,7 +173,7 @@ def compute_agg_stats(
     regression: bool,
     ignore_index: int = -100,
     thresholds: torch.Tensor = None,
-) -> Dict[str, torch.Tensor]:
+) -> Tuple[Dict[str, torch.Tensor], torch.Tensor]:
     """
     Compute aggregate statistics from model outputs.
     Args:
@@ -190,22 +190,24 @@ def compute_agg_stats(
     metrics = {"loss": loss}
     if not regression:
         if len(labels.shape) == 1:
-            bin_cls_metrics = binary_cls_metrics(
+            bin_cls_metrics, thresh = binary_cls_metrics(
                 logits, labels, ignore_index, thresholds
             )
             metrics.update(bin_cls_metrics)
-            return metrics
+            return metrics, torch.tensor(thresh)
         drug_metrics = {}
+        threshes = []
         for drug_idx in range(labels.shape[1]):
             drug_labels = labels[:, drug_idx]
             drug_logits = logits[:, drug_idx]
             thresh = thresholds[drug_idx] if thresholds is not None else None
-            drug_m = binary_cls_metrics(
+            drug_m, thresh = binary_cls_metrics(
                 drug_logits, drug_labels, ignore_index, thresh
             )
             drug_metrics.update(
                 {f"drug_{drug_idx}_{k}": v for k, v in drug_m.items()}
             )
+            threshes.append(thresh)
         for metric in BINARY_CLS_METRICS:
             metrics[f"{metric}"] = get_macro_metric(
                 metrics_dict=drug_metrics,
@@ -214,7 +216,7 @@ def compute_agg_stats(
                 drug_idxs=[DRUG_TO_LABEL_IDX[idx] for idx in DRUGS_OF_INTEREST],
             )
         metrics.update(drug_metrics)
-        return metrics
+        return metrics, torch.tensor(threshes)
 
     if len(labels.shape) == 1:
         labels = labels.view(-1)
