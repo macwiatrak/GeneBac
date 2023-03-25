@@ -121,6 +121,7 @@ def get_gene_pheno_data(
 
     with open(train_val_test_split_indices_file_path, "r") as f:
         train_val_test_split_indices = json.load(f)
+
     if fold_idx:
         train_unique_ids = train_val_test_split_indices[
             f"train_fold_{fold_idx}"
