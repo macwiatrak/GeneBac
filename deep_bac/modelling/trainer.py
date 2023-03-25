@@ -1,4 +1,7 @@
+import signal
+
 import torch.cuda
+from lightning_lite.plugins.environments import SLURMEnvironment
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import (
     EarlyStopping,
@@ -32,7 +35,7 @@ def get_trainer(
     filename = (
         "{epoch:02d}-{val_r2:.4f}"
         if "r2" in config.monitor_metric
-        else "{epoch:02d}-{train_gmean_spec_sens:.4f}"
+        else "{epoch:02d}-{val_gmean_spec_sens:.4f}"
     )
     """Get the trainer"""
     return Trainer(
@@ -61,4 +64,7 @@ def get_trainer(
         accumulate_grad_batches=config.accumulate_grad_batches,
         resume_from_checkpoint=resume_from_ckpt_path,
         move_metrics_to_cpu=True,
+        plugins=[
+            SLURMEnvironment(auto_requeue=True, requeue_signal=signal.SIGHUP)
+        ],
     )
