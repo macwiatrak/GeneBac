@@ -102,8 +102,6 @@ class DeepBacGenePheno(pl.LightningModule):
         )
 
     def training_epoch_end(self, outputs: List[Dict[str, torch.tensor]]):
-        if self.config.use_validation_set:
-            return None
         agg_stats, thresholds = compute_agg_stats(
             outputs,
             regression=self.regression,
