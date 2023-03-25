@@ -108,7 +108,7 @@ def test_model_gene_pheno_train_fake_data(tmpdir):
         gradient_clip_val=1.0,
         logger=logger,
     )
-    trainer.fit(model, train_dataloaders=dataloader)
+    trainer.fit(model, train_dataloaders=dataloader, val_dataloaders=dataloader)
     # assert logger.val_logs[-1]["val_loss"] < logger.val_logs[0]["val_loss"]
     assert (
         logger.train_logs[-1]["train_loss"] < logger.train_logs[0]["train_loss"]
@@ -186,7 +186,7 @@ def test_model_gene_pheno_train_real_data(tmpdir):
             ),
         ],
     )
-    trainer.fit(model, train_dataloaders=dataloader)
+    trainer.fit(model, train_dataloaders=dataloader, val_dataloaders=dataloader)
     assert logger.val_logs[-1]["train_loss"] < logger.val_logs[0]["train_loss"]
 
 
