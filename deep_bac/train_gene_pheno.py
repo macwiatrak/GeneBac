@@ -83,27 +83,12 @@ def run(
         model = model.load_from_checkpoint(ckpt_path)
         drug_thresholds = get_drug_thresholds(model, data.train_dataloader)
         model.drug_thresholds = drug_thresholds
-        print("Testing model on test dl tuned thresholds")
-        _ = trainer.test(
+        return trainer.test(
             model,
             dataloaders=data.test_dataloader,
         )
 
-        model.drug_thresholds = None
-        print("Testing model on train dl own thresholds")
-        _ = trainer.test(
-            model,
-            dataloaders=data.train_dataloader,
-        )
-
-        model.drug_thresholds = drug_thresholds
-        print("Testing model on train dl tuned thresholds")
-        return trainer.test(
-            model,
-            dataloaders=data.train_dataloader,
-        )
-
-    trainer.fit(model, data.train_dataloader)
+    trainer.fit(model, data.train_dataloader, data.val_dataloader)
 
     if test_after_train:
         model = model.load_from_checkpoint(
