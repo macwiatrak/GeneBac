@@ -33,7 +33,7 @@ def remove_ignore_index(
     )
     loss = loss * mask
     loss = loss.sum() / mask.sum()
-    loss = torch.tensor(0.0) if torch.isnan(loss) else torch.tensor(1e-8)
+    loss = loss if not torch.isnan(loss) else None
     return loss
 
 
