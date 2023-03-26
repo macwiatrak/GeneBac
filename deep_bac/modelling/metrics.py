@@ -47,6 +47,12 @@ FIRST_LINE_DRUGS = ["INH", "RIF", "EMB"]
 
 SECOND_LINE_DRUGS = ["AMI", "ETH", "KAN", "LEV", "MXF", "RFB"]
 
+NEW_AND_REPURPOSED_DRUGS = ["BDQ", "CFZ", "DLM", "LZD"]
+
+DRUGS_OF_INTEREST = (
+    FIRST_LINE_DRUGS + SECOND_LINE_DRUGS + NEW_AND_REPURPOSED_DRUGS
+)
+
 
 def get_regression_metrics(
     logits: torch.Tensor, labels: torch.Tensor
@@ -123,8 +129,8 @@ def binary_cls_metrics(
     logits: torch.Tensor,
     labels: torch.Tensor,
     ignore_index: int,
-    thresh: float = None,
-) -> Dict[str, torch.Tensor]:
+    thresh: torch.Tensor = None,
+) -> Tuple[Dict[str, torch.Tensor], float]:
     """
     Get metrics for binary classification task.
     Returns:
@@ -135,7 +141,11 @@ def binary_cls_metrics(
             logits, labels, ignore_index
         )
     else:
-        gmean, spec, sens = get_spec_sens(logits, labels, thresh, ignore_index)
+        gmean, spec, sens = get_spec_sens(
+            logits, labels, thresh.item(), ignore_index
+        )
+    # quick fix to prevent nan thresh
+    thresh = torch.tensor(0.5) if torch.isnan(thresh) else thresh
     if labels[labels != -100].sum() == 0:
         auroc_score = torch.tensor(-100.0)
     else:
@@ -157,7 +167,7 @@ def binary_cls_metrics(
         "spec": spec,
         "sens": sens,
         "gmean_spec_sens": gmean,
-    }
+    }, thresh.item()
 
 
 def compute_agg_stats(
@@ -165,13 +175,14 @@ def compute_agg_stats(
     regression: bool,
     ignore_index: int = -100,
     thresholds: torch.Tensor = None,
-) -> Dict[str, torch.Tensor]:
+) -> Tuple[Dict[str, torch.Tensor], torch.Tensor]:
     """
     Compute aggregate statistics from model outputs.
     Args:
         outputs: list of model outputs
         regression: bool indicating if the task is regression or classification
         ignore_index: index to ignore in the labels
+        thresholds: a torch tensor of thresholds to use for each drug
     Returns:
         dict of aggregate statistics
     """
@@ -181,36 +192,33 @@ def compute_agg_stats(
     metrics = {"loss": loss}
     if not regression:
         if len(labels.shape) == 1:
-            bin_cls_metrics = binary_cls_metrics(
+            bin_cls_metrics, thresh = binary_cls_metrics(
                 logits, labels, ignore_index, thresholds
             )
             metrics.update(bin_cls_metrics)
-            return metrics
+            return metrics, torch.tensor(thresh)
         drug_metrics = {}
+        threshes = []
         for drug_idx in range(labels.shape[1]):
             drug_labels = labels[:, drug_idx]
             drug_logits = logits[:, drug_idx]
-            thresh = (
-                thresholds[drug_idx].item() if thresholds is not None else None
-            )
-            drug_m = binary_cls_metrics(
+            thresh = thresholds[drug_idx] if thresholds is not None else None
+            drug_m, thresh = binary_cls_metrics(
                 drug_logits, drug_labels, ignore_index, thresh
             )
             drug_metrics.update(
                 {f"drug_{drug_idx}_{k}": v for k, v in drug_m.items()}
             )
+            threshes.append(thresh)
         for metric in BINARY_CLS_METRICS:
             metrics[f"{metric}"] = get_macro_metric(
                 metrics_dict=drug_metrics,
                 metric=metric,
                 # use only first line drugs for macro metrics
-                drug_idxs=[
-                    DRUG_TO_LABEL_IDX[idx]
-                    for idx in FIRST_LINE_DRUGS + SECOND_LINE_DRUGS
-                ],
+                drug_idxs=[DRUG_TO_LABEL_IDX[idx] for idx in DRUGS_OF_INTEREST],
             )
         metrics.update(drug_metrics)
-        return metrics
+        return metrics, torch.tensor(threshes)
 
     if len(labels.shape) == 1:
         labels = labels.view(-1)
@@ -238,10 +246,7 @@ def compute_agg_stats(
             metrics_dict=drug_metrics,
             metric=metric,
             # use only first & second line drugs for macro metrics
-            drug_idxs=[
-                DRUG_TO_LABEL_IDX[idx]
-                for idx in FIRST_LINE_DRUGS + SECOND_LINE_DRUGS
-            ],
+            drug_idxs=[DRUG_TO_LABEL_IDX[idx] for idx in DRUGS_OF_INTEREST],
         )
     metrics.update(drug_metrics)
     return metrics
@@ -282,3 +287,25 @@ def get_stats_for_thresholds(
         }
         output.update(thresh_stats)
     return output
+
+
+def compute_drug_thresholds(
+    logits: torch.Tensor,
+    labels: torch.Tensor,
+    ignore_index: int = -100,
+) -> torch.Tensor:
+    if len(labels.shape) == 1:
+        thresh, _, _, _ = choose_best_spec_sens_threshold(
+            logits, labels, ignore_index
+        )
+        return torch.tensor(thresh)
+
+    drug_thresholds = []
+    for drug_idx in range(labels.shape[1]):
+        drug_labels = labels[:, drug_idx]
+        drug_logits = logits[:, drug_idx]
+        thresh, _, _, _ = choose_best_spec_sens_threshold(
+            drug_logits, drug_labels, ignore_index
+        )
+        drug_thresholds.append(thresh)
+    return torch.tensor(drug_thresholds)

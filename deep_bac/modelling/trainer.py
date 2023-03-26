@@ -1,4 +1,7 @@
+import signal
+
 import torch.cuda
+from lightning_lite.plugins.environments import SLURMEnvironment
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import (
     EarlyStopping,
@@ -29,11 +32,15 @@ def get_trainer(
         config.monitor_metric if config.monitor_metric else "val_loss"
     )
     mode = "min" if "loss" in config.monitor_metric else "max"
-    filename = (
-        "{epoch:02d}-{val_r2:.4f}"
-        if "r2" in config.monitor_metric
-        else "{epoch:02d}-{val_gmean_spec_sens:.4f}"
-    )
+    if config.monitor_metric == "val_r2":
+        filename = "{epoch:02d}-{val_r2:.4f}"
+    elif config.monitor_metric == "val_gmean_spec_sens":
+        filename = "{epoch:02d}-{val_gmean_spec_sens:.4f}"
+    elif config.monitor_metric == "train_gmean_spec_sens":
+        filename = "{epoch:02d}-{train_gmean_spec_sens:.4f}"
+    else:
+        filename = "{epoch:02d}-{val_loss:.4f}"
+
     """Get the trainer"""
     return Trainer(
         devices=devices,
@@ -60,4 +67,8 @@ def get_trainer(
         logger=TensorBoardLogger(output_dir),
         accumulate_grad_batches=config.accumulate_grad_batches,
         resume_from_checkpoint=resume_from_ckpt_path,
+        move_metrics_to_cpu=True,
+        plugins=[
+            SLURMEnvironment(auto_requeue=True, requeue_signal=signal.SIGHUP)
+        ],
     )

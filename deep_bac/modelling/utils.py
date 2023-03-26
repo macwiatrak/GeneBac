@@ -1,8 +1,13 @@
+import logging
+
 import torch
 from torch import nn
+from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from deep_bac.baselines.md_cnn.md_cnn import MDCNN
 from deep_bac.modelling.data_types import DeepGeneBacConfig
+from deep_bac.modelling.metrics import compute_drug_thresholds
 from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
 from deep_bac.modelling.modules.enformer_like_encoder import EnformerLikeEncoder
 from deep_bac.modelling.modules.graph_transformer import GraphTransformer
@@ -15,6 +20,8 @@ from deep_bac.modelling.modules.positional_encodings import (
 from deep_bac.modelling.modules.gene_bac_encoder import GeneBacEncoder
 from deep_bac.modelling.modules.utils import Flatten
 
+logging.basicConfig(level=logging.INFO)
+
 
 def remove_ignore_index(
     loss: torch.Tensor, labels: torch.Tensor, ignore_index: int = -100
@@ -25,7 +32,9 @@ def remove_ignore_index(
         labels == ignore_index, torch.zeros_like(loss), torch.ones_like(loss)
     )
     loss = loss * mask
-    return loss.sum() / mask.sum()
+    loss = loss.sum() / mask.sum()
+    loss = loss if not torch.isnan(loss) else None
+    return loss
 
 
 def get_gene_encoder(config: DeepGeneBacConfig):
@@ -96,3 +105,25 @@ def get_pos_encoder(config: DeepGeneBacConfig):
             dim=config.n_gene_bottleneck_layer,
         )
     raise ValueError(f"Unknown pos encoder type: {config.pos_encoder_type}")
+
+
+def get_drug_thresholds(model, dataloader: DataLoader):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    logging.info(f"Using device {device}")
+    model.to(device)
+    model.eval()
+    logits_list = []
+    labels_list = []
+    logging.info(f"Calculating optimal thresholds.")
+    with torch.no_grad():
+        for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
+            logits, _ = model(
+                batch.input_tensor.to(model.device),
+                batch.tss_indexes.to(model.device),
+            )
+            logits_list.append(logits.cpu())
+            labels_list.append(batch.labels.cpu())
+    logits = torch.cat(logits_list, dim=0)
+    labels = torch.cat(labels_list, dim=0)
+    drug_thresholds = compute_drug_thresholds(logits, labels)
+    return drug_thresholds

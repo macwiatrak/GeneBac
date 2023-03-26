@@ -9,6 +9,7 @@ from deep_bac.data_preprocessing.data_reader import get_gene_pheno_data
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 from deep_bac.modelling.trainer import get_trainer
+from deep_bac.modelling.utils import get_drug_thresholds
 from deep_bac.utils import get_selected_genes, format_and_write_results
 
 logging.basicConfig(level=logging.INFO)
@@ -32,6 +33,7 @@ def run(
     ] = "cryptic",
     test_after_train: bool = False,
     resume_from_ckpt_path: str = None,
+    fold_idx: int = None,
 ):
     selected_genes = get_selected_genes(use_drug_specific_genes)
     logging.info(f"Selected genes: {selected_genes}")
@@ -47,7 +49,7 @@ def run(
             input_dir, "phenotype_labels_with_binary_labels.parquet"
         ),
         train_val_test_split_indices_file_path=os.path.join(
-            input_dir, "train_val_test_split_unq_ids.json"
+            input_dir, "train_test_cv_split_unq_ids.json"
         ),
         variance_per_gene_file_path=os.path.join(
             input_dir, "unnormalised_variance_per_gene.csv"
@@ -63,7 +65,11 @@ def run(
         num_workers=num_workers if num_workers is not None else os.cpu_count(),
         selected_genes=selected_genes,
         test=any([test, test_after_train]),
+        fold_idx=fold_idx,
     )
+    logging.info(f"Fold index: {fold_idx}")
+    val_dataloader = data.val_dataloader if fold_idx is not None else []
+
     logging.info("Finished loading data")
 
     config.train_set_len = data.train_set_len
@@ -79,19 +85,25 @@ def run(
     model = DeepBacGenePheno(config)
 
     if test:
+        model = model.load_from_checkpoint(ckpt_path)
+        drug_thresholds = get_drug_thresholds(model, data.train_dataloader)
+        model.drug_thresholds = drug_thresholds
         return trainer.test(
             model,
             dataloaders=data.test_dataloader,
-            ckpt_path=ckpt_path,
         )
 
-    trainer.fit(model, data.train_dataloader, data.val_dataloader)
+    trainer.fit(model, data.train_dataloader, val_dataloaders=val_dataloader)
 
     if test_after_train:
+        model = model.load_from_checkpoint(
+            trainer.checkpoint_callback.best_model_path
+        )
+        drug_thresholds = get_drug_thresholds(model, data.train_dataloader)
+        model.drug_thresholds = drug_thresholds
         return trainer.test(
             model,
             dataloaders=data.test_dataloader,
-            ckpt_path="best",
         )
     return None
 
@@ -115,6 +127,7 @@ def main(args):
         use_drug_specific_genes=args.use_drug_specific_genes,
         test_after_train=args.test_after_train,
         resume_from_ckpt_path=args.resume_from_ckpt_path,
+        fold_idx=args.fold_idx,
     )
     format_and_write_results(
         results=results,

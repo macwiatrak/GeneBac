@@ -9,6 +9,7 @@ from deep_bac.modelling.metrics import (
     BINARY_CLS_METRICS,
     FIRST_LINE_DRUGS,
     SECOND_LINE_DRUGS,
+    NEW_AND_REPURPOSED_DRUGS,
 )
 
 DRUG_SPECIFIC_GENES_DICT = {
@@ -152,6 +153,8 @@ def get_drug_line(drug: str):
         return "First"
     if drug in SECOND_LINE_DRUGS:
         return "Second"
+    if drug in NEW_AND_REPURPOSED_DRUGS:
+        return "New and repurposed"
     return None
 
 
