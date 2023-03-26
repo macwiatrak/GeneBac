@@ -58,5 +58,4 @@ class DeepGeneBacArgumentParser(Tap):
     ] = "cryptic"
     pos_encoder_type: Literal["learnable", "fixed"] = "fixed"
     resume_from_ckpt_path: str = None
-    use_validation_set: bool = False
     fold_idx: int = None
