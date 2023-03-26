@@ -32,7 +32,9 @@ def remove_ignore_index(
         labels == ignore_index, torch.zeros_like(loss), torch.ones_like(loss)
     )
     loss = loss * mask
-    return loss.sum() / mask.sum()
+    loss = loss.sum() / mask.sum()
+    loss = torch.tensor(0.0) if torch.isnan(loss) else torch.tensor(1e-8)
+    return loss
 
 
 def get_gene_encoder(config: DeepGeneBacConfig):

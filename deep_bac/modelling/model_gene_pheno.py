@@ -108,13 +108,14 @@ class DeepBacGenePheno(pl.LightningModule):
             thresholds=None,
         )
         self.drug_thresholds = thresholds
-        # agg_stats = {f"train_{k}": v for k, v in agg_stats.items()}
-        # self.log_dict(
-        #     agg_stats,
-        #     prog_bar=True,
-        #     logger=True,
-        #     sync_dist=True,
-        # )
+        if not self.config.use_validation_set:
+            agg_stats = {f"train_{k}": v for k, v in agg_stats.items()}
+            self.log_dict(
+                agg_stats,
+                prog_bar=True,
+                logger=True,
+                sync_dist=True,
+            )
 
     def eval_step(self, batch: BatchBacInputSample):
         logits, _ = self(batch.input_tensor, batch.tss_indexes)

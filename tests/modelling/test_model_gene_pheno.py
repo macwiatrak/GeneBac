@@ -145,6 +145,7 @@ def test_model_gene_pheno_train_real_data(tmpdir):
         n_transformer_heads=2,
         n_highly_variable_genes=len(selected_genes),
         max_gene_length=max_gene_length,
+        use_validation_set=False,
     )
 
     dataloader = get_gene_pheno_dataloader(
@@ -187,7 +188,9 @@ def test_model_gene_pheno_train_real_data(tmpdir):
         ],
     )
     trainer.fit(model, train_dataloaders=dataloader, val_dataloaders=dataloader)
-    assert logger.val_logs[-1]["train_loss"] < logger.val_logs[0]["train_loss"]
+    assert (
+        logger.train_logs[-1]["train_loss"] < logger.train_logs[0]["train_loss"]
+    )
 
 
 def test_model_gene_pheno_test_drug_thresh_real_data(tmpdir):

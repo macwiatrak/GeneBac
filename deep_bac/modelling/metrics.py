@@ -144,6 +144,8 @@ def binary_cls_metrics(
         gmean, spec, sens = get_spec_sens(
             logits, labels, thresh.item(), ignore_index
         )
+    # quick fix to prevent nan thresh
+    thresh = torch.tensor(0.5) if torch.isnan(thresh) else thresh
     if labels[labels != -100].sum() == 0:
         auroc_score = torch.tensor(-100.0)
     else:

@@ -122,15 +122,15 @@ def get_gene_pheno_data(
     with open(train_val_test_split_indices_file_path, "r") as f:
         train_val_test_split_indices = json.load(f)
 
-    if fold_idx:
+    if fold_idx is not None:
         train_unique_ids = train_val_test_split_indices[
             f"train_fold_{fold_idx}"
         ]
         val_unique_ids = train_val_test_split_indices[f"val_fold_{fold_idx}"]
     else:
         train_unique_ids = train_val_test_split_indices["train"]
-        # compute the metrics on the train anyway
-        val_unique_ids = train_val_test_split_indices["train"]
+        # we are not doing validation so make the list empty
+        val_unique_ids = []
 
     test_unique_ids = train_val_test_split_indices["test"]
 
@@ -153,7 +153,8 @@ def get_gene_pheno_data(
     )
 
     val_dataloader = get_gene_pheno_dataloader(
-        batch_size=batch_size,
+        batch_size=2
+        * batch_size,  # double the batch size during eval for speed up
         unique_ids=val_unique_ids,
         bac_genes_df_file_path=input_df_file_path,
         reference_gene_data_df=reference_gene_data_df,
@@ -176,7 +177,8 @@ def get_gene_pheno_data(
             train_set_len=len(train_unique_ids),
         )
     test_dataloader = get_gene_pheno_dataloader(
-        batch_size=batch_size,
+        batch_size=2
+        * batch_size,  # double the batch size during eval for speed up
         unique_ids=test_unique_ids,
         bac_genes_df_file_path=input_df_file_path,
         reference_gene_data_df=reference_gene_data_df,

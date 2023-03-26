@@ -67,6 +67,9 @@ def run(
         test=any([test, test_after_train]),
         fold_idx=fold_idx,
     )
+    config.use_validation_set = False if not fold_idx else True
+    val_dataloader = data.val_dataloader if fold_idx else []
+
     logging.info("Finished loading data")
 
     config.train_set_len = data.train_set_len
@@ -90,7 +93,7 @@ def run(
             dataloaders=data.test_dataloader,
         )
 
-    trainer.fit(model, data.train_dataloader, data.val_dataloader)
+    trainer.fit(model, data.train_dataloader, val_dataloaders=val_dataloader)
 
     if test_after_train:
         model = model.load_from_checkpoint(
