@@ -67,8 +67,8 @@ def run(
         test=any([test, test_after_train]),
         fold_idx=fold_idx,
     )
-    config.use_validation_set = False if not fold_idx else True
-    val_dataloader = data.val_dataloader if fold_idx else []
+    config.use_validation_set = False if fold_idx is not None else True
+    val_dataloader = data.val_dataloader if fold_idx is not None else []
 
     logging.info("Finished loading data")
 
