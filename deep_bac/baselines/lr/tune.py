@@ -41,7 +41,7 @@ def tune(
 
     # do grid search for best hyperparameters
     # TODO: make a function to score based on gmean spec sens
-    clf = GridSearchCV(model, parameters, cv=5, scoring="f1_score")
+    clf = GridSearchCV(model, parameters, cv=5, scoring="f1")
     clf.fit(data_matrices.train_var_matrix, data_matrices.train_labels)
     # return best hyperparameters
     return clf.best_params_
@@ -60,7 +60,7 @@ def run(
         os.path.join(variant_matrix_input_dir, "var_matrix.npz")
     )
     with open(
-        os.path.join(variant_matrix_input_dir, "unq_id_to_idx.json"), "r"
+        os.path.join(variant_matrix_input_dir, "unique_id_to_idx.json"), "r"
     ) as f:
         unq_id_to_idx = json.load(f)
 
@@ -77,6 +77,7 @@ def run(
         model=model,
         parameters=params,
     )
+    print(best_params)
     return best_params
 
 
@@ -87,7 +88,7 @@ def main():
         train_test_split_unq_ids_file_path=os.path.join(
             INPUT_DIR, "train_test_cv_split_unq_ids.json"
         ),
-        variant_matrix_input_dir="",
+        variant_matrix_input_dir="/tmp/var-matrix/",
         df_unq_ids_labels=pd.read_parquet(
             os.path.join(
                 INPUT_DIR, "phenotype_labels_with_binary_labels.parquet"
@@ -101,3 +102,7 @@ def main():
         max_iter=1000,
     )
     print(best_params)
+
+
+if __name__ == "__main__":
+    main()

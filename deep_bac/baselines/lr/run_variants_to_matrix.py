@@ -38,7 +38,6 @@ def get_and_filter_variants_df(
         file_path,
         usecols=cols_to_use,
         compression="gzip",
-        on_bad_lines=False,
     )
     # filter unique ids
     df = df[df["UNIQUEID"].isin(unique_ids_to_use)]
@@ -92,7 +91,6 @@ def run(
     use_drug_specific_genes: Literal[
         "INH", "Walker", "MD-CNN", "cryptic"
     ] = None,
-    train_test_split_unq_ids_file_path: str = None,
 ):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
@@ -101,7 +99,9 @@ def run(
         os.path.join(input_dir, PHENOTYPE_FILE_NAME)
     )
 
-    logging.info("Reading variants")
+    logging.info(
+        f"Nr of unique isolates: {len(strain_w_phenotype_ids)}. Reading variants"
+    )
     # get variants
     variants_df = get_and_filter_variants_df(
         file_path=os.path.join(
@@ -115,7 +115,9 @@ def run(
     # agg the variants by unique id
     agg_variants_df = variants_df.groupby(["UNIQUEID"]).agg(list)
     del variants_df  # remove it to save memory
-    logging.info("Finished aggregating variants")
+    logging.info(
+        f"Finished aggregating variants, nr of unique isolates: {len(agg_variants_df)}"
+    )
 
     # Get vars per unique id / isolate
     unqid_var_dict = get_unqid_var_dict(agg_variants_df)
