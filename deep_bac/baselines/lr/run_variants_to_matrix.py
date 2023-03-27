@@ -92,6 +92,7 @@ def run(
     use_drug_specific_genes: Literal[
         "INH", "Walker", "MD-CNN", "cryptic"
     ] = None,
+    train_test_split_unq_ids_file_path: str = None,
 ):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
@@ -143,7 +144,7 @@ def main():
     run(
         input_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/",
         output_dir="/tmp/var-matrix/",
-        # use_drug_specific_genes="cryptic",
+        use_drug_specific_genes="cryptic",
     )
 
 
