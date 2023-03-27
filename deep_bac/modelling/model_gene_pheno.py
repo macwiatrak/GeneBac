@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Union
 
 import numpy as np
 import pytorch_lightning as pl
@@ -89,12 +89,19 @@ class DeepBacGenePheno(pl.LightningModule):
         logits = self.decoder(strain_encodings)
         return logits, strain_encodings
 
-    def training_step(self, batch: BatchBacInputSample, batch_idx: int) -> Dict:
+    def training_step(
+        self, batch: BatchBacInputSample, batch_idx: int
+    ) -> Union[Dict, None]:
         logits, _ = self(batch.input_tensor, batch.tss_indexes)
         # get loss with reduction="none" to compute loss per sample
         loss = self.loss_fn(logits.view(-1), batch.labels.view(-1))
         # remove loss for samples with no label and compute mean
         loss = remove_ignore_index(loss, batch.labels.view(-1))
+        if (
+            loss is None
+        ):  # do this to prevent a failure in automatic optimisation in PL
+            return None
+
         return dict(
             loss=loss,
             logits=logits.cpu(),

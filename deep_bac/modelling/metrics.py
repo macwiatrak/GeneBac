@@ -186,9 +186,11 @@ def compute_agg_stats(
     Returns:
         dict of aggregate statistics
     """
-    logits = torch.cat([x["logits"] for x in outputs]).squeeze(-1)
-    labels = torch.cat([x["labels"] for x in outputs])
-    loss = torch.stack([x["loss"] for x in outputs]).mean()
+    logits = torch.cat([x["logits"] for x in outputs if x is not None]).squeeze(
+        -1
+    )
+    labels = torch.cat([x["labels"] for x in outputs if x is not None])
+    loss = torch.stack([x["loss"] for x in outputs if x is not None]).mean()
     metrics = {"loss": loss}
     if not regression:
         if len(labels.shape) == 1:
