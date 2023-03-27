@@ -40,3 +40,23 @@ def split_train_val_test(
         train_labels=train_labels,
         test_labels=test_labels,
     )
+
+
+def get_drug_var_matrices(
+    drug_idx: int,
+    data: DataVarMatrices,
+):
+    train_drug_indices = np.where(data.train_labels[:, drug_idx] != -100.0)[0]
+    test_drug_indices = np.where(data.train_labels[:, drug_idx] != -100.0)[0]
+
+    train_var_matrix = data.train_var_matrix[train_drug_indices]
+    train_labels = data.train_labels[train_drug_indices, drug_idx]
+
+    test_var_matrix = data.test_var_matrix[test_drug_indices, drug_idx]
+    test_labels = data.test_labels[test_drug_indices, drug_idx]
+    return DataVarMatrices(
+        train_var_matrix=train_var_matrix,
+        test_var_matrix=test_var_matrix,
+        train_labels=train_labels,
+        test_labels=test_labels,
+    )
