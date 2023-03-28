@@ -14,6 +14,7 @@ def split_train_val_test(
     variant_matrix: csr_matrix,
     unq_id_to_idx: Dict[str, int],
     df_unq_ids_labels: pd.DataFrame,
+    exclude_vars_not_in_train: bool = False,
 ) -> DataVarMatrices:
     with open(train_test_split_unq_ids_file_path, "r") as f:
         train_test_split_unq_ids = json.load(f)
@@ -42,6 +43,11 @@ def split_train_val_test(
         )
         test_var_matrix.append(var_vector.toarray())
     test_var_matrix = np.concatenate(test_var_matrix)
+
+    if exclude_vars_not_in_train:
+        vars_in_train = np.where(train_var_matrix.sum(axis=0) > 0)[0]
+        train_var_matrix = train_var_matrix[:, vars_in_train]
+        test_var_matrix = test_var_matrix[:, vars_in_train]
 
     train_labels = np.stack(
         [
@@ -89,6 +95,7 @@ def get_var_matrix_data(
     variant_matrix_input_dir: str,
     train_test_split_unq_ids_file_path: str,
     df_unq_ids_labels: pd.DataFrame,
+    exclude_vars_not_in_train: bool = False,
 ) -> DataVarMatrices:
 
     variant_matrix = load_npz(
@@ -104,6 +111,7 @@ def get_var_matrix_data(
         variant_matrix,
         unq_id_to_idx,
         df_unq_ids_labels,
+        exclude_vars_not_in_train,
     )
     data = get_drug_var_matrices(drug_idx, data)
     return data
