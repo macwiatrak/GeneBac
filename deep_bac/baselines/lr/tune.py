@@ -42,7 +42,9 @@ def tune(
     # do grid search for best hyperparameters
     # TODO: make a function to score based on gmean spec sens
     clf = GridSearchCV(model, parameters, cv=5, scoring="f1")
-    clf.fit(data_matrices.train_var_matrix, data_matrices.train_labels)
+    clf.fit(
+        data_matrices.train_var_matrix, data_matrices.train_labels, n_jobs=-1
+    )
     # return best hyperparameters
     return clf.best_params_
 
@@ -95,7 +97,7 @@ def main():
             )
         ),
         params={
-            "C": [0.0001, 0.001, 0.01, 0.1, 0.2, 0.5],
+            "C": [0.0001, 0.001, 0.01, 0.1, 1.0],
             "class_weight": [None, "balanced"],
         },
         penalty=None,
