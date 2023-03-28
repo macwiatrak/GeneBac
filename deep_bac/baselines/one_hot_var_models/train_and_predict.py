@@ -26,6 +26,7 @@ def run(
     max_iter: int = 1000,
     penalty: Literal["l1", "l2", "elasticnet"] = "l2",
     random_state: int = 42,
+    exclude_vars_not_in_train: bool = False,
 ):
     df_unq_ids_labels = pd.read_parquet(df_unq_ids_labels_file_path)
     params = {
@@ -48,6 +49,7 @@ def run(
             max_iter=max_iter,
             random_state=random_state,
             penalty=penalty,
+            exclude_vars_not_in_train=exclude_vars_not_in_train,
         )
         logging.info(f"Test metrics for {drug} drug: {test_metrics}")
         output_dfs.append(dict_metrics_to_df(test_metrics, drug, split="test"))
@@ -66,6 +68,7 @@ def main(args):
         max_iter=args.max_iter,
         penalty=args.penalty,
         random_state=args.random_state,
+        exclude_vars_not_in_train=args.exclude_vars_not_in_train,
     )
 
 

@@ -28,6 +28,7 @@ def train_and_predict(
     max_iter: int,
     penalty: Literal["l1", "l2", "elasticnet"] = None,
     random_state: int = 42,
+    exclude_vars_not_in_train: bool = False,
 ) -> Dict[str, float]:
     seed_everything(random_state)
     data_matrices = get_var_matrix_data(
@@ -35,14 +36,16 @@ def train_and_predict(
         variant_matrix_input_dir=variant_matrix_input_dir,
         train_test_split_unq_ids_file_path=train_test_split_unq_ids_file_path,
         df_unq_ids_labels=df_unq_ids_labels,
+        exclude_vars_not_in_train=exclude_vars_not_in_train,
     )
 
+    solver = "saga" if penalty == "elasticnet" else "liblinear"
     model = LogisticRegression(
         max_iter=max_iter,
         penalty=penalty,
         random_state=random_state,
         tol=0.001,
-        solver="saga",  # supports all penalties
+        solver=solver,  # supports all penalties
     )
     logging.info(f"Using logistic regression with {penalty} penalty")
 
@@ -58,7 +61,7 @@ def train_and_predict(
         penalty=penalty,
         random_state=random_state,
         tol=0.001,
-        solver="saga",  # supports all penalties
+        solver=solver,  # supports all penalties
         **best_params,
     )
 
@@ -93,7 +96,7 @@ def main():
         train_test_split_unq_ids_file_path=os.path.join(
             INPUT_DIR, "train_test_cv_split_unq_ids.json"
         ),
-        variant_matrix_input_dir="/tmp/var-matrix/",
+        variant_matrix_input_dir="/tmp/variant-matrix-specific-loci/",
         df_unq_ids_labels=pd.read_parquet(
             os.path.join(
                 INPUT_DIR, "phenotype_labels_with_binary_labels.parquet"
@@ -107,6 +110,7 @@ def main():
         max_iter=100,
         penalty="l2",
         random_state=42,
+        exclude_vars_not_in_train=True,
     )
 
 

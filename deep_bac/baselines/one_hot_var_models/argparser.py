@@ -23,3 +23,4 @@ class OneHotModelArgumentParser(Tap):
     max_iter: int = 1000
     penalty: Literal["l1", "l2", "elasticnet"] = "l2"
     random_state: int = 42
+    exclude_vars_not_in_train: bool = False
