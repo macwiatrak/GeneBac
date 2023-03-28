@@ -29,9 +29,14 @@ def run(
     exclude_vars_not_in_train: bool = False,
 ):
     df_unq_ids_labels = pd.read_parquet(df_unq_ids_labels_file_path)
+    c = (
+        [0.0001, 0.001, 0.01, 0.1, 1.0]
+        if penalty == "l2"
+        else [0.01, 0.1, 0.5, 1.0, 5.0]
+    )
     params = {
-        "C": [0.0001, 0.001, 0.01, 0.1, 1.0],
-        "class_weight": [None, "balanced"],
+        "C": c,
+        # "class_weight": [None, "balanced"],
     }
     # add l1 ratio if using elasticnet
     if penalty == "elasticnet":
