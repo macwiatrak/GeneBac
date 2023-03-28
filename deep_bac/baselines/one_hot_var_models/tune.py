@@ -72,6 +72,7 @@ def run_grid_search_cv(
         penalty=penalty,
         random_state=random_state,
         tol=0.001,
+        solver="saga",
     )
 
     best_params = tune(
