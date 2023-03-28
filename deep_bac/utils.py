@@ -84,10 +84,10 @@ DRUG_SPECIFIC_GENES_DICT = {
     "cryptic": [
         # First-line drugs
         "embB",  # EMB, RIF, LEV, MOX, RFB
-        "embA",  # EMB
+        # "embA",  # EMB
         "rpoB",  # EMB, INH, RIF, AMI, ETH, KAN, LEV, MOX, RFB, BDQ, LZD
         "katG",  # EMB, INH, RIF, RFB
-        "pncA",  # EMB
+        # "pncA",  # EMB
         "ahpC",  # INH
         "fabG1",  # INH, ETH, CLF
         "inhA",  # INH, ETH
@@ -96,29 +96,29 @@ DRUG_SPECIFIC_GENES_DICT = {
         # Second-line drugs
         "rrs",  # AMI, KAN, LEV, MOX, BDQ
         "gyrA",  # AMI, ETH, KAN, LEV, MOX
-        "echA8",  # AMI
-        "Rv2896c",  # AMI
+        # "echA8",  # AMI
+        # "Rv2896c",  # AMI
         "ethA",  # ETH, KAN
         "eis",  # KAN
         "gyrB",  # LEV, MOX
-        "rpoC",  # RFB
-        "Rv0810c",  # RFB,
+        # "rpoC",  # RFB
+        # "Rv0810c",  # RFB,
         # New and repurposed druga
         "Rv0678",  # BDQ, CLF
-        "atpE",  # BDQ
-        "pgi",  # BDQ,
+        # "atpE",  # BDQ
+        # "pgi",  # BDQ,
         "cyp142",  # CLF
-        "Rv3188",  # CLF,
-        "Rv3327",  # CLF
+        # "Rv3188",  # CLF,
+        # "Rv3327",  # CLF
         "ddn",  # DLM
         "fadE22",  # DLM
         "fba",  # DLM
-        "Rv2180c",  # DLM
-        "gap",  # DLM
+        # "Rv2180c",  # DLM
+        # "gap",  # DLM
         "rplC",  # LZD
         "emrB",  # LZD
-        "Rv3552",  # LZD
-        "add",  # LZD
+        # "Rv3552",  # LZD
+        # "add",  # LZD
     ],
     "INH": [
         "katG",

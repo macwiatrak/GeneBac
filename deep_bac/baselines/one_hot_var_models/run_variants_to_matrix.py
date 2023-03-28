@@ -145,7 +145,7 @@ def run(
 def main():
     run(
         input_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/",
-        output_dir="/tmp/variant-matrix-cryptic-loci/",
+        output_dir="/tmp/variant-matrix-cryptic-loci-updated/",
         use_drug_specific_genes="cryptic",
     )
 
