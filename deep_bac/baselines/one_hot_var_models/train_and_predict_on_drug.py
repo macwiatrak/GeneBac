@@ -7,10 +7,10 @@ import torch
 from pytorch_lightning.utilities.seed import seed_everything
 from sklearn.linear_model import LogisticRegression
 
-from deep_bac.baselines.lr.data_reader import (
+from deep_bac.baselines.one_hot_var_models.data_reader import (
     get_var_matrix_data,
 )
-from deep_bac.baselines.lr.tune import tune, INPUT_DIR
+from deep_bac.baselines.one_hot_var_models.tune import tune, INPUT_DIR
 from deep_bac.modelling.metrics import (
     choose_best_spec_sens_threshold,
     binary_cls_metrics,

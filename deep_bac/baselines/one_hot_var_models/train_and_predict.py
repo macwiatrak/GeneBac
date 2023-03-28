@@ -3,9 +3,16 @@ from typing import Dict, Literal
 
 import pandas as pd
 
-from deep_bac.baselines.lr.argparser import OneHotModelArgumentParser
-from deep_bac.baselines.lr.train_and_predict_on_drug import train_and_predict
-from deep_bac.baselines.lr.utils import dict_metrics_to_df, DRUG_TO_IDX
+from deep_bac.baselines.one_hot_var_models.argparser import (
+    OneHotModelArgumentParser,
+)
+from deep_bac.baselines.one_hot_var_models.train_and_predict_on_drug import (
+    train_and_predict,
+)
+from deep_bac.baselines.one_hot_var_models.utils import (
+    dict_metrics_to_df,
+    DRUG_TO_IDX,
+)
 
 logging.basicConfig(level=logging.INFO)
 

@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix, load_npz
 
-from deep_bac.baselines.lr.data_types import DataVarMatrices
+from deep_bac.baselines.one_hot_var_models.data_types import DataVarMatrices
 
 
 def split_train_val_test(
