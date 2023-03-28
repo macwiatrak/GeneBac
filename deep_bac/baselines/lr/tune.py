@@ -1,29 +1,45 @@
 import logging
 import os
-from typing import Dict, List, Literal, Tuple, Any
+from typing import Dict, List, Literal, Any
 
+import numpy as np
 import pandas as pd
+import torch
 from pytorch_lightning.utilities.seed import seed_everything
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import make_scorer
 from sklearn.model_selection import GridSearchCV
 
 from deep_bac.baselines.lr.data_reader import (
     get_var_matrix_data,
 )
 from deep_bac.baselines.lr.data_types import DataVarMatrices
+from deep_bac.modelling.metrics import choose_best_spec_sens_threshold
 
 logging.basicConfig(level=logging.INFO)
 
 INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data/"
 
 
+def gmean_spec_sens_score_fn(y: np.ndarray, y_pred: np.ndarray) -> float:
+    thresh, max_gmean, spec, sens = choose_best_spec_sens_threshold(
+        logits=torch.tensor(y_pred),
+        labels=torch.tensor(y),
+    )
+    return max_gmean.item()
+
+
 def tune(
     data_matrices: DataVarMatrices,
     model: LogisticRegression,
     parameters: Dict[str, List],
+    n_folds: int = 5,
 ) -> Dict[str, Any]:
-    # TODO: make a function to score based on gmean spec sens
-    clf = GridSearchCV(model, parameters, cv=5, scoring="f1", n_jobs=-1)
+    scorer = make_scorer(
+        gmean_spec_sens_score_fn, greater_is_better=True, needs_proba=True
+    )
+    logging.info(f"Starting the tuning with nr of folds: {n_folds}")
+    clf = GridSearchCV(model, parameters, cv=n_folds, scoring=scorer, n_jobs=-1)
     clf.fit(
         data_matrices.train_var_matrix,
         data_matrices.train_labels,
@@ -58,12 +74,12 @@ def run_grid_search_cv(
         tol=0.001,
     )
 
-    best_params, _ = tune(
+    best_params = tune(
         data_matrices=data,
         model=model,
         parameters=params,
     )
-    print(best_params)
+    logging.info(f"Best params: {best_params}")
     return best_params
 
 
@@ -81,11 +97,11 @@ def main():
             )
         ),
         params={
-            "C": [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0],
-            "class_weight": [None, "balanced"],
+            # "C": [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0],
+            # "class_weight": [None, "balanced"],
         },
         penalty=None,
-        max_iter=1000,
+        max_iter=100,
         random_state=42,
     )
     print(best_params)

@@ -50,7 +50,6 @@ def train_and_predict(
         model=model,
         parameters=params,
     )
-    logging.info(f"Best params: {best_params}")
 
     # tune and get the best model
     best_model = LogisticRegression(
@@ -61,6 +60,7 @@ def train_and_predict(
         **best_params,
     )
 
+    logging.info(f"Fitting and computing metrics using the best model.")
     # fit the best model
     best_model.fit(data_matrices.train_var_matrix, data_matrices.train_labels)
     train_pred = best_model.predict_proba(data_matrices.train_var_matrix)[:, 1]
