@@ -22,8 +22,8 @@ def run(
 ):
     df_unq_ids_labels = pd.read_parquet(df_unq_ids_labels_file_path)
     params = {
-        # "C": [0.0001, 0.001, 0.01, 0.1, 1.0],
-        # "class_weight": [None, "balanced"],
+        "C": [0.0001, 0.001, 0.01, 0.1, 1.0],
+        "class_weight": [None, "balanced"],
     }
     output_dfs = []
     for drug, drug_idx in drug_to_idx.items():
