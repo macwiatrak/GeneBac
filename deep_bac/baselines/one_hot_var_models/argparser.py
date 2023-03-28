@@ -17,7 +17,7 @@ class OneHotModelArgumentParser(Tap):
     train_test_split_unq_ids_file_path: str = os.path.join(
         INPUT_DIR, "train_test_cv_split_unq_ids.json"
     )
-    variant_matrix_input_dir: str = "/tmp/variant-matrix-specific-loci/"
+    variant_matrix_input_dir: str = "/tmp/variant-matrix-cryptic-loci-updated/"
     output_dir: str = "/tmp/"
     # model hyperparameters
     max_iter: int = 1000
