@@ -22,6 +22,8 @@ setup(
         "pyarrow==10.0.1",
         "pyfastx~=0.8.4",
         "pytorch-lightning~=1.8.6",
+        "scikit-learn~=1.2.1",
+        "scikit-multilearn~=0.2.0",
         "tensorboardX~=2.5.1",
         "torch~=1.13.1",
         "torchmetrics~=0.11.0",
