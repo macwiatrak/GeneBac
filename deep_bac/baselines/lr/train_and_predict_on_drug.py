@@ -79,6 +79,7 @@ def train_and_predict(
         thresh=thresh,
     )
     metrics = {f"test_{k}": v.item() for k, v in metrics.items()}
+    metrics["test_threshold"] = thresh
     return metrics
 
 
@@ -99,7 +100,7 @@ def main():
             # "C": [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0],
             # "class_weight": [None, "balanced"],
         },
-        max_iter=1000,
+        max_iter=100,
         penalty="l2",
         random_state=42,
     )
