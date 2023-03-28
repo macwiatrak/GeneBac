@@ -162,7 +162,7 @@ def format_predictions(
     predictions: Dict,
     metrics_list: List[str],
     drug_to_idx_dict: Dict[str, int] = DRUG_TO_LABEL_IDX,
-    split: str = "test",
+    split: Literal["train", "val", "test"] = "test",
 ):
     output = defaultdict(list)
     for metric in metrics_list:

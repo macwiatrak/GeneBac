@@ -83,7 +83,7 @@ def get_regression_metrics(
 def choose_best_spec_sens_threshold(
     logits: torch.Tensor, labels: torch.Tensor, ignore_index: int = -100
 ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-    if labels[labels != -100].sum() == 0:
+    if labels[labels != ignore_index].sum() == 0:
         return (
             torch.tensor(0.5),
             torch.tensor(-100.0),
@@ -128,7 +128,7 @@ def get_spec_sens(
 def binary_cls_metrics(
     logits: torch.Tensor,
     labels: torch.Tensor,
-    ignore_index: int,
+    ignore_index: int = -100,
     thresh: torch.Tensor = None,
 ) -> Tuple[Dict[str, torch.Tensor], float]:
     """
