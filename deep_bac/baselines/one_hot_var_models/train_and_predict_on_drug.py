@@ -42,6 +42,7 @@ def train_and_predict(
         penalty=penalty,
         random_state=random_state,
         tol=0.001,
+        solver="saga",  # supports all penalties
     )
     logging.info(f"Using logistic regression with {penalty} penalty")
 
@@ -57,6 +58,7 @@ def train_and_predict(
         penalty=penalty,
         random_state=random_state,
         tol=0.001,
+        solver="saga",  # supports all penalties
         **best_params,
     )
 
