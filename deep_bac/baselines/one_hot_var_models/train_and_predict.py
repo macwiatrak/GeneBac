@@ -36,7 +36,7 @@ def run(
     )
     params = {
         "C": c,
-        # "class_weight": [None, "balanced"],
+        "class_weight": [None, "balanced"],
     }
     # add l1 ratio if using elasticnet
     if penalty == "elasticnet":
