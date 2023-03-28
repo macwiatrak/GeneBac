@@ -3,6 +3,8 @@ from typing import Dict, Literal
 
 import pandas as pd
 
+from deep_bac.utils import get_drug_line
+
 
 def dict_metrics_to_df(
     metrics: Dict[str, float],
@@ -16,4 +18,5 @@ def dict_metrics_to_df(
         output["metric"].append(metric)
         output["drug"].append(drug)
         output["split"].append(split)
+        output["drug_class"] = get_drug_line(drug)
     return pd.DataFrame(output)

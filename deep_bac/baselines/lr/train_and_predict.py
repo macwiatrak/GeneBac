@@ -3,11 +3,27 @@ from typing import Dict, Literal
 
 import pandas as pd
 
-from deep_bac.baselines.lr.argparser import OneHotModelsArgumentParser
+from deep_bac.baselines.lr.argparser import OneHotModelArgumentParser
 from deep_bac.baselines.lr.train_and_predict_on_drug import train_and_predict
 from deep_bac.baselines.lr.utils import dict_metrics_to_df
 
 logging.basicConfig(level=logging.INFO)
+
+DRUG_TO_IDX = {
+    "MXF": 0,
+    "BDQ": 1,
+    "KAN": 2,
+    "CFZ": 3,
+    "AMI": 4,
+    "DLM": 6,
+    "RFB": 7,
+    "LZD": 8,
+    "EMB": 9,
+    "LEV": 10,
+    "ETH": 11,
+    "INH": 12,
+    "RIF": 13,
+}  # removed "PAS": 5 as it has not enough labels
 
 
 def run(
@@ -17,13 +33,13 @@ def run(
     variant_matrix_input_dir: str,
     df_unq_ids_labels_file_path: str,
     max_iter: int = 1000,
-    penalty: Literal["l1", "l2", "elasticnet"] = "l1",
+    penalty: Literal["l1", "l2", "elasticnet"] = "l2",
     random_state: int = 42,
 ):
     df_unq_ids_labels = pd.read_parquet(df_unq_ids_labels_file_path)
     params = {
-        "C": [0.0001, 0.001, 0.01, 0.1, 1.0],
-        "class_weight": [None, "balanced"],
+        # "C": [0.0001, 0.001, 0.01, 0.1, 1.0],
+        # "class_weight": [None, "balanced"],
     }
     output_dfs = []
     for drug, drug_idx in drug_to_idx.items():
@@ -46,7 +62,7 @@ def run(
 def main(args):
     run(
         output_file_path=args.output_file_path,
-        drug_to_idx={},
+        drug_to_idx=DRUG_TO_IDX,
         train_test_split_unq_ids_file_path=args.train_test_split_unq_ids_file_path,
         variant_matrix_input_dir=args.variant_matrix_input_dir,
         df_unq_ids_labels_file_path=args.df_unq_ids_labels_file_path,
@@ -57,5 +73,5 @@ def main(args):
 
 
 if __name__ == "__main__":
-    args = OneHotModelsArgumentParser().parse_args()
+    args = OneHotModelArgumentParser().parse_args()
     main(args)

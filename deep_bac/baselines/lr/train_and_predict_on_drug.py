@@ -80,6 +80,8 @@ def train_and_predict(
     )
     metrics = {k: v.item() for k, v in metrics.items()}
     metrics["threshold"] = thresh
+    # add best params to save them
+    metrics.update(best_params)
     return metrics
 
 
