@@ -3,6 +3,7 @@ import os
 from typing import Dict, List, Literal
 
 import pandas as pd
+import torch
 from pytorch_lightning.utilities.seed import seed_everything
 from sklearn.linear_model import LogisticRegression
 
@@ -10,11 +11,15 @@ from deep_bac.baselines.lr.data_reader import (
     get_var_matrix_data,
 )
 from deep_bac.baselines.lr.tune import tune, INPUT_DIR
+from deep_bac.modelling.metrics import (
+    choose_best_spec_sens_threshold,
+    binary_cls_metrics,
+)
 
 logging.basicConfig(level=logging.INFO)
 
 
-def run(
+def train_and_predict(
     drug_idx: int,
     train_test_split_unq_ids_file_path: str,
     variant_matrix_input_dir: str,
@@ -58,18 +63,27 @@ def run(
 
     # fit the best model
     best_model.fit(data_matrices.train_var_matrix, data_matrices.train_labels)
-    train_pred = best_model.predict_proba(data_matrices.train_var_matrix)
-    # TODO: get optimal threshold
-    # threshold = get_optimal_threshold(train_pred, data_matrices.train_labels)
-    threshold = 0.5
+    train_pred = best_model.predict_proba(data_matrices.train_var_matrix)[:, 1]
+    # get optimal thresholds using the train set
+    thresh, _, _, _ = choose_best_spec_sens_threshold(
+        logits=torch.tensor(train_pred),
+        labels=torch.tensor(data_matrices.train_labels),
+    )
 
-    test_pred = best_model.predict(data_matrices.test_var_matrix)
-    # metrics = compute_metrics(test_pred, data_matrices.test_labels, threshold)
-    return {}
+    # predict on the test set
+    test_pred = best_model.predict_proba(data_matrices.test_var_matrix)[:, 1]
+    # compute the metrics using the test set
+    metrics, thresh = binary_cls_metrics(
+        logits=torch.tensor(test_pred),
+        labels=torch.tensor(data_matrices.test_labels),
+        thresh=thresh,
+    )
+    metrics = {f"test_{k}": v.item() for k, v in metrics.items()}
+    return metrics
 
 
 def main():
-    run(
+    _ = train_and_predict(
         drug_idx=0,
         train_test_split_unq_ids_file_path=os.path.join(
             INPUT_DIR, "train_test_cv_split_unq_ids.json"

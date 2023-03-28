@@ -23,9 +23,10 @@ def tune(
     parameters: Dict[str, List],
 ) -> Dict[str, Any]:
     # TODO: make a function to score based on gmean spec sens
-    clf = GridSearchCV(model, parameters, cv=5, scoring="f1")
+    clf = GridSearchCV(model, parameters, cv=5, scoring="f1", n_jobs=-1)
     clf.fit(
-        data_matrices.train_var_matrix, data_matrices.train_labels, n_jobs=-1
+        data_matrices.train_var_matrix,
+        data_matrices.train_labels,
     )
     # return best hyperparameters
     return clf.best_params_
