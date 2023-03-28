@@ -5,25 +5,9 @@ import pandas as pd
 
 from deep_bac.baselines.lr.argparser import OneHotModelArgumentParser
 from deep_bac.baselines.lr.train_and_predict_on_drug import train_and_predict
-from deep_bac.baselines.lr.utils import dict_metrics_to_df
+from deep_bac.baselines.lr.utils import dict_metrics_to_df, DRUG_TO_IDX
 
 logging.basicConfig(level=logging.INFO)
-
-DRUG_TO_IDX = {
-    "MXF": 0,
-    "BDQ": 1,
-    "KAN": 2,
-    "CFZ": 3,
-    "AMI": 4,
-    "DLM": 6,
-    "RFB": 7,
-    "LZD": 8,
-    "EMB": 9,
-    "LEV": 10,
-    "ETH": 11,
-    "INH": 12,
-    "RIF": 13,
-}  # removed "PAS": 5 as it has not enough labels
 
 
 def run(
