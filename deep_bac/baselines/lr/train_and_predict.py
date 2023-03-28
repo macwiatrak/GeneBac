@@ -25,6 +25,10 @@ def run(
         "C": [0.0001, 0.001, 0.01, 0.1, 1.0],
         "class_weight": [None, "balanced"],
     }
+    # add l1 ratio if using elasticnet
+    if penalty == "elasticnet":
+        params["l1_ratio"] = [0.0, 0.25, 0.5, 0.75, 1.0]
+
     output_dfs = []
     for drug, drug_idx in drug_to_idx.items():
         logging.info(f"Tuning and predicting for {drug} drug")
