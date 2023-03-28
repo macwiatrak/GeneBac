@@ -18,7 +18,7 @@ class OneHotModelArgumentParser(Tap):
         INPUT_DIR, "train_test_cv_split_unq_ids.json"
     )
     variant_matrix_input_dir: str = "/tmp/variant-matrix-specific-loci/"
-    output_file_path: str = "/tmp/lr_model_output.csv"
+    output_dir: str = "/tmp/"
     # model hyperparameters
     max_iter: int = 1000
     penalty: Literal["l1", "l2", "elasticnet"] = "l2"

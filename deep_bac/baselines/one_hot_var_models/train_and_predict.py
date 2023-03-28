@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 def run(
-    output_file_path: str,
+    output_dir: str,
     drug_to_idx: Dict[str, int],
     train_test_split_unq_ids_file_path: str,
     variant_matrix_input_dir: str,
@@ -51,12 +51,14 @@ def run(
         )
         logging.info(f"Test metrics for {drug} drug: {test_metrics}")
         output_dfs.append(dict_metrics_to_df(test_metrics, drug, split="test"))
-    pd.concat(output_dfs).to_csv(output_file_path)
+    pd.concat(output_dfs).to_csv(
+        f"{output_dir}/test_results_{penalty}_{random_state}.csv"
+    )
 
 
 def main(args):
     run(
-        output_file_path=args.output_file_path,
+        output_dir=args.output_dir,
         drug_to_idx=DRUG_TO_IDX,
         train_test_split_unq_ids_file_path=args.train_test_split_unq_ids_file_path,
         variant_matrix_input_dir=args.variant_matrix_input_dir,
