@@ -7,8 +7,6 @@ from pytorch_lightning.utilities.seed import seed_everything
 from sklearn.linear_model import LogisticRegression
 
 from deep_bac.baselines.lr.data_reader import (
-    split_train_val_test,
-    get_drug_var_matrices,
     get_var_matrix_data,
 )
 from deep_bac.baselines.lr.tune import tune, INPUT_DIR
