@@ -1,17 +1,16 @@
-import json
 import logging
 import os
-from typing import Dict, List, Literal
+from typing import Dict, List, Literal, Tuple, Any
 
 import pandas as pd
-from scipy.sparse import csr_matrix, load_npz
+from pytorch_lightning.utilities.seed import seed_everything
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
 
 from deep_bac.baselines.lr.data_reader import (
-    split_train_val_test,
-    get_drug_var_matrices,
+    get_var_matrix_data,
 )
+from deep_bac.baselines.lr.data_types import DataVarMatrices
 
 logging.basicConfig(level=logging.INFO)
 
@@ -19,27 +18,10 @@ INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data/"
 
 
 def tune(
-    drug_idx: int,
-    train_test_split_unq_ids_file_path: str,
-    variant_matrix: csr_matrix,
-    unq_id_to_idx: Dict[str, int],
-    df_unq_ids_labels: pd.DataFrame,
+    data_matrices: DataVarMatrices,
     model: LogisticRegression,
     parameters: Dict[str, List],
-):
-    data_matrices = split_train_val_test(
-        train_test_split_unq_ids_file_path=train_test_split_unq_ids_file_path,
-        variant_matrix=variant_matrix,
-        unq_id_to_idx=unq_id_to_idx,
-        df_unq_ids_labels=df_unq_ids_labels,
-    )
-
-    data_matrices = get_drug_var_matrices(
-        drug_idx=drug_idx,
-        data=data_matrices,
-    )
-
-    # do grid search for best hyperparameters
+) -> Dict[str, Any]:
     # TODO: make a function to score based on gmean spec sens
     clf = GridSearchCV(model, parameters, cv=5, scoring="f1")
     clf.fit(
@@ -49,7 +31,7 @@ def tune(
     return clf.best_params_
 
 
-def run(
+def run_grid_search_cv(
     drug_idx: int,
     train_test_split_unq_ids_file_path: str,
     variant_matrix_input_dir: str,
@@ -57,25 +39,26 @@ def run(
     params: Dict[str, List],
     max_iter: int,
     penalty: Literal["l1", "l2", "elasticnet"] = None,
-):
-    variant_matrix = load_npz(
-        os.path.join(variant_matrix_input_dir, "var_matrix.npz")
+    random_state: int = 42,
+) -> Dict[str, Any]:
+    seed_everything(random_state)
+
+    data = get_var_matrix_data(
+        drug_idx=drug_idx,
+        variant_matrix_input_dir=variant_matrix_input_dir,
+        train_test_split_unq_ids_file_path=train_test_split_unq_ids_file_path,
+        df_unq_ids_labels=df_unq_ids_labels,
     )
-    with open(
-        os.path.join(variant_matrix_input_dir, "unique_id_to_idx.json"), "r"
-    ) as f:
-        unq_id_to_idx = json.load(f)
 
     model = LogisticRegression(
         max_iter=max_iter,
         penalty=penalty,
+        random_state=random_state,
+        tol=0.001,
     )
-    best_params = tune(
-        drug_idx=drug_idx,
-        train_test_split_unq_ids_file_path=train_test_split_unq_ids_file_path,
-        variant_matrix=variant_matrix,
-        unq_id_to_idx=unq_id_to_idx,
-        df_unq_ids_labels=df_unq_ids_labels,
+
+    best_params, _ = tune(
+        data_matrices=data,
         model=model,
         parameters=params,
     )
@@ -85,7 +68,7 @@ def run(
 
 def main():
 
-    best_params = run(
+    best_params = run_grid_search_cv(
         drug_idx=0,
         train_test_split_unq_ids_file_path=os.path.join(
             INPUT_DIR, "train_test_cv_split_unq_ids.json"
@@ -97,11 +80,12 @@ def main():
             )
         ),
         params={
-            "C": [0.0001, 0.001, 0.01, 0.1, 1.0],
+            "C": [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0],
             "class_weight": [None, "balanced"],
         },
         penalty=None,
         max_iter=1000,
+        random_state=42,
     )
     print(best_params)
 

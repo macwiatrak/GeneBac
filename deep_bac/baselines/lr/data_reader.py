@@ -1,9 +1,10 @@
 import json
+import os
 from typing import Dict
 
 import numpy as np
 import pandas as pd
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, load_npz
 
 from deep_bac.baselines.lr.data_types import DataVarMatrices
 
@@ -81,3 +82,28 @@ def get_drug_var_matrices(
         train_labels=train_labels,
         test_labels=test_labels,
     )
+
+
+def get_var_matrix_data(
+    drug_idx: int,
+    variant_matrix_input_dir: str,
+    train_test_split_unq_ids_file_path: str,
+    df_unq_ids_labels: pd.DataFrame,
+) -> DataVarMatrices:
+
+    variant_matrix = load_npz(
+        os.path.join(variant_matrix_input_dir, "var_matrix.npz")
+    )
+    with open(
+        os.path.join(variant_matrix_input_dir, "unique_id_to_idx.json"), "r"
+    ) as f:
+        unq_id_to_idx = json.load(f)
+
+    data = split_train_val_test(
+        train_test_split_unq_ids_file_path,
+        variant_matrix,
+        unq_id_to_idx,
+        df_unq_ids_labels,
+    )
+    data = get_drug_var_matrices(drug_idx, data)
+    return data
