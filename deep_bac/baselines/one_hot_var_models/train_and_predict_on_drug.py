@@ -39,12 +39,13 @@ def train_and_predict(
         exclude_vars_not_in_train=exclude_vars_not_in_train,
     )
 
+    solver = "saga" if penalty == "elasticnet" else "liblinear"
     model = LogisticRegression(
         max_iter=max_iter,
         penalty=penalty,
         random_state=random_state,
         tol=0.001,
-        solver="saga",  # supports all penalties
+        solver=solver,  # supports all penalties
     )
     logging.info(f"Using logistic regression with {penalty} penalty")
 
@@ -60,7 +61,7 @@ def train_and_predict(
         penalty=penalty,
         random_state=random_state,
         tol=0.001,
-        solver="saga",  # supports all penalties
+        solver=solver,  # supports all penalties
         **best_params,
     )
 

@@ -69,12 +69,13 @@ def run_grid_search_cv(
         exclude_vars_not_in_train=exclude_vars_not_in_train,
     )
 
+    solver = "saga" if penalty == "elasticnet" else "liblinear"
     model = LogisticRegression(
         max_iter=max_iter,
         penalty=penalty,
         random_state=random_state,
         tol=0.001,
-        solver="saga",
+        solver=solver,
     )
 
     best_params = tune(
