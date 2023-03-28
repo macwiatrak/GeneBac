@@ -78,8 +78,8 @@ def train_and_predict(
         labels=torch.tensor(data_matrices.test_labels),
         thresh=thresh,
     )
-    metrics = {f"test_{k}": v.item() for k, v in metrics.items()}
-    metrics["test_threshold"] = thresh
+    metrics = {k: v.item() for k, v in metrics.items()}
+    metrics["threshold"] = thresh
     return metrics
 
 
