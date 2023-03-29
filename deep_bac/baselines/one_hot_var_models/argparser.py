@@ -21,6 +21,6 @@ class OneHotModelArgumentParser(Tap):
     output_dir: str = "/tmp/"
     # model hyperparameters
     max_iter: int = 1000
-    penalty: Literal["l1", "l2", "elasticnet"] = "l2"
+    penalty: Literal["l1", "l2", "elasticnet"] = "l1"
     random_state: int = 42
     exclude_vars_not_in_train: bool = False
