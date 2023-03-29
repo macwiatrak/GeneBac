@@ -5,7 +5,7 @@ from typing import Dict, List, Literal
 import pandas as pd
 import torch
 from pytorch_lightning.utilities.seed import seed_everything
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, ElasticNet
 
 from deep_bac.baselines.one_hot_var_models.data_reader import (
     get_var_matrix_data,
@@ -39,14 +39,21 @@ def train_and_predict(
         exclude_vars_not_in_train=exclude_vars_not_in_train,
     )
 
-    solver = "saga" if penalty == "elasticnet" else "liblinear"
-    model = LogisticRegression(
-        max_iter=max_iter,
-        penalty=penalty,
-        random_state=random_state,
-        tol=0.001,
-        solver=solver,  # supports all penalties
-    )
+    if penalty == "l1" or penalty == "l2":
+        model = LogisticRegression(
+            max_iter=max_iter,
+            penalty=penalty,
+            random_state=random_state,
+            tol=0.001,
+            solver="liblinear",  # supports both l1 and l2
+            class_weight="balanced",
+        )
+    else:
+        model = ElasticNet(
+            max_iter=max_iter,
+            random_state=random_state,
+            tol=0.001,
+        )
     logging.info(f"Using logistic regression with {penalty} penalty")
 
     best_params = tune(
@@ -56,14 +63,23 @@ def train_and_predict(
     )
 
     # tune and get the best model
-    best_model = LogisticRegression(
-        max_iter=max_iter,
-        penalty=penalty,
-        random_state=random_state,
-        tol=0.001,
-        solver=solver,  # supports all penalties
-        **best_params,
-    )
+    if penalty == "l1" or penalty == "l2":
+        best_model = LogisticRegression(
+            max_iter=max_iter,
+            penalty=penalty,
+            random_state=random_state,
+            tol=0.001,
+            solver="liblinear",  # supports all penalties
+            class_weight="balanced",
+            **best_params,
+        )
+    else:
+        best_model = ElasticNet(
+            max_iter=max_iter,
+            random_state=random_state,
+            tol=0.001,
+            **best_params,
+        )
 
     logging.info(f"Fitting and computing metrics using the best model.")
     # fit the best model

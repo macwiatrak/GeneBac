@@ -41,6 +41,8 @@ def run(
     # add l1 ratio if using elasticnet
     if penalty == "elasticnet":
         params["l1_ratio"] = [0.0, 0.25, 0.5, 0.75, 1.0]
+        params["alpha"] = [0.1, 0.25, 0.5, 1.0, 2.0]
+        del params["C"]
 
     output_dfs = []
     for drug, drug_idx in drug_to_idx.items():
