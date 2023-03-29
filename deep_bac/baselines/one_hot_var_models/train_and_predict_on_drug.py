@@ -46,7 +46,6 @@ def train_and_predict(
             random_state=random_state,
             tol=0.001,
             solver="liblinear",  # supports both l1 and l2
-            class_weight="balanced",
         )
     else:
         model = ElasticNet(
@@ -70,7 +69,6 @@ def train_and_predict(
             random_state=random_state,
             tol=0.001,
             solver="liblinear",  # supports all penalties
-            class_weight="balanced",
             **best_params,
         )
     else:
