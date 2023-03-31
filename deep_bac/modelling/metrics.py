@@ -357,25 +357,30 @@ def get_macro_gene_expression_metrics(
             logits=torch.tensor(per_strain_logits[strain_id]),
             labels=torch.tensor(per_strain_labels[strain_id]),
         )
-    agg_macro_gene_metrics = {
-        f"macro_gene_{metric}": torch.tensor(
+
+    agg_macro_metrics = {}
+    for metric in REGRESSION_METRICS:
+        gene_val = torch.tensor(
             [x[metric] for x in per_gene_metrics.values() if x[metric] != -100]
         ).mean()
-        for metric in REGRESSION_METRICS
-    }
-    agg_macro_strain_metrics = {
-        f"macro_strain_{metric}": torch.tensor(
+        gene_val = (
+            gene_val if not torch.isnan(gene_val) else torch.tensor(-100.0)
+        )
+        agg_macro_metrics[f"macro_gene_{metric}"] = gene_val
+
+        strain_val = torch.tensor(
             [
                 x[metric]
                 for x in per_strain_metrics.values()
                 if x[metric] != -100
             ]
         ).mean()
-        for metric in REGRESSION_METRICS
-    }
+        strain_val = (
+            strain_val if not torch.isnan(strain_val) else torch.tensor(-100.0)
+        )
+        agg_macro_metrics[f"macro_strain_{metric}"] = strain_val
 
-    agg_macro_gene_metrics.update(agg_macro_strain_metrics)
-    return agg_macro_gene_metrics, per_gene_metrics
+    return agg_macro_metrics, per_gene_metrics
 
 
 def get_macro_thresh_metrics(
@@ -387,7 +392,7 @@ def get_macro_thresh_metrics(
     for thresh, genes_in_thresh in gene_vars_w_thresholds.items():
         thresh_metrics = {}
         for metric in REGRESSION_METRICS:
-            thresh_metrics[f"{metric}_{str(thresh)}"] = torch.tensor(
+            val = torch.tensor(
                 [
                     get_gene_metric(per_gene_metrics, gene, metric)
                     for gene in genes_in_thresh
@@ -395,5 +400,8 @@ def get_macro_thresh_metrics(
                     != -ignore_index
                 ]
             ).mean()
+            thresh_metrics[f"macro_{metric}_{str(thresh)}"] = (
+                val if not torch.isnan(val) else torch.tensor(-100.0)
+            )
         metrics.update(thresh_metrics)
     return metrics
