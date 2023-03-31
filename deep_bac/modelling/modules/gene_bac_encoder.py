@@ -52,7 +52,7 @@ class GeneBacEncoder(nn.Module):
             pool_size=3,  # change from 2
         )
 
-        seq_depth = 10
+        seq_depth = 8
         self.bottleneck = DenseLayer(
             in_features=n_filters_pre_bottleneck * seq_depth,
             out_features=n_bottleneck_layer,

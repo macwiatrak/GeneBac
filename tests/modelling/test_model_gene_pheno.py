@@ -66,7 +66,7 @@ def test_model_gene_pheno_train_fake_data(tmpdir):
     n_samples = 50
     n_genes = 5
     n_classes = 14
-    seq_length = 3012
+    seq_length = 2560
     regression = False
     n_bottleneck_layer = 64
     max_epochs = 5
