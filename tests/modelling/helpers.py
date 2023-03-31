@@ -85,6 +85,8 @@ class TestBacGenomeGeneExprDataset(Dataset):
             input_tensor=self.data[idx],
             labels=self.labels[idx],
             tss_index=self.tss_indexes[idx],
+            gene_name="test_gene" if idx % 2 == 0 else "test_gene_2",
+            strain_id="strain_1" if idx % 2 == 0 else "strain_2",
         )
 
 

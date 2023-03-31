@@ -11,6 +11,8 @@ from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.metrics import (
     get_regression_metrics,
     get_stats_for_thresholds,
+    get_macro_gene_expression_metrics,
+    get_macro_thresh_metrics,
 )
 from deep_bac.modelling.modules.positional_encodings import (
     FixedGeneExpressionPositionalEncoding,
@@ -81,6 +83,7 @@ class DeepBacGeneExpr(pl.LightningModule):
             logits=logits,
             labels=batch.labels,
             gene_names=batch.gene_names,
+            strain_ids=batch.strain_ids,
         )
 
     def eval_epoch_end(
@@ -89,12 +92,25 @@ class DeepBacGeneExpr(pl.LightningModule):
 
         logits = torch.cat([x["logits"] for x in outputs]).squeeze(-1)
         labels = torch.cat([x["labels"] for x in outputs])
+        gene_names = list(itertools.chain(*[x["gene_names"] for x in outputs]))
+        strain_ids = list(itertools.chain(*[x["strain_ids"] for x in outputs]))
         agg_stats = get_regression_metrics(logits=logits, labels=labels)
 
+        agg_macro_metrics, per_gene_metrics = get_macro_gene_expression_metrics(
+            logits=logits,
+            labels=labels,
+            gene_names=gene_names,
+            strain_ids=strain_ids,
+        )
+        agg_stats.update(agg_macro_metrics)
+
         if self.gene_vars_w_thresholds:
-            gene_names = list(
-                itertools.chain(*[x["gene_names"] for x in outputs])
+            macro_thresh_stats = get_macro_thresh_metrics(
+                gene_vars_w_thresholds=self.gene_vars_w_thresholds,
+                per_gene_metrics=per_gene_metrics,
             )
+            agg_stats.update(macro_thresh_stats)
+
             thresh_stats = get_stats_for_thresholds(
                 logits=logits,
                 labels=labels,
