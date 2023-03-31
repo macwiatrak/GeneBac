@@ -84,17 +84,8 @@ def get_genes_to_strain_model(config: DeepGeneBacConfig):
             DenseLayer(
                 in_features=config.n_gene_bottleneck_layer
                 * config.n_highly_variable_genes,
-                out_features=config.n_gene_bottleneck_layer
-                * config.n_highly_variable_genes
-                // 2,
-                batch_norm=True,
-            ),
-            DenseLayer(
-                in_features=config.n_gene_bottleneck_layer
-                * config.n_highly_variable_genes
-                // 2,
                 out_features=config.n_gene_bottleneck_layer,
-                batch_norm=True,
+                layer_norm=True,
             ),
         )
     raise ValueError(f"Unknown graph model type: {config.graph_model_type}")
