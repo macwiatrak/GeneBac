@@ -400,7 +400,7 @@ def get_macro_thresh_metrics(
                     != -ignore_index
                 ]
             ).mean()
-            thresh_metrics[f"macro_{metric}_{str(thresh)}"] = (
+            thresh_metrics[f"macro_gene_{metric}_{str(thresh)}"] = (
                 val if not torch.isnan(val) else torch.tensor(-100.0)
             )
         metrics.update(thresh_metrics)
