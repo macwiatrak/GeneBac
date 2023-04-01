@@ -12,7 +12,7 @@ class GeneBacEncoder(nn.Module):
     def __init__(
         self,
         input_dim: int = 4,
-        n_filters_init: int = 64,
+        n_filters_init: int = 128,
         n_repeat_blocks_tower: int = 6,
         filters_mult: float = 1.122,
         n_filters_pre_bottleneck: int = 56,  # 112,  # 227,
