@@ -2,7 +2,7 @@ from typing import Literal
 
 import torch
 from torch import nn
-from torch_geometric.nn import GCNConv, GATv2Conv, GATConv, MessagePassing
+from torch_geometric.nn import GCNConv, GATv2Conv, MessagePassing
 
 
 def batch_edge_index(
@@ -51,8 +51,9 @@ class GNNModel(nn.Module):
         self.same_edge_indices = edge_indices
         self.same_edge_features = edge_features
 
-        gnn_layer = GCNConv if layer_type == "GCN" else GATConv
-        kwargs = {"heads": n_heads}  # "edge_dim": hidden_dim // 2
+        gnn_layer = GCNConv if layer_type == "GCN" else GATv2Conv
+        edge_dim = edge_features.shape[1] if edge_features is not None else None
+        kwargs = {"heads": n_heads, "edge_dim": edge_dim}
 
         layers = []
         in_channels, out_channels = input_dim, hidden_dim
@@ -101,7 +102,11 @@ class GNNModel(nn.Module):
         bs, n_nodes, dim = node_features.shape
         node_features = node_features.view(bs * n_nodes, dim)
         edge_index = batch_edge_index(edge_index, bs, n_nodes)
-        edge_features = edge_features.repeat(bs, 1)
+
+        if len(edge_features.shape) == 1:
+            edge_features = edge_features.repeat(bs)
+        else:
+            edge_features = edge_features.repeat(bs, 1)
 
         for l in self.layers:
             # For graph layers, we need to add the "edge_index" tensor as additional input
