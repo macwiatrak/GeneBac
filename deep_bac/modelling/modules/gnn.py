@@ -17,9 +17,9 @@ def batch_edge_index(
     Returns:
         torch.Tensor: Edge indices with batch indices
     """
-    edge_indices = []
-    for batch_idx in range(n_batches):
-        edge_indices.append(edge_index + batch_idx * n_nodes)
+    edge_indices = [
+        edge_index + batch_idx * n_nodes for batch_idx in range(n_batches)
+    ]
     return torch.cat(edge_indices, dim=1)
 
 

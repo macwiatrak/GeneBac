@@ -44,18 +44,17 @@ class GeneBacEncoder(nn.Module):
             curr_n_filters = _round(curr_n_filters * filters_mult)
         self.tower = nn.Sequential(*tower_layers)
 
-        self.pre_bottleneck = ConvLayer(
-            in_channels=curr_n_filters,
-            out_channels=n_filters_pre_bottleneck,
-            kernel_size=1,
-            batch_norm=batch_norm,
-            pool_size=2,  # change from 3
-        )
+        # self.pre_bottleneck = ConvLayer(
+        #     in_channels=curr_n_filters,
+        #     out_channels=n_filters_pre_bottleneck,
+        #     kernel_size=1,
+        #     batch_norm=batch_norm,
+        #     pool_size=2,  # change from 3
+        # )
 
-        seq_depth = 6
+        seq_depth = 13
         self.bottleneck = DenseLayer(
-            in_features=n_filters_pre_bottleneck
-            * seq_depth,  # curr_n_filters * seq_depth,
+            in_features=curr_n_filters * seq_depth,
             out_features=n_bottleneck_layer,
             use_bias=True,
             batch_norm=False,
@@ -66,7 +65,7 @@ class GeneBacEncoder(nn.Module):
     def forward(self, x: torch.Tensor):
         x = self.stem(x)
         x = self.tower(x)
-        x = self.pre_bottleneck(x)
+        # x = self.pre_bottleneck(x)
         # flatten the input
         x = x.view(x.shape[0], -1)
         x = self.bottleneck(x)
