@@ -48,7 +48,7 @@ def get_gene_encoder(config: DeepGeneBacConfig):
 
     if config.gene_encoder_type == "gene_bac":
         return GeneBacEncoder(
-            n_filters_init=128,  # config.n_init_filters,
+            n_filters_init=64,  # config.n_init_filters,
             n_bottleneck_layer=config.n_gene_bottleneck_layer,
         )
 
