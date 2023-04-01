@@ -2,21 +2,25 @@ from typing import Literal
 
 import torch
 from torch import nn
-from torch_geometric.nn import GCNConv, GATv2Conv
+from torch_geometric.nn import GCNConv, GATv2Conv, GATConv, MessagePassing
 
 
-def batch_edge_index(edge_index: torch.Tensor, n_batches: int) -> torch.Tensor:
+def batch_edge_index(
+    edge_index: torch.Tensor, n_batches: int, n_nodes: int
+) -> torch.Tensor:
     """Add batch indices to edge_index
 
     Args:
         edge_index (torch.Tensor): Edge indices
         n_batches (int): Number of batches
-
+        n_nodes (int): Number of nodes
     Returns:
         torch.Tensor: Edge indices with batch indices
     """
-    batch = torch.arange(n_batches).repeat_interleave(edge_index.size(1))
-    return torch.cat([batch.unsqueeze(0), edge_index], dim=0)
+    edge_indices = []
+    for batch_idx in range(n_batches):
+        edge_indices.append(edge_index + batch_idx * n_nodes)
+    return torch.cat(edge_indices, dim=1)
 
 
 class GNNModel(nn.Module):
@@ -26,6 +30,7 @@ class GNNModel(nn.Module):
         hidden_dim: int,
         output_dim: int,
         n_layers: int = 2,
+        n_heads: int = 2,
         layer_type: Literal["GCN", "GAT"] = "GAT",
         edge_indices: torch.Tensor = None,
         edge_features: torch.Tensor = None,
@@ -46,8 +51,8 @@ class GNNModel(nn.Module):
         self.same_edge_indices = edge_indices
         self.same_edge_features = edge_features
 
-        gnn_layer = GCNConv if layer_type == "GCN" else GATv2Conv
-        kwargs = {"heads": 2} if layer_type == "GAT" else {}
+        gnn_layer = GCNConv if layer_type == "GCN" else GATConv
+        kwargs = {"heads": n_heads}  # "edge_dim": hidden_dim // 2
 
         layers = []
         in_channels, out_channels = input_dim, hidden_dim
@@ -60,12 +65,14 @@ class GNNModel(nn.Module):
                 nn.Dropout(dropout_rate),
             ]
             in_channels = hidden_dim
+
+        kwargs["heads"] = 1
         layers += [
             gnn_layer(
                 in_channels=in_channels, out_channels=output_dim, **kwargs
             )
         ]
-        self.layers = nn.Sequential(*layers)
+        self.layers = nn.ModuleList(layers)
 
         if layer_type == "GCN" and self.same_edge_features is not None:
             # select combined edge score as edge weight for the GCN model
@@ -92,14 +99,18 @@ class GNNModel(nn.Module):
         )
 
         bs, n_nodes, dim = node_features.shape
-        # TODO: flatten it properly
         node_features = node_features.view(bs * n_nodes, dim)
-        # TODO: batch edge indexes
-        edge_index = batch_edge_index(edge_index, bs)
-        # TODO: batch edge features
-        edge_features = edge_features.repeat(bs, 1, 1)
+        edge_index = batch_edge_index(edge_index, bs, n_nodes)
+        edge_features = edge_features.repeat(bs, 1)
 
-        x = self.layers(node_features, edge_index, edge_features)
+        for l in self.layers:
+            # For graph layers, we need to add the "edge_index" tensor as additional input
+            # All PyTorch Geometric graph layer inherit the class "MessagePassing", hence
+            # we can simply check the class type.
+            if isinstance(l, MessagePassing):
+                x = l(node_features, edge_index, edge_features)
+            else:
+                x = l(node_features)
         # TODO: check this works
         x = x.view(bs, n_nodes, -1)
         # TODO: check this works
