@@ -24,6 +24,7 @@ class DeepGeneBacConfig:
     train_set_len: Optional[int] = None
     warmup_proportion: float = 0.1
     random_state: int = 42
+    dropout_rate: float = 0.1
     gradient_clip_val: float = 1.0
     early_stopping_patience: int = 10
     accumulate_grad_batches: int = 1

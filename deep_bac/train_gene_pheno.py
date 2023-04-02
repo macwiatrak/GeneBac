@@ -79,6 +79,7 @@ def run(
         len(selected_genes) if selected_genes else n_highly_variable_genes
     )
     config.gene_to_idx = data.gene_to_idx
+    logging.info(f"Gene to idx: {config.gene_to_idx}")
 
     trainer = get_trainer(
         config, output_dir, resume_from_ckpt_path=resume_from_ckpt_path
