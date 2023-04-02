@@ -1,6 +1,6 @@
 from dataclasses_json import dataclass_json
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 import torch
 from torch.utils.data import DataLoader
@@ -35,3 +35,4 @@ class DataReaderOutput:
     val_dataloader: DataLoader
     test_dataloader: Optional[DataLoader] = None
     train_set_len: Optional[int] = None
+    gene_to_idx: Dict[str, int] = None

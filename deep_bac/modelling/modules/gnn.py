@@ -1,4 +1,4 @@
-from typing import Literal, List, Tuple
+from typing import Literal, List, Tuple, Dict
 
 import pandas as pd
 import torch
@@ -39,11 +39,10 @@ def batch_edge_index(
 
 def get_edge_data(
     edge_file_path: str,
-    selected_genes: List[str],
+    gene_to_idx: Dict[str, int],
     edge_feature_list: List[str] = STRINGDB_EDGE_FEATURES,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     edge_df = pd.read_csv(edge_file_path, sep="\t")
-    gene_to_idx = {gene: idx for idx, gene in enumerate(selected_genes)}
     edge_tensor = torch.tensor(
         [
             [gene_to_idx[gene] for gene in edge_df["node1"].tolist()],
@@ -151,8 +150,6 @@ class GNNModel(nn.Module):
                 x = l(node_features, edge_index, edge_features)
             else:
                 x = l(node_features)
-        # TODO: check this works
         x = x.view(bs, n_nodes, -1)
-        # TODO: check this works
         x = x.mean(dim=1)
         return x

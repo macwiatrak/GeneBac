@@ -1,6 +1,6 @@
 import json
 import os
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 import pandas as pd
 import torch
@@ -68,7 +68,7 @@ def get_gene_pheno_dataloader(
     shuffle: bool = True,
     num_workers: int = 4,
     pin_memory: bool = True,
-) -> DataLoader:
+) -> Tuple[DataLoader, Dict[str, int]]:
     dataset = BacGenomeGenePhenoDataset(
         unique_ids=unique_ids,
         bac_genes_df_file_path=bac_genes_df_file_path,
@@ -90,7 +90,7 @@ def get_gene_pheno_dataloader(
         pin_memory=pin_memory,
         collate_fn=_collate_samples,
     )
-    return dataloader
+    return dataloader, dataset.gene_to_id
 
 
 def get_gene_pheno_data(
@@ -134,7 +134,7 @@ def get_gene_pheno_data(
 
     test_unique_ids = train_val_test_split_indices["test"]
 
-    train_dataloader = get_gene_pheno_dataloader(
+    train_dataloader, gene_to_id = get_gene_pheno_dataloader(
         batch_size=batch_size,
         unique_ids=train_unique_ids,
         bac_genes_df_file_path=input_df_file_path,
@@ -152,7 +152,7 @@ def get_gene_pheno_data(
         pin_memory=True,
     )
 
-    val_dataloader = get_gene_pheno_dataloader(
+    val_dataloader, _ = get_gene_pheno_dataloader(
         batch_size=2
         * batch_size,  # double the batch size during eval for speed up
         unique_ids=val_unique_ids,
@@ -175,8 +175,9 @@ def get_gene_pheno_data(
             train_dataloader=train_dataloader,
             val_dataloader=val_dataloader,
             train_set_len=len(train_unique_ids),
+            gene_to_idx=gene_to_id,
         )
-    test_dataloader = get_gene_pheno_dataloader(
+    test_dataloader, _ = get_gene_pheno_dataloader(
         batch_size=2
         * batch_size,  # double the batch size during eval for speed up
         unique_ids=test_unique_ids,
@@ -200,6 +201,7 @@ def get_gene_pheno_data(
         val_dataloader=val_dataloader,
         test_dataloader=test_dataloader,
         train_set_len=len(train_unique_ids),
+        gene_to_idx=gene_to_id,
     )
 
 

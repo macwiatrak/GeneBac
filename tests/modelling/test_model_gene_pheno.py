@@ -83,7 +83,7 @@ def test_model_gene_pheno_train_fake_data(tmpdir):
         max_epochs=max_epochs,
         train_set_len=n_samples,
         n_graph_layers=2,
-        n_transformer_heads=4,
+        n_heads=2,
         n_highly_variable_genes=n_genes,
         max_gene_length=seq_length,
         n_init_filters=64,
@@ -143,7 +143,7 @@ def test_model_gene_pheno_train_real_data(tmpdir):
         max_epochs=max_epochs,
         train_set_len=None,
         n_graph_layers=1,
-        n_transformer_heads=2,
+        n_heads=2,
         n_highly_variable_genes=len(selected_genes),
         max_gene_length=max_gene_length,
     )
@@ -220,7 +220,7 @@ def test_model_gene_pheno_test_drug_thresh_real_data(tmpdir):
         max_epochs=max_epochs,
         train_set_len=None,
         n_graph_layers=1,
-        n_transformer_heads=2,
+        n_heads=2,
         n_highly_variable_genes=len(selected_genes),
         max_gene_length=max_gene_length,
     )
