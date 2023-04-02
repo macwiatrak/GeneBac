@@ -22,11 +22,11 @@ class GeneBacEncoder(nn.Module):
     ):
         super().__init__()
 
-        self.stem = ResidualConvLayer(
+        self.stem = ConvLayer(
             in_channels=input_dim,
             out_channels=n_filters_init,
             kernel_size=17,
-            pool_size=2,  # change from 3
+            pool_size=3,  # change from 3
             batch_norm=batch_norm,
         )
 
@@ -34,7 +34,7 @@ class GeneBacEncoder(nn.Module):
         curr_n_filters = n_filters_init
         for i in range(n_repeat_blocks_tower):
             tower_layers.append(
-                ResidualConvLayer(
+                ConvLayer(
                     in_channels=curr_n_filters,
                     out_channels=_round(curr_n_filters * filters_mult),
                     kernel_size=5,
@@ -53,7 +53,7 @@ class GeneBacEncoder(nn.Module):
         #     pool_size=2,  # change from 3
         # )
 
-        seq_depth = 20
+        seq_depth = 13
         self.bottleneck = DenseLayer(
             in_features=curr_n_filters * seq_depth,
             out_features=n_bottleneck_layer,
