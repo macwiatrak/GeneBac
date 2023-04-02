@@ -135,12 +135,14 @@ class GNNModel(nn.Module):
 
         bs, n_nodes, dim = node_features.shape
         node_features = node_features.view(bs * n_nodes, dim)
-        edge_index = batch_edge_index(edge_index, bs, n_nodes)
+        edge_index = batch_edge_index(edge_index, bs, n_nodes).to(
+            node_features.device
+        )
 
         if len(edge_features.shape) == 1:
-            edge_features = edge_features.repeat(bs)
+            edge_features = edge_features.repeat(bs).to(node_features.device)
         else:
-            edge_features = edge_features.repeat(bs, 1)
+            edge_features = edge_features.repeat(bs, 1).to(node_features.device)
 
         for l in self.layers:
             # For graph layers, we need to add the "edge_index" tensor as additional input
