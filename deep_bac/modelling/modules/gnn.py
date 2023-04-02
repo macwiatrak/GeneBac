@@ -42,7 +42,7 @@ def get_edge_data(
     gene_to_idx: Dict[str, int],
     edge_feature_list: List[str] = STRINGDB_EDGE_FEATURES,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
-    edge_df = pd.read_csv(edge_file_path, sep="\t")
+    edge_df = pd.read_csv(edge_file_path, sep="\t").reset_index()
     edge_tensor = torch.tensor(
         [
             [gene_to_idx[gene] for gene in edge_df["node1"].tolist()],
