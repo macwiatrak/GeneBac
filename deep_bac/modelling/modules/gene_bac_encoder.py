@@ -5,6 +5,7 @@ from deep_bac.modelling.modules.layers import (
     ConvLayer,
     DenseLayer,
     _round,
+    ResidualConvLayer,
 )
 
 
@@ -13,7 +14,7 @@ class GeneBacEncoder(nn.Module):
         self,
         input_dim: int = 4,
         n_filters_init: int = 128,
-        n_repeat_blocks_tower: int = 5,
+        n_repeat_blocks_tower: int = 6,
         filters_mult: float = 1.122,
         n_filters_pre_bottleneck: int = 56,  # 112,  # 227,
         n_bottleneck_layer: int = 64,
@@ -21,11 +22,11 @@ class GeneBacEncoder(nn.Module):
     ):
         super().__init__()
 
-        self.stem = ConvLayer(
+        self.stem = ResidualConvLayer(
             in_channels=input_dim,
             out_channels=n_filters_init,
             kernel_size=17,
-            pool_size=3,
+            pool_size=2,  # change from 3
             batch_norm=batch_norm,
         )
 
@@ -33,7 +34,7 @@ class GeneBacEncoder(nn.Module):
         curr_n_filters = n_filters_init
         for i in range(n_repeat_blocks_tower):
             tower_layers.append(
-                ConvLayer(
+                ResidualConvLayer(
                     in_channels=curr_n_filters,
                     out_channels=_round(curr_n_filters * filters_mult),
                     kernel_size=5,
@@ -52,7 +53,7 @@ class GeneBacEncoder(nn.Module):
         #     pool_size=2,  # change from 3
         # )
 
-        seq_depth = 26  # 13
+        seq_depth = 20
         self.bottleneck = DenseLayer(
             in_features=curr_n_filters * seq_depth,
             out_features=n_bottleneck_layer,
