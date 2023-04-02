@@ -90,7 +90,7 @@ def get_gene_pheno_dataloader(
         pin_memory=pin_memory,
         collate_fn=_collate_samples,
     )
-    return dataloader, dataset.gene_to_id
+    return dataloader, dataset.gene_to_idx
 
 
 def get_gene_pheno_data(

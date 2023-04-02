@@ -68,6 +68,9 @@ class BacGenomeGenePhenoDataset(Dataset):
             for i, gene in enumerate(reference_gene_data_df["gene"].tolist())
             if gene in selected_genes
         }
+        self.gene_to_idx = {
+            gene: idx for idx, gene in enumerate(self.gene_to_id.keys())
+        }
 
     def __getitem__(self, idx):
         unq_id = self.unique_ids[idx]

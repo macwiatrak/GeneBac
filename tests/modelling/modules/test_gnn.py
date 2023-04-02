@@ -35,7 +35,7 @@ def test_gnn_encoder_forward():
 def test_gnn_model():
     selected_gens = DRUG_SPECIFIC_GENES_DICT["cryptic"]
     gene_to_idx = {gene: idx for idx, gene in enumerate(selected_gens)}
-    batch_size = 10
+    batch_size = 16
     n_genes = len(selected_gens)
     gene_dim = 64
     n_heads = 2
