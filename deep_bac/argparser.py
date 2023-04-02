@@ -25,7 +25,7 @@ class DeepGeneBacArgumentParser(Tap):
     n_gene_bottleneck_layer: int = 64
     n_init_filters: int = 128
     n_heads: int = 2
-    n_graph_layers: int = 1
+    n_graph_layers: int = 2
     n_output: int = 14  # nr of drugs in the cryptic dataset
     # data loader arguments
     max_gene_length: int = 2560
