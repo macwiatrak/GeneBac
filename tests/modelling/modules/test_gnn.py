@@ -53,6 +53,7 @@ def test_gnn_model():
         input_dim=gene_dim,
         hidden_dim=gene_dim,
         output_dim=gene_dim,
+        n_genes=n_genes,
         n_layers=2,
         layer_type="GAT",
         edge_indices=edge_indices,

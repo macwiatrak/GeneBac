@@ -5,6 +5,8 @@ import torch
 from torch import nn
 from torch_geometric.nn import GCNConv, GATv2Conv, MessagePassing
 
+from deep_bac.modelling.modules.layers import DenseLayer
+from deep_bac.modelling.modules.utils import Flatten
 
 STRINGDB_EDGE_FEATURES = [
     "neighborhood_on_chromosome",
@@ -63,6 +65,7 @@ class GNNModel(nn.Module):
         input_dim: int,
         hidden_dim: int,
         output_dim: int,
+        n_genes: int,
         n_layers: int = 2,
         n_heads: int = 2,
         layer_type: Literal["GCN", "GAT"] = "GAT",
@@ -108,6 +111,14 @@ class GNNModel(nn.Module):
             )
         ]
         self.layers = nn.ModuleList(layers)
+        self.dense = nn.Sequential(
+            Flatten(),
+            DenseLayer(
+                in_features=output_dim * n_genes,
+                out_features=output_dim,
+                batch_norm=True,
+            ),
+        )
 
         if layer_type == "GCN" and self.same_edge_features is not None:
             # select combined edge score as edge weight for the GCN model
@@ -153,5 +164,6 @@ class GNNModel(nn.Module):
             else:
                 x = l(node_features)
         x = x.view(bs, n_nodes, -1)
-        x = x.mean(dim=1)
+        x = self.dense(x)
+        # x = x.mean(dim=1)
         return x

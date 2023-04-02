@@ -104,6 +104,7 @@ def get_genes_to_strain_model(
             input_dim=config.n_gene_bottleneck_layer,
             hidden_dim=config.n_gene_bottleneck_layer,
             output_dim=config.n_gene_bottleneck_layer,
+            n_genes=len(config.gene_to_idx),
             n_layers=config.n_graph_layers,
             n_heads=config.n_heads,
             layer_type=config.graph_model_type,
