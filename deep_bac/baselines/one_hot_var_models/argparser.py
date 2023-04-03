@@ -20,10 +20,10 @@ class OneHotModelArgumentParser(Tap):
     variant_matrix_input_dir: str = "/tmp/variant-matrix-cryptic-loci-updated/"
     output_dir: str = "/tmp/"
     # model hyperparameters
-    max_epochs: int = 1000
+    max_epochs: int = 500
     lr: float = 0.001
-    l1_lambda: float = 0.05
-    l2_lambda: float = 0.05
+    l1_lambda: float = 0.1
+    l2_lambda: float = 0.00
     batch_size: int = 128
     num_workers: int = 0
     penalty: Literal["l1", "l2", "elasticnet"] = "l1"

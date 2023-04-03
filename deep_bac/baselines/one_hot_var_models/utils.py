@@ -2,6 +2,13 @@ from collections import defaultdict
 from typing import Dict, Literal
 
 import pandas as pd
+from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks import (
+    TQDMProgressBar,
+    EarlyStopping,
+    ModelCheckpoint,
+)
+from pytorch_lightning.loggers import TensorBoardLogger
 
 from deep_bac.utils import get_drug_line
 
@@ -37,3 +44,30 @@ def dict_metrics_to_df(
         output["split"].append(split)
         output["drug_class"] = get_drug_line(drug)
     return pd.DataFrame(output)
+
+
+def get_trainer_linear_model(
+    output_dir: str,
+    max_epochs: int = 500,
+    patience: int = 10,
+):
+    return Trainer(
+        max_epochs=max_epochs,
+        callbacks=[
+            EarlyStopping(
+                monitor="train_gmean_spec_sens",
+                patience=patience,
+                mode="max",
+            ),
+            ModelCheckpoint(
+                dirpath=output_dir,
+                filename="{epoch:02d}-{train_gmean_spec_sens:.4f}",
+                monitor="train_gmean_spec_sens",
+                mode="max",
+                save_top_k=1,
+                save_last=True,
+            ),
+            TQDMProgressBar(refresh_rate=100),
+        ],
+        logger=TensorBoardLogger(output_dir),
+    )

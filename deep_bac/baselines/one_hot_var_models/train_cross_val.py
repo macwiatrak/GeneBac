@@ -27,7 +27,7 @@ from deep_bac.baselines.one_hot_var_models.data_reader import (
 from deep_bac.baselines.one_hot_var_models.model import LinearModel
 
 from deep_bac.baselines.one_hot_var_models.utils import (
-    DRUG_TO_IDX,
+    get_trainer_linear_model,
 )
 from deep_bac.modelling.metrics import compute_drug_thresholds
 
@@ -54,9 +54,9 @@ def run(
     variant_matrix_input_dir: str,
     df_unq_ids_labels_file_path: str,
     lr: float = 0.001,
-    l1_lambda: float = 0.05,
+    l1_lambda: float = 0.1,
     l2_lambda: float = 0.05,
-    max_epochs: int = 1000,
+    max_epochs: int = 500,
     random_state: int = 42,
     batch_size: int = 128,
     num_workers: int = 0,
@@ -86,25 +86,8 @@ def run(
             l2_lambda=l2_lambda,
             regression=regression,
         )
-        trainer = Trainer(
-            max_epochs=max_epochs,
-            callbacks=[
-                EarlyStopping(
-                    monitor="train_gmean_spec_sens",
-                    patience=20,
-                    mode="max",
-                ),
-                ModelCheckpoint(
-                    dirpath=output_dir,
-                    filename="{epoch:02d}-{train_gmean_spec_sens:.4f}",
-                    monitor="train_gmean_spec_sens",
-                    mode="max",
-                    save_top_k=1,
-                    save_last=True,
-                ),
-                TQDMProgressBar(refresh_rate=100),
-            ],
-            logger=TensorBoardLogger(output_dir),
+        trainer = get_trainer_linear_model(
+            output_dir=output_dir, max_epochs=max_epochs
         )
         trainer.fit(
             model,
