@@ -12,6 +12,7 @@ class LinearModel(LightningModule):
     def __init__(
         self,
         input_dim: int,
+        output_dim: int,
         lr: float = 1e-3,
         l1_lambda: float = 0.05,
         l2_lambda: float = 0.05,
@@ -26,8 +27,9 @@ class LinearModel(LightningModule):
         self.lr = lr
         self.drug_thresholds = drug_thresholds
         self.regression = regression
+        self.output_dim = output_dim
 
-        self.linear = torch.nn.Linear(input_dim, 1)
+        self.linear = torch.nn.Linear(input_dim, output_dim)
         self.loss_fn = (
             nn.MSELoss(reduction="none")
             if self.regression
@@ -41,13 +43,16 @@ class LinearModel(LightningModule):
         x, labels = batch
         logits = self(x)
         # get loss with reduction="none" to compute loss per sample
-        loss = self.loss_fn(logits.view(-1), labels.view(-1))
+        loss = self.loss_fn(
+            logits.view(-1), labels.view(-1).type(torch.float32)
+        )
         # remove loss for samples with no label and compute mean
-        loss = remove_ignore_index(loss, labels.view(-1))
+        loss = remove_ignore_index(loss, labels.view(-1).type(torch.float32))
         if (
             loss is None
         ):  # do this to prevent a failure in automatic optimisation in PL
             return None
+        loss = loss + self.l1_reg() + self.l2_reg()
 
         return dict(
             loss=loss,
@@ -74,13 +79,12 @@ class LinearModel(LightningModule):
         x, labels = batch
         logits = self(x)
         # get loss with reduction="none" to compute loss per sample
-        loss = (
-            self.loss_fn(logits.view(-1), labels.view(-1))
-            + self.l1_reg()
-            + self.l2_reg()
+        loss = self.loss_fn(
+            logits.view(-1), labels.view(-1).type(torch.float32)
         )
         # remove loss for samples with no label and compute mean
-        loss = remove_ignore_index(loss, labels.view(-1))
+        loss = remove_ignore_index(loss, labels.view(-1).type(torch.float32))
+        loss = loss + self.l1_reg() + self.l2_reg()
         return dict(
             loss=loss.cpu(),
             logits=logits.cpu(),
@@ -144,10 +148,10 @@ class LinearModel(LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
 
-    def l1_reg(self):
-        l1_norm = self.linear.weight.abs().sum(dim=-1)
+    def l1_reg(self) -> torch.Tensor:
+        l1_norm = self.linear.weight.abs().sum() / self.output_dim
         return self.l1_lambda * l1_norm
 
     def l2_reg(self):
-        l2_norm = self.linear.weight.pow(2).sum(dim=-1)
+        l2_norm = self.linear.weight.pow(2).sum() / self.output_dim
         return self.l2_lambda * l2_norm
