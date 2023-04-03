@@ -18,14 +18,14 @@ class DeepGeneBacArgumentParser(Tap):
     gene_encoder_type: Literal[
         "conv_transformer", "gene_bac", "MD-CNN", "enformer_like"
     ] = "gene_bac"
-    graph_model_type: Literal["transformer", "dense"] = "dense"
+    graph_model_type: Literal["transformer", "dense", "GAT", "GCN"] = "dense"
     regression: bool = False
     use_drug_idx: int = None
     lr: float = 0.0005
     n_gene_bottleneck_layer: int = 64
     n_init_filters: int = 128
-    n_transformer_heads: int = 2
-    n_graph_layers: int = 1
+    n_heads: int = 2
+    n_graph_layers: int = 2
     n_output: int = 14  # nr of drugs in the cryptic dataset
     # data loader arguments
     max_gene_length: int = 2560

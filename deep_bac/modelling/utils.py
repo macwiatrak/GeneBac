@@ -1,4 +1,5 @@
 import logging
+import os
 
 import torch
 from torch import nn
@@ -10,6 +11,7 @@ from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.metrics import compute_drug_thresholds
 from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
 from deep_bac.modelling.modules.enformer_like_encoder import EnformerLikeEncoder
+from deep_bac.modelling.modules.gnn import GNNModel, get_edge_data
 from deep_bac.modelling.modules.graph_transformer import GraphTransformer
 from deep_bac.modelling.modules.layers import DenseLayer
 from deep_bac.modelling.modules.positional_encodings import (
@@ -43,7 +45,7 @@ def get_gene_encoder(config: DeepGeneBacConfig):
         return ConvTransformerEncoder(
             n_bottleneck_layer=config.n_gene_bottleneck_layer,
             n_filters=config.n_init_filters,
-            n_transformer_heads=config.n_transformer_heads,
+            n_transformer_heads=config.n_heads,
         )
 
     if config.gene_encoder_type == "gene_bac":
@@ -66,7 +68,9 @@ def get_gene_encoder(config: DeepGeneBacConfig):
     raise ValueError(f"Unknown gene encoder type: {config.gene_encoder_type}")
 
 
-def get_genes_to_strain_model(config: DeepGeneBacConfig):
+def get_genes_to_strain_model(
+    config: DeepGeneBacConfig,
+):
     """Get the graph model"""
     if config.gene_encoder_type == "MD-CNN":
         return None
@@ -75,7 +79,7 @@ def get_genes_to_strain_model(config: DeepGeneBacConfig):
             n_gene_bottleneck_layer=config.n_gene_bottleneck_layer,
             n_genes=config.n_highly_variable_genes,
             n_layers=config.n_graph_layers,
-            n_heads=config.n_transformer_heads,
+            n_heads=config.n_heads,
         )
 
     if config.graph_model_type == "dense":
@@ -87,6 +91,26 @@ def get_genes_to_strain_model(config: DeepGeneBacConfig):
                 out_features=config.n_gene_bottleneck_layer,
                 layer_norm=True,
             ),
+        )
+
+    if config.graph_model_type == "GAT" or config.graph_model_type == "GCN":
+        edge_indices, edge_features = get_edge_data(
+            edge_file_path=os.path.join(
+                config.input_dir, "ppi_interactions_string.tsv"
+            ),
+            gene_to_idx=config.gene_to_idx,
+        )
+        return GNNModel(
+            input_dim=config.n_gene_bottleneck_layer,
+            hidden_dim=config.n_gene_bottleneck_layer,
+            output_dim=config.n_gene_bottleneck_layer,
+            n_genes=len(config.gene_to_idx),
+            n_layers=config.n_graph_layers,
+            n_heads=config.n_heads,
+            layer_type=config.graph_model_type,
+            edge_indices=edge_indices,
+            edge_features=edge_features,
+            dropout_rate=config.dropout_rate,
         )
     raise ValueError(f"Unknown graph model type: {config.graph_model_type}")
 
