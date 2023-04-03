@@ -55,7 +55,7 @@ def test_gnn_model():
         output_dim=gene_dim,
         n_genes=n_genes,
         n_layers=2,
-        layer_type="GAT",
+        layer_type="GCN",
         edge_indices=edge_indices,
         edge_features=edge_features,
         n_heads=n_heads,
@@ -69,3 +69,4 @@ def test_gnn_model():
 
     loss = nn.BCEWithLogitsLoss()(logits, labels)
     assert loss > 0.0
+    loss.backward()
