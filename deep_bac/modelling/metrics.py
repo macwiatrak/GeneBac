@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import List, Dict, Tuple
 
 import torch
@@ -62,7 +63,7 @@ def get_regression_metrics(
     Returns:
         dict of metrics
     """
-    if len(logits) == 0:
+    if len(logits) <= 2:  # you cannot compute r2 with less than 2 samples
         return {
             "pearson": torch.tensor(-100.0),
             "spearman": torch.tensor(-100.0),
@@ -311,3 +312,96 @@ def compute_drug_thresholds(
         )
         drug_thresholds.append(thresh)
     return torch.tensor(drug_thresholds)
+
+
+def get_gene_metric(
+    per_gene_metrics: Dict[str, Dict],
+    gene: str,
+    metric: str,
+):
+    if gene not in per_gene_metrics:
+        return -100.0
+    return per_gene_metrics[gene][metric]
+
+
+def get_macro_gene_expression_metrics(
+    logits: torch.Tensor,
+    labels: torch.Tensor,
+    gene_names: List[str],
+    strain_ids: List[str],
+) -> Tuple[Dict[str, torch.Tensor], Dict[str, Dict]]:
+
+    per_gene_logits = defaultdict(list)
+    per_gene_labels = defaultdict(list)
+    per_strain_logits = defaultdict(list)
+    per_strain_labels = defaultdict(list)
+
+    for gene_name, strain_id, logit, label in zip(
+        gene_names, strain_ids, logits, labels
+    ):
+        per_gene_logits[gene_name].append(logit)
+        per_gene_labels[gene_name].append(label)
+        per_strain_logits[strain_id].append(logit)
+        per_strain_labels[strain_id].append(label)
+
+    per_gene_metrics = defaultdict(dict)
+    for gene_name in per_gene_logits.keys():
+        per_gene_metrics[gene_name] = get_regression_metrics(
+            logits=torch.tensor(per_gene_logits[gene_name]),
+            labels=torch.tensor(per_gene_labels[gene_name]),
+        )
+
+    per_strain_metrics = defaultdict(dict)
+    for strain_id in per_strain_logits.keys():
+        per_strain_metrics[strain_id] = get_regression_metrics(
+            logits=torch.tensor(per_strain_logits[strain_id]),
+            labels=torch.tensor(per_strain_labels[strain_id]),
+        )
+
+    agg_macro_metrics = {}
+    for metric in REGRESSION_METRICS:
+        gene_val = torch.tensor(
+            [x[metric] for x in per_gene_metrics.values() if x[metric] != -100]
+        ).mean()
+        gene_val = (
+            gene_val if not torch.isnan(gene_val) else torch.tensor(-100.0)
+        )
+        agg_macro_metrics[f"macro_gene_{metric}"] = gene_val
+
+        strain_val = torch.tensor(
+            [
+                x[metric]
+                for x in per_strain_metrics.values()
+                if x[metric] != -100
+            ]
+        ).mean()
+        strain_val = (
+            strain_val if not torch.isnan(strain_val) else torch.tensor(-100.0)
+        )
+        agg_macro_metrics[f"macro_strain_{metric}"] = strain_val
+
+    return agg_macro_metrics, per_gene_metrics
+
+
+def get_macro_thresh_metrics(
+    gene_vars_w_thresholds: Dict[float, List[str]],
+    per_gene_metrics: Dict[str, Dict],
+    ignore_index: int = -100,
+) -> Dict[str, torch.Tensor]:
+    metrics = {}
+    for thresh, genes_in_thresh in gene_vars_w_thresholds.items():
+        thresh_metrics = {}
+        for metric in REGRESSION_METRICS:
+            val = torch.tensor(
+                [
+                    get_gene_metric(per_gene_metrics, gene, metric)
+                    for gene in genes_in_thresh
+                    if get_gene_metric(per_gene_metrics, gene, metric)
+                    != -ignore_index
+                ]
+            ).mean()
+            thresh_metrics[f"macro_gene_{metric}_{str(thresh)}"] = (
+                val if not torch.isnan(val) else torch.tensor(-100.0)
+            )
+        metrics.update(thresh_metrics)
+    return metrics

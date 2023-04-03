@@ -86,7 +86,6 @@ def test_model_gene_pheno_train_fake_data(tmpdir):
         n_heads=2,
         n_highly_variable_genes=n_genes,
         max_gene_length=seq_length,
-        n_init_filters=64,
     )
 
     dataloader = get_test_gene_reg_dataloader(
