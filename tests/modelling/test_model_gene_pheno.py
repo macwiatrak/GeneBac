@@ -147,7 +147,7 @@ def test_model_gene_pheno_train_real_data(tmpdir):
         max_gene_length=max_gene_length,
     )
 
-    dataloader = get_gene_pheno_dataloader(
+    dataloader, gene_to_idx = get_gene_pheno_dataloader(
         batch_size=batch_size,
         bac_genes_df_file_path="../test_data/sample_agg_variants.parquet",
         reference_gene_data_df=reference_gene_data_df,

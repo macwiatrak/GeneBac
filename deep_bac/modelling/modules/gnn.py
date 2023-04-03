@@ -72,6 +72,7 @@ class GNNModel(nn.Module):
         edge_indices: torch.Tensor = None,
         edge_features: torch.Tensor = None,
         dropout_rate: float = 0.2,
+        activation_fn: nn.Module = nn.ReLU(inplace=False),
     ):
         """
         Inputs:
@@ -99,7 +100,7 @@ class GNNModel(nn.Module):
                 gnn_layer(
                     in_channels=in_channels, out_channels=out_channels, **kwargs
                 ),
-                nn.ReLU(inplace=True),
+                nn.ReLU(inplace=False),
                 nn.Dropout(dropout_rate),
             ]
             in_channels = hidden_dim
@@ -117,12 +118,16 @@ class GNNModel(nn.Module):
                 in_features=output_dim * n_genes,
                 out_features=output_dim,
                 batch_norm=True,
+                activation_fn=nn.ReLU(inplace=False),
             ),
         )
 
         if layer_type == "GCN" and self.same_edge_features is not None:
             # select combined edge score as edge weight for the GCN model
             self.same_edge_features = self.same_edge_features[:, -1]
+
+        self.dropout = nn.Dropout(dropout_rate)
+        self.activation_fn = activation_fn
 
     def forward(
         self,
@@ -164,6 +169,6 @@ class GNNModel(nn.Module):
             else:
                 x = l(node_features)
         x = x.view(bs, n_nodes, -1)
-        x = self.dense(x)
+        x = self.dense(self.dropout(self.activation_fn(x)))
         # x = x.mean(dim=1)
         return x
