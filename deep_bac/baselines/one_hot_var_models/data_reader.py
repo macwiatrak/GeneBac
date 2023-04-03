@@ -4,9 +4,14 @@ from typing import Dict
 
 import numpy as np
 import pandas as pd
+import torch
 from scipy.sparse import csr_matrix, load_npz
+from torch.utils.data import DataLoader, TensorDataset
 
-from deep_bac.baselines.one_hot_var_models.data_types import DataVarMatrices
+from deep_bac.baselines.one_hot_var_models.data_types import (
+    DataVarMatrices,
+    OneHotVarDataReaderOutput,
+)
 
 
 def split_train_val_test(
@@ -115,3 +120,95 @@ def get_var_matrix_data(
     )
     data = get_drug_var_matrices(drug_idx, data)
     return data
+
+
+def get_one_hot_data(
+    variant_matrix_input_dir: str,
+    df_unq_ids_labels_file_path: str,
+    train_test_split_unq_ids_file_path: str = None,
+    fold_idx: int = None,
+    exclude_vars_not_in_train: bool = False,
+    batch_size: int = 128,
+    num_workers: int = 0,
+):
+
+    df_unq_ids_labels = pd.read_parquet(df_unq_ids_labels_file_path)
+
+    variant_matrix = load_npz(
+        os.path.join(variant_matrix_input_dir, "var_matrix.npz")
+    )
+    with open(
+        os.path.join(variant_matrix_input_dir, "unique_id_to_idx.json"), "r"
+    ) as f:
+        unq_id_to_idx = json.load(f)
+
+    data = split_train_val_test(
+        train_test_split_unq_ids_file_path,
+        variant_matrix,
+        unq_id_to_idx,
+        df_unq_ids_labels,
+        exclude_vars_not_in_train,
+    )
+    if fold_idx is None:
+        train_var_matrix = torch.tensor(data.train_var_matrix)
+        train_labels = torch.tensor(data.train_labels)
+        train_dl = DataLoader(
+            TensorDataset(
+                torch.tensor(data.train_var_matrix),
+                torch.tensor(data.train_labels),
+            ),
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=num_workers,
+        )
+        test_dl = DataLoader(
+            TensorDataset(
+                torch.tensor(data.test_var_matrix),
+                torch.tensor(data.test_labels),
+            ),
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=num_workers,
+        )
+        return OneHotVarDataReaderOutput(
+            train_dl=train_dl,
+            test_dl=test_dl,
+            train_var_matrix=train_var_matrix,
+            train_labels=train_labels,
+        )
+
+    with open(train_test_split_unq_ids_file_path, "r") as f:
+        train_test_split_unq_ids = json.load(f)
+
+    train_unique_ids = train_test_split_unq_ids[f"train_fold_{fold_idx}"]
+    train_indices = np.array(
+        [unq_id_to_idx[unq_id] for unq_id in train_unique_ids]
+    )
+    train_var_matrix = torch.tensor(data.train_var_matrix[train_indices])
+    train_labels = torch.tensor(data.train_labels[train_indices])
+
+    train_dl = DataLoader(
+        TensorDataset(train_var_matrix, train_labels),
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers,
+    )
+
+    val_unique_ids = train_test_split_unq_ids[f"val_fold_{fold_idx}"]
+    train_indices = np.array(
+        [unq_id_to_idx[unq_id] for unq_id in val_unique_ids]
+    )
+    val_var_matrix = torch.tensor(data.train_var_matrix[train_indices])
+    val_labels = torch.tensor(data.train_labels[train_indices])
+    val_dl = DataLoader(
+        TensorDataset(val_var_matrix, val_labels),
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+    )
+    return OneHotVarDataReaderOutput(
+        train_dl=train_dl,
+        val_dl=val_dl,
+        train_var_matrix=train_var_matrix,
+        train_labels=train_labels,
+    )
