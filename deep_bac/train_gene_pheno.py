@@ -98,6 +98,14 @@ def run(
     trainer.fit(model, data.train_dataloader, val_dataloaders=val_dataloader)
 
     if test_after_train:
+        logging.info("Testing after training without computing thresholds")
+        _ = trainer.test(
+            model,
+            dataloaders=data.test_dataloader,
+            ckpt_path="best",
+        )
+
+        logging.info("Testing after training after computing thresholds")
         model = model.load_from_checkpoint(
             trainer.checkpoint_callback.best_model_path
         )
