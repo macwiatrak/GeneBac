@@ -17,6 +17,18 @@ from deep_bac.baselines.one_hot_var_models.utils import (
 logging.basicConfig(level=logging.INFO)
 
 
+def get_tuning_params(penalty: Literal["l1", "l2", "elasticnet"] = "l2"):
+    if penalty == "l2":
+        return {"C": [0.01, 0.1, 0.5, 1.0, 5.0]}
+
+    if penalty == "l1":
+        return {"C": [0.0001, 0.001, 0.01, 0.1, 1.0]}
+    return {
+        "l1_ratio": [0.001, 0.01, 0.1, 0.25, 0.5],
+        "alpha": [0.001, 0.01, 0.1, 0.25, 0.5],
+    }
+
+
 def run(
     output_dir: str,
     drug_to_idx: Dict[str, int],
@@ -29,18 +41,7 @@ def run(
     exclude_vars_not_in_train: bool = False,
 ):
     df_unq_ids_labels = pd.read_parquet(df_unq_ids_labels_file_path)
-    c = (
-        [0.01, 0.1, 0.5, 1.0, 5.0]
-        if penalty == "l1"
-        else [0.0001, 0.001, 0.01, 0.1, 1.0]
-    )
-    params = {
-        "C": c,
-        "class_weight": [None, "balanced"],
-    }
-    # add l1 ratio if using elasticnet
-    if penalty == "elasticnet":
-        params["l1_ratio"] = [0.0, 0.25, 0.5, 0.75, 1.0]
+    params = get_tuning_params(penalty)
 
     output_dfs = []
     for drug, drug_idx in drug_to_idx.items():

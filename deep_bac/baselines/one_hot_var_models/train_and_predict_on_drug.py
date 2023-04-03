@@ -5,7 +5,7 @@ from typing import Dict, List, Literal
 import pandas as pd
 import torch
 from pytorch_lightning.utilities.seed import seed_everything
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, ElasticNet
 
 from deep_bac.baselines.one_hot_var_models.data_reader import (
     get_var_matrix_data,
@@ -26,7 +26,7 @@ def train_and_predict(
     df_unq_ids_labels: pd.DataFrame,
     params: Dict[str, List],
     max_iter: int,
-    penalty: Literal["l1", "l2", "elasticnet"] = None,
+    penalty: Literal["l1", "l2", "elasticnet"] = "l1",
     random_state: int = 42,
     exclude_vars_not_in_train: bool = False,
 ) -> Dict[str, float]:
@@ -39,36 +39,58 @@ def train_and_predict(
         exclude_vars_not_in_train=exclude_vars_not_in_train,
     )
 
-    solver = "saga" if penalty == "elasticnet" else "liblinear"
-    model = LogisticRegression(
-        max_iter=max_iter,
-        penalty=penalty,
-        random_state=random_state,
-        tol=0.001,
-        solver=solver,  # supports all penalties
-    )
+    if penalty == "l1" or penalty == "l2":
+        model = LogisticRegression(
+            max_iter=max_iter,
+            penalty=penalty,
+            random_state=random_state,
+            tol=0.001,
+            solver="liblinear",  # supports both l1 and l2
+        )
+    else:
+        model = ElasticNet(
+            max_iter=max_iter,
+            random_state=random_state,
+            tol=0.001,
+        )
     logging.info(f"Using logistic regression with {penalty} penalty")
 
     best_params = tune(
         data_matrices=data_matrices,
         model=model,
         parameters=params,
+        penalty=penalty,
     )
 
     # tune and get the best model
-    best_model = LogisticRegression(
-        max_iter=max_iter,
-        penalty=penalty,
-        random_state=random_state,
-        tol=0.001,
-        solver=solver,  # supports all penalties
-        **best_params,
-    )
+    if penalty == "l1" or penalty == "l2":
+        best_model = LogisticRegression(
+            max_iter=max_iter,
+            penalty=penalty,
+            random_state=random_state,
+            tol=0.001,
+            solver="liblinear",  # supports all penalties
+            **best_params,
+        )
+    else:
+        best_model = ElasticNet(
+            max_iter=max_iter,
+            random_state=random_state,
+            tol=0.001,
+            **best_params,
+        )
 
     logging.info(f"Fitting and computing metrics using the best model.")
     # fit the best model
     best_model.fit(data_matrices.train_var_matrix, data_matrices.train_labels)
-    train_pred = best_model.predict_proba(data_matrices.train_var_matrix)[:, 1]
+
+    if penalty == "elasticnet":
+        train_pred = best_model.predict(data_matrices.train_var_matrix)
+    else:
+        train_pred = best_model.predict_proba(data_matrices.train_var_matrix)[
+            :, 1
+        ]
+
     # get optimal thresholds using the train set
     thresh, _, _, _ = choose_best_spec_sens_threshold(
         logits=torch.tensor(train_pred),
@@ -76,7 +98,13 @@ def train_and_predict(
     )
 
     # predict on the test set
-    test_pred = best_model.predict_proba(data_matrices.test_var_matrix)[:, 1]
+    if penalty == "elasticnet":
+        test_pred = best_model.predict(data_matrices.test_var_matrix)
+    else:
+        test_pred = best_model.predict_proba(data_matrices.test_var_matrix)[
+            :, 1
+        ]
+
     # compute the metrics using the test set
     metrics, thresh = binary_cls_metrics(
         logits=torch.tensor(test_pred),
@@ -103,12 +131,12 @@ def main():
             )
         ),
         params={
-            "C": [1.0],
+            "alpha": [0.5, 1.0],
+            # "C": [1.0],
             # "C": [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0],
-            # "class_weight": [None, "balanced"],
         },
         max_iter=100,
-        penalty="l2",
+        penalty="elasticnet",
         random_state=42,
         exclude_vars_not_in_train=True,
     )

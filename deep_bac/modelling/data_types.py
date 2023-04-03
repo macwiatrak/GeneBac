@@ -15,8 +15,8 @@ class DeepGeneBacConfig:
     lr: float = 0.001
     batch_size: int = 1
     n_gene_bottleneck_layer: int = 64
-    n_init_filters: int = 256
-    n_transformer_heads: int = 4
+    n_init_filters: int = 128
+    n_transformer_heads: int = 2
     n_graph_layers: int = 2
     n_output: int = 14  # nr of drugs in the cryptic dataset
     max_gene_length: int = 2560

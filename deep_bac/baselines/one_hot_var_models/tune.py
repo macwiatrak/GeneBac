@@ -33,10 +33,13 @@ def tune(
     data_matrices: DataVarMatrices,
     model: LogisticRegression,
     parameters: Dict[str, List],
+    penalty: Literal["l1", "l2", "elasticnet"] = "l1",
     n_folds: int = 5,
 ) -> Dict[str, Any]:
     scorer = make_scorer(
-        gmean_spec_sens_score_fn, greater_is_better=True, needs_proba=True
+        gmean_spec_sens_score_fn,
+        greater_is_better=True,
+        needs_proba=False if penalty == "elasticnet" else True,
     )
     logging.info(f"Starting the tuning with nr of folds: {n_folds}")
     clf = GridSearchCV(model, parameters, cv=n_folds, scoring=scorer, n_jobs=-1)
