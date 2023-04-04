@@ -98,14 +98,10 @@ def run(
     trainer.fit(model, data.train_dataloader, val_dataloaders=val_dataloader)
 
     if test_after_train:
-        model = model.load_from_checkpoint(
-            trainer.checkpoint_callback.best_model_path
-        )
-        drug_thresholds = get_drug_thresholds(model, data.train_dataloader)
-        model.drug_thresholds = drug_thresholds
         return trainer.test(
             model,
             dataloaders=data.test_dataloader,
+            ckpt_path="best",
         )
     return None
 
