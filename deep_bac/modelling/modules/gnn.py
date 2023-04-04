@@ -117,8 +117,8 @@ class GNNModel(nn.Module):
             DenseLayer(
                 in_features=output_dim * n_genes,
                 out_features=output_dim,
-                batch_norm=True,
                 layer_norm=False,
+                batch_norm=False,
                 activation_fn=nn.ReLU(inplace=False),
             ),
         )

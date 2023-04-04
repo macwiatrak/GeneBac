@@ -26,6 +26,7 @@ def test_gnn_encoder_forward():
         edge_indices=edge_indices,
         edge_features=edge_features,
         n_heads=n_heads,
+        n_genes=n_genes,
     )
 
     out = model(x)
