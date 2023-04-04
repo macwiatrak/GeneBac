@@ -112,15 +112,16 @@ class GNNModel(nn.Module):
             )
         ]
         self.layers = nn.ModuleList(layers)
-        # self.dense = nn.Sequential(
-        #     Flatten(),
-        #     DenseLayer(
-        #         in_features=output_dim * n_genes,
-        #         out_features=output_dim,
-        #         batch_norm=True,
-        #         activation_fn=nn.ReLU(inplace=False),
-        #     ),
-        # )
+        self.dense = nn.Sequential(
+            Flatten(),
+            DenseLayer(
+                in_features=output_dim * n_genes,
+                out_features=output_dim,
+                batch_norm=True,
+                layer_norm=False,
+                activation_fn=nn.ReLU(inplace=False),
+            ),
+        )
 
         if layer_type == "GCN" and self.same_edge_features is not None:
             # select combined edge score as edge weight for the GCN model
@@ -169,6 +170,6 @@ class GNNModel(nn.Module):
             else:
                 x = l(node_features)
         x = x.view(bs, n_nodes, -1)
-        # x = self.dense(self.dropout(self.activation_fn(x)))
-        x = x.mean(dim=1)
+        x = self.dense(self.dropout(self.activation_fn(x)))
+        # x = x.mean(dim=1)
         return x
