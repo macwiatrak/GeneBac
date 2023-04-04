@@ -99,16 +99,16 @@ def train_and_predict(
 
     # predict on the test set
     if penalty == "elasticnet":
-        test_pred = best_model.predict(data_matrices.test_var_matrix)
+        test_pred = best_model.predict(data_matrices.eval_var_matrix)
     else:
-        test_pred = best_model.predict_proba(data_matrices.test_var_matrix)[
+        test_pred = best_model.predict_proba(data_matrices.eval_var_matrix)[
             :, 1
         ]
 
     # compute the metrics using the test set
     metrics, thresh = binary_cls_metrics(
         logits=torch.tensor(test_pred),
-        labels=torch.tensor(data_matrices.test_labels),
+        labels=torch.tensor(data_matrices.eval_labels),
         thresh=thresh,
     )
     metrics = {k: v.item() for k, v in metrics.items()}

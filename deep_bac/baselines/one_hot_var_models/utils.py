@@ -49,7 +49,7 @@ def dict_metrics_to_df(
 def get_trainer_linear_model(
     output_dir: str,
     max_epochs: int = 500,
-    patience: int = 10,
+    patience: int = 50,
 ):
     return Trainer(
         max_epochs=max_epochs,

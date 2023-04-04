@@ -21,7 +21,7 @@ from deep_bac.baselines.one_hot_var_models.argparser import (
     OneHotModelArgumentParser,
 )
 from deep_bac.baselines.one_hot_var_models.data_reader import (
-    split_train_val_test,
+    get_train_eval_var_data,
     get_one_hot_data,
 )
 from deep_bac.baselines.one_hot_var_models.model import LinearModel
@@ -108,7 +108,8 @@ def run(
             model,
             dataloaders=data.val_dl,
         )
-        metrics_list.append(fold_metrics)
+        # fold_metrics = trainer.checkpoint_callback.best_model_ep
+        metrics_list.append(fold_metrics[0])
 
     # compute avg metrics across the folds
     avg_metrics = {
@@ -116,7 +117,7 @@ def run(
         for k in metrics_list[0].keys()
     }
     logging.info(
-        f"Avg metrics for linear model with L1 lambda {l1_lambda} and L2 lambda {l2_lambda}: {avg_metrics}"
+        f"\n\nAvg metrics for linear model with L1 lambda {l1_lambda} and L2 lambda {l2_lambda}: {avg_metrics}"
     )
 
 

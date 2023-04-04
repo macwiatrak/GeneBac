@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -14,18 +14,14 @@ from deep_bac.baselines.one_hot_var_models.data_types import (
 )
 
 
-def split_train_val_test(
-    train_test_split_unq_ids_file_path: str,
+def get_train_eval_var_data(
+    train_unq_ids: List[str],
+    eval_unq_ids: List[str],
     variant_matrix: csr_matrix,
     unq_id_to_idx: Dict[str, int],
     df_unq_ids_labels: pd.DataFrame,
     exclude_vars_not_in_train: bool = False,
 ) -> DataVarMatrices:
-    with open(train_test_split_unq_ids_file_path, "r") as f:
-        train_test_split_unq_ids = json.load(f)
-
-    train_unq_ids = train_test_split_unq_ids["train"]
-    test_unq_ids = train_test_split_unq_ids["test"]
 
     zeros_vector = csr_matrix((1, variant_matrix.shape[1]), dtype=np.int8)
 
@@ -39,15 +35,15 @@ def split_train_val_test(
         train_var_matrix.append(var_vector.toarray())
     train_var_matrix = np.concatenate(train_var_matrix)
 
-    test_var_matrix = []
-    for unq_id in test_unq_ids:
+    eval_var_matrix = []
+    for unq_id in eval_unq_ids:
         var_vector = (
             variant_matrix[unq_id_to_idx[unq_id]]
             if unq_id in unq_id_to_idx
             else zeros_vector
         )
-        test_var_matrix.append(var_vector.toarray())
-    test_var_matrix = np.concatenate(test_var_matrix)
+        eval_var_matrix.append(var_vector.toarray())
+    test_var_matrix = np.concatenate(eval_var_matrix)
 
     if exclude_vars_not_in_train:
         vars_in_train = np.where(train_var_matrix.sum(axis=0) > 0)[0]
@@ -63,15 +59,15 @@ def split_train_val_test(
     test_labels = np.stack(
         [
             df_unq_ids_labels.loc[unq_id]["BINARY_LABELS"]
-            for unq_id in test_unq_ids
+            for unq_id in eval_unq_ids
         ]
     )
 
     return DataVarMatrices(
         train_var_matrix=train_var_matrix,
-        test_var_matrix=test_var_matrix,
+        eval_var_matrix=test_var_matrix,
         train_labels=train_labels,
-        test_labels=test_labels,
+        eval_labels=test_labels,
     )
 
 
@@ -80,18 +76,18 @@ def get_drug_var_matrices(
     data: DataVarMatrices,
 ):
     train_drug_indices = np.where(data.train_labels[:, drug_idx] != -100.0)[0]
-    test_drug_indices = np.where(data.test_labels[:, drug_idx] != -100.0)[0]
+    test_drug_indices = np.where(data.eval_labels[:, drug_idx] != -100.0)[0]
 
     train_var_matrix = data.train_var_matrix[train_drug_indices]
     train_labels = data.train_labels[train_drug_indices, drug_idx]
 
-    test_var_matrix = data.test_var_matrix[test_drug_indices]
-    test_labels = data.test_labels[test_drug_indices, drug_idx]
+    test_var_matrix = data.eval_var_matrix[test_drug_indices]
+    test_labels = data.eval_labels[test_drug_indices, drug_idx]
     return DataVarMatrices(
         train_var_matrix=train_var_matrix,
-        test_var_matrix=test_var_matrix,
+        eval_var_matrix=test_var_matrix,
         train_labels=train_labels,
-        test_labels=test_labels,
+        eval_labels=test_labels,
     )
 
 
@@ -111,7 +107,7 @@ def get_var_matrix_data(
     ) as f:
         unq_id_to_idx = json.load(f)
 
-    data = split_train_val_test(
+    data = get_train_eval_var_data(
         train_test_split_unq_ids_file_path,
         variant_matrix,
         unq_id_to_idx,
@@ -142,30 +138,42 @@ def get_one_hot_data(
     ) as f:
         unq_id_to_idx = json.load(f)
 
-    data = split_train_val_test(
-        train_test_split_unq_ids_file_path,
+    with open(train_test_split_unq_ids_file_path, "r") as f:
+        train_test_split_unq_ids = json.load(f)
+
+    if fold_idx is None:
+        train_unq_ids = train_test_split_unq_ids["train"]
+        eval_unq_ids = train_test_split_unq_ids["test"]
+    else:
+        train_unq_ids = train_test_split_unq_ids[f"train_fold_{fold_idx}"]
+        eval_unq_ids = train_test_split_unq_ids[f"val_fold_{fold_idx}"]
+
+    data = get_train_eval_var_data(
+        train_unq_ids,
+        eval_unq_ids,
         variant_matrix,
         unq_id_to_idx,
         df_unq_ids_labels,
         exclude_vars_not_in_train,
     )
     if fold_idx is None:
-        train_var_matrix = torch.tensor(data.train_var_matrix)
+        train_var_matrix = torch.tensor(
+            data.train_var_matrix, dtype=torch.float32
+        )
         train_labels = torch.tensor(data.train_labels)
         train_dl = DataLoader(
-            TensorDataset(
-                torch.tensor(data.train_var_matrix),
-                torch.tensor(data.train_labels),
-            ),
+            TensorDataset(train_var_matrix, train_labels),
             batch_size=batch_size,
             shuffle=True,
             num_workers=num_workers,
         )
+
+        eval_var_matrix = torch.tensor(
+            data.eval_var_matrix, dtype=torch.float32
+        )
+        eval_labels = torch.tensor(data.eval_labels)
         test_dl = DataLoader(
-            TensorDataset(
-                torch.tensor(data.test_var_matrix),
-                torch.tensor(data.test_labels),
-            ),
+            TensorDataset(eval_var_matrix, eval_labels),
             batch_size=batch_size,
             shuffle=True,
             num_workers=num_workers,
@@ -177,15 +185,8 @@ def get_one_hot_data(
             train_labels=train_labels,
         )
 
-    with open(train_test_split_unq_ids_file_path, "r") as f:
-        train_test_split_unq_ids = json.load(f)
-
-    train_unique_ids = train_test_split_unq_ids[f"train_fold_{fold_idx}"]
-    train_indices = np.array(
-        [unq_id_to_idx[unq_id] for unq_id in train_unique_ids]
-    )
-    train_var_matrix = torch.tensor(data.train_var_matrix[train_indices])
-    train_labels = torch.tensor(data.train_labels[train_indices])
+    train_var_matrix = torch.tensor(data.train_var_matrix, dtype=torch.float32)
+    train_labels = torch.tensor(data.train_labels)
 
     train_dl = DataLoader(
         TensorDataset(train_var_matrix, train_labels),
@@ -194,12 +195,8 @@ def get_one_hot_data(
         num_workers=num_workers,
     )
 
-    val_unique_ids = train_test_split_unq_ids[f"val_fold_{fold_idx}"]
-    train_indices = np.array(
-        [unq_id_to_idx[unq_id] for unq_id in val_unique_ids]
-    )
-    val_var_matrix = torch.tensor(data.train_var_matrix[train_indices])
-    val_labels = torch.tensor(data.train_labels[train_indices])
+    val_var_matrix = torch.tensor(data.eval_var_matrix, dtype=torch.float32)
+    val_labels = torch.tensor(data.eval_labels)
     val_dl = DataLoader(
         TensorDataset(val_var_matrix, val_labels),
         batch_size=batch_size,

@@ -10,9 +10,9 @@ from torch.utils.data import DataLoader
 @dataclass
 class DataVarMatrices:
     train_var_matrix: np.ndarray
-    test_var_matrix: np.ndarray
+    eval_var_matrix: np.ndarray
     train_labels: np.ndarray
-    test_labels: np.ndarray
+    eval_labels: np.ndarray
 
 
 @dataclass_json
