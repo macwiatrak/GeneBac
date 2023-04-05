@@ -52,6 +52,7 @@ class DeepGeneBacArgumentParser(Tap):
         "val_spearman",
         "train_loss",
         "train_gmean_spec_sens",
+        "train_r2",
     ] = "train_gmean_spec_sens"
     use_drug_specific_genes: Literal[
         "INH", "Walker", "MD-CNN", "cryptic"
