@@ -19,7 +19,7 @@ def test_model_gene_pheno_steps():
     n_genes = 3
     seq_length = 2560
     in_channels = 4
-    n_filters = 256
+    n_filters = 128
     n_bottleneck_layer = 64
     n_output = 5
 
@@ -30,7 +30,7 @@ def test_model_gene_pheno_steps():
     config = DeepGeneBacConfig(
         gene_encoder_type="gene_bac",
         graph_model_type="dense",
-        regression=False,
+        regression=True,
         n_gene_bottleneck_layer=n_bottleneck_layer,
         n_init_filters=n_filters,
         n_output=n_output,
@@ -117,7 +117,7 @@ def test_model_gene_pheno_train_fake_data(tmpdir):
 
 def test_model_gene_pheno_train_real_data(tmpdir):
     n_classes = 14
-    regression = False
+    regression = True
     n_bottleneck_layer = 64
     n_filters = 256
     max_epochs = 10

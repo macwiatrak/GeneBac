@@ -230,7 +230,7 @@ def compute_agg_stats(
         logits_wo_ignore = logits[labels != ignore_index]
         reg_metrics = get_regression_metrics(logits_wo_ignore, labels_wo_ignore)
         metrics.update(reg_metrics)
-        return reg_metrics
+        return reg_metrics, torch.tensor([])
 
     drug_metrics = {}
     for drug_idx in range(labels.shape[1]):
@@ -252,7 +252,7 @@ def compute_agg_stats(
             drug_idxs=[DRUG_TO_LABEL_IDX[idx] for idx in DRUGS_OF_INTEREST],
         )
     metrics.update(drug_metrics)
-    return metrics
+    return metrics, torch.tensor([])
 
 
 def get_macro_metric(
