@@ -1,6 +1,7 @@
 import logging
 from typing import Dict, Literal
 
+import numpy as np
 import pandas as pd
 
 from deep_bac.baselines.one_hot_var_models.argparser import (
@@ -13,6 +14,7 @@ from deep_bac.baselines.one_hot_var_models.utils import (
     dict_metrics_to_df,
     DRUG_TO_IDX,
 )
+from deep_bac.modelling.metrics import BINARY_CLS_METRICS
 
 logging.basicConfig(level=logging.INFO)
 
@@ -43,7 +45,7 @@ def run(
     df_unq_ids_labels = pd.read_parquet(df_unq_ids_labels_file_path)
     params = get_tuning_params(penalty)
 
-    output_dfs = []
+    output_metrics = []
     for drug, drug_idx in drug_to_idx.items():
         logging.info(f"Tuning and predicting for {drug} drug")
         test_metrics = train_and_predict(
@@ -58,10 +60,23 @@ def run(
             exclude_vars_not_in_train=exclude_vars_not_in_train,
         )
         logging.info(f"Test metrics for {drug} drug: {test_metrics}")
-        output_dfs.append(dict_metrics_to_df(test_metrics, drug, split="test"))
+        output_metrics.append(test_metrics)
+
+    output_dfs = [
+        dict_metrics_to_df(test_metrics, drug, split="test")
+        for test_metrics, drug in zip(output_metrics, drug_to_idx.keys())
+    ]
     pd.concat(output_dfs).to_csv(
         f"{output_dir}/test_results_{penalty}_{random_state}.csv"
     )
+
+    avg_metrics = {
+        metric: np.mean(
+            [test_metrics[metric] for test_metrics in output_metrics]
+        )
+        for metric in BINARY_CLS_METRICS
+    }
+    logging.info(f"Average test metrics: {avg_metrics}")
 
 
 def main(args):
