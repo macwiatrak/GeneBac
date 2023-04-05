@@ -41,6 +41,7 @@ def run(
     penalty: Literal["l1", "l2", "elasticnet"] = "l1",
     random_state: int = 42,
     exclude_vars_not_in_train: bool = False,
+    regression: bool = False,
 ):
     df_unq_ids_labels = pd.read_parquet(df_unq_ids_labels_file_path)
     params = get_tuning_params(penalty)
@@ -58,6 +59,7 @@ def run(
             random_state=random_state,
             penalty=penalty,
             exclude_vars_not_in_train=exclude_vars_not_in_train,
+            regression=regression,
         )
         logging.info(f"Test metrics for {drug} drug: {test_metrics}")
         output_metrics.append(test_metrics)
@@ -90,6 +92,7 @@ def main(args):
         penalty=args.penalty,
         random_state=args.random_state,
         exclude_vars_not_in_train=args.exclude_vars_not_in_train,
+        regression=args.regression,
     )
 
 

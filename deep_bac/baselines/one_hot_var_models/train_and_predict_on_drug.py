@@ -29,6 +29,7 @@ def train_and_predict(
     penalty: Literal["l1", "l2", "elasticnet"] = "l1",
     random_state: int = 42,
     exclude_vars_not_in_train: bool = False,
+    regression: bool = False,
 ) -> Dict[str, float]:
     seed_everything(random_state)
     data_matrices = get_var_matrix_data(
@@ -37,6 +38,7 @@ def train_and_predict(
         train_test_split_unq_ids_file_path=train_test_split_unq_ids_file_path,
         df_unq_ids_labels=df_unq_ids_labels,
         exclude_vars_not_in_train=exclude_vars_not_in_train,
+        regression=regression,
     )
 
     if penalty == "l1" or penalty == "l2":
@@ -139,6 +141,7 @@ def main():
         penalty="elasticnet",
         random_state=42,
         exclude_vars_not_in_train=True,
+        regression=False,
     )
 
 

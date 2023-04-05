@@ -24,3 +24,4 @@ class OneHotModelArgumentParser(Tap):
     penalty: Literal["l1", "l2", "elasticnet"] = "l1"
     random_state: int = 42
     exclude_vars_not_in_train: bool = False
+    regression: bool = False

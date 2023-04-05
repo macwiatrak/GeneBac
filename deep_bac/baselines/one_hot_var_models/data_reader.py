@@ -15,6 +15,7 @@ def split_train_val_test(
     unq_id_to_idx: Dict[str, int],
     df_unq_ids_labels: pd.DataFrame,
     exclude_vars_not_in_train: bool = False,
+    regression: bool = False,
 ) -> DataVarMatrices:
     with open(train_test_split_unq_ids_file_path, "r") as f:
         train_test_split_unq_ids = json.load(f)
@@ -49,17 +50,12 @@ def split_train_val_test(
         train_var_matrix = train_var_matrix[:, vars_in_train]
         test_var_matrix = test_var_matrix[:, vars_in_train]
 
+    labels = "LOGMIC_LABELS" if regression else "BINARY_LABELS"
     train_labels = np.stack(
-        [
-            df_unq_ids_labels.loc[unq_id]["BINARY_LABELS"]
-            for unq_id in train_unq_ids
-        ]
+        [df_unq_ids_labels.loc[unq_id][labels] for unq_id in train_unq_ids]
     )
     test_labels = np.stack(
-        [
-            df_unq_ids_labels.loc[unq_id]["BINARY_LABELS"]
-            for unq_id in test_unq_ids
-        ]
+        [df_unq_ids_labels.loc[unq_id][labels] for unq_id in test_unq_ids]
     )
 
     return DataVarMatrices(
@@ -96,6 +92,7 @@ def get_var_matrix_data(
     train_test_split_unq_ids_file_path: str,
     df_unq_ids_labels: pd.DataFrame,
     exclude_vars_not_in_train: bool = False,
+    regression: bool = False,
 ) -> DataVarMatrices:
 
     variant_matrix = load_npz(
@@ -112,6 +109,7 @@ def get_var_matrix_data(
         unq_id_to_idx,
         df_unq_ids_labels,
         exclude_vars_not_in_train,
+        regression,
     )
     data = get_drug_var_matrices(drug_idx, data)
     return data

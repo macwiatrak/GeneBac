@@ -61,6 +61,7 @@ def run_grid_search_cv(
     penalty: Literal["l1", "l2", "elasticnet"] = None,
     random_state: int = 42,
     exclude_vars_not_in_train: bool = False,
+    regression: bool = False,
 ) -> Dict[str, Any]:
     seed_everything(random_state)
 
@@ -70,6 +71,7 @@ def run_grid_search_cv(
         train_test_split_unq_ids_file_path=train_test_split_unq_ids_file_path,
         df_unq_ids_labels=df_unq_ids_labels,
         exclude_vars_not_in_train=exclude_vars_not_in_train,
+        regression=regression,
     )
 
     solver = "saga" if penalty == "elasticnet" else "liblinear"
