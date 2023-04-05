@@ -19,13 +19,13 @@ logging.basicConfig(level=logging.INFO)
 
 def get_tuning_params(penalty: Literal["l1", "l2", "elasticnet"] = "l2"):
     if penalty == "l2":
-        return {"C": [0.01, 0.1, 0.5, 1.0, 5.0]}
+        return {"C": [0.1, 0.5, 1.0, 5.0]}
 
     if penalty == "l1":
-        return {"C": [0.0001, 0.001, 0.01, 0.1, 1.0]}
+        return {"C": [0.01, 0.1, 0.5, 1.0]}
     return {
-        "l1_ratio": [0.001, 0.01, 0.1, 0.25, 0.5],
-        "alpha": [0.001, 0.01, 0.1, 0.25, 0.5],
+        "l1_ratio": [0.01, 0.1, 0.25, 0.5],
+        "alpha": [0.01, 0.1, 0.25, 0.5],
     }
 
 
@@ -35,8 +35,8 @@ def run(
     train_test_split_unq_ids_file_path: str,
     variant_matrix_input_dir: str,
     df_unq_ids_labels_file_path: str,
-    max_iter: int = 1000,
-    penalty: Literal["l1", "l2", "elasticnet"] = "l2",
+    max_iter: int = 500,
+    penalty: Literal["l1", "l2", "elasticnet"] = "l1",
     random_state: int = 42,
     exclude_vars_not_in_train: bool = False,
 ):
