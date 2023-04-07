@@ -11,6 +11,7 @@ from deep_bac.baselines.one_hot_var_models.data_reader import (
     get_var_matrix_data,
 )
 from deep_bac.baselines.one_hot_var_models.tune import tune, INPUT_DIR
+from deep_bac.baselines.one_hot_var_models.utils import get_model
 from deep_bac.modelling.metrics import (
     choose_best_spec_sens_threshold,
     binary_cls_metrics,
@@ -40,22 +41,14 @@ def train_and_predict(
         exclude_vars_not_in_train=exclude_vars_not_in_train,
         regression=regression,
     )
+    model = get_model(
+        penalty=penalty,
+        max_iter=max_iter,
+        random_state=random_state,
+        regression=regression,
+    )
 
-    if penalty == "l1" or penalty == "l2":
-        model = LogisticRegression(
-            max_iter=max_iter,
-            penalty=penalty,
-            random_state=random_state,
-            tol=0.001,
-            solver="liblinear",  # supports both l1 and l2
-        )
-    else:
-        model = ElasticNet(
-            max_iter=max_iter,
-            random_state=random_state,
-            tol=0.001,
-        )
-    logging.info(f"Using logistic regression with {penalty} penalty")
+    logging.info(f"Using model with {penalty} penalty")
 
     best_params = tune(
         data_matrices=data_matrices,
@@ -64,23 +57,13 @@ def train_and_predict(
         penalty=penalty,
     )
 
-    # tune and get the best model
-    if penalty == "l1" or penalty == "l2":
-        best_model = LogisticRegression(
-            max_iter=max_iter,
-            penalty=penalty,
-            random_state=random_state,
-            tol=0.001,
-            solver="liblinear",  # supports all penalties
-            **best_params,
-        )
-    else:
-        best_model = ElasticNet(
-            max_iter=max_iter,
-            random_state=random_state,
-            tol=0.001,
-            **best_params,
-        )
+    best_model = get_model(
+        penalty=penalty,
+        max_iter=max_iter,
+        random_state=random_state,
+        regression=regression,
+        best_params=best_params,
+    )
 
     logging.info(f"Fitting and computing metrics using the best model.")
     # fit the best model

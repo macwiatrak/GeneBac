@@ -7,7 +7,7 @@ import pandas as pd
 import torch
 from pytorch_lightning.utilities.seed import seed_everything
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import make_scorer
+from sklearn.metrics import make_scorer, r2_score
 from sklearn.model_selection import GridSearchCV
 
 from deep_bac.baselines.one_hot_var_models.data_reader import (
@@ -34,10 +34,13 @@ def tune(
     model: LogisticRegression,
     parameters: Dict[str, List],
     penalty: Literal["l1", "l2", "elasticnet"] = "l1",
+    regression: bool = False,
     n_folds: int = 5,
 ) -> Dict[str, Any]:
+    # TODO: check this works for regression
+    score_fn = gmean_spec_sens_score_fn if not regression else r2_score
     scorer = make_scorer(
-        gmean_spec_sens_score_fn,
+        score_fn,
         greater_is_better=True,
         needs_proba=False if penalty == "elasticnet" else True,
     )
