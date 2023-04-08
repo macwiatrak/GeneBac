@@ -24,7 +24,7 @@ def get_tuning_params(
 ) -> Dict[str, List]:
     if penalty == "elasticnet":
         return {
-            "l1_ratio": [0.01, 0.1, 0.25, 0.5],
+            "l1_ratio": [0.01, 0.1, 0.5],
             "alpha": [0.01, 0.1, 0.25, 0.5],
         }
 
@@ -35,7 +35,7 @@ def get_tuning_params(
         return {"C": [0.01, 0.1, 0.5, 1.0]}
 
     if regression and penalty == "l2":
-        return {"alpha": [0.01, 0.1, 0.25, 0.5, 1.0]}
+        return {"alpha": [0.01, 0.1, 0.5, 1.0]}
 
     if regression and penalty == "l1":
         return {"alpha": [0.01, 0.1, 0.5, 1.0]}
