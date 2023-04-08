@@ -7,7 +7,7 @@ import pandas as pd
 import torch
 from pytorch_lightning.utilities.seed import seed_everything
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import make_scorer
+from sklearn.metrics import make_scorer, r2_score
 from sklearn.model_selection import GridSearchCV
 
 from deep_bac.baselines.one_hot_var_models.data_reader import (
@@ -34,12 +34,14 @@ def tune(
     model: LogisticRegression,
     parameters: Dict[str, List],
     penalty: Literal["l1", "l2", "elasticnet"] = "l1",
+    regression: bool = False,
     n_folds: int = 5,
 ) -> Dict[str, Any]:
+    score_fn = gmean_spec_sens_score_fn if not regression else r2_score
     scorer = make_scorer(
-        gmean_spec_sens_score_fn,
+        score_fn,
         greater_is_better=True,
-        needs_proba=False if penalty == "elasticnet" else True,
+        needs_proba=False if penalty == "elasticnet" or regression else True,
     )
     logging.info(f"Starting the tuning with nr of folds: {n_folds}")
     clf = GridSearchCV(model, parameters, cv=n_folds, scoring=scorer, n_jobs=-1)
@@ -61,6 +63,7 @@ def run_grid_search_cv(
     penalty: Literal["l1", "l2", "elasticnet"] = None,
     random_state: int = 42,
     exclude_vars_not_in_train: bool = False,
+    regression: bool = False,
 ) -> Dict[str, Any]:
     seed_everything(random_state)
 
@@ -70,6 +73,7 @@ def run_grid_search_cv(
         train_test_split_unq_ids_file_path=train_test_split_unq_ids_file_path,
         df_unq_ids_labels=df_unq_ids_labels,
         exclude_vars_not_in_train=exclude_vars_not_in_train,
+        regression=regression,
     )
 
     solver = "saga" if penalty == "elasticnet" else "liblinear"
@@ -85,6 +89,7 @@ def run_grid_search_cv(
         data_matrices=data,
         model=model,
         parameters=params,
+        regression=regression,
     )
     logging.info(f"Best params: {best_params}")
     return best_params
