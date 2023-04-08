@@ -37,7 +37,6 @@ def tune(
     regression: bool = False,
     n_folds: int = 5,
 ) -> Dict[str, Any]:
-    # TODO: check this works for regression
     score_fn = gmean_spec_sens_score_fn if not regression else r2_score
     scorer = make_scorer(
         score_fn,
