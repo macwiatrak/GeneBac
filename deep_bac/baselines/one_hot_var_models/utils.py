@@ -1,6 +1,7 @@
 from collections import defaultdict
 from typing import Dict, Literal
 
+import numpy as np
 import pandas as pd
 from sklearn.linear_model import (
     LogisticRegression,
@@ -73,6 +74,17 @@ def get_model(
             tol=0.001,
             **best_params,
         )
+
+
+def get_preds(
+    model,
+    X: np.ndarray,
+    penalty: Literal["l1", "l2", "elasticnet"] = "l1",
+    regression: bool = False,
+) -> np.ndarray:
+    if penalty == "elasticnet" or regression:
+        return model.predict(X)
+    return model.predict_proba(X)[:, 1]
 
 
 def dict_metrics_to_df(

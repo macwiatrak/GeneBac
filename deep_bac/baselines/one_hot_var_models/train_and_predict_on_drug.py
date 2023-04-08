@@ -5,16 +5,16 @@ from typing import Dict, List, Literal
 import pandas as pd
 import torch
 from pytorch_lightning.utilities.seed import seed_everything
-from sklearn.linear_model import LogisticRegression, ElasticNet
 
 from deep_bac.baselines.one_hot_var_models.data_reader import (
     get_var_matrix_data,
 )
 from deep_bac.baselines.one_hot_var_models.tune import tune, INPUT_DIR
-from deep_bac.baselines.one_hot_var_models.utils import get_model
+from deep_bac.baselines.one_hot_var_models.utils import get_model, get_preds
 from deep_bac.modelling.metrics import (
     choose_best_spec_sens_threshold,
     binary_cls_metrics,
+    get_regression_metrics,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -69,35 +69,36 @@ def train_and_predict(
     # fit the best model
     best_model.fit(data_matrices.train_var_matrix, data_matrices.train_labels)
 
-    if penalty == "elasticnet":
-        train_pred = best_model.predict(data_matrices.train_var_matrix)
-    else:
-        train_pred = best_model.predict_proba(data_matrices.train_var_matrix)[
-            :, 1
-        ]
-
-    # get optimal thresholds using the train set
-    thresh, _, _, _ = choose_best_spec_sens_threshold(
-        logits=torch.tensor(train_pred),
-        labels=torch.tensor(data_matrices.train_labels),
+    train_pred = get_preds(
+        best_model, data_matrices.train_var_matrix, penalty, regression
     )
+
+    if not regression:
+        # get optimal thresholds using the train set
+        thresh, _, _, _ = choose_best_spec_sens_threshold(
+            logits=torch.tensor(train_pred),
+            labels=torch.tensor(data_matrices.train_labels),
+        )
 
     # predict on the test set
-    if penalty == "elasticnet":
-        test_pred = best_model.predict(data_matrices.test_var_matrix)
-    else:
-        test_pred = best_model.predict_proba(data_matrices.test_var_matrix)[
-            :, 1
-        ]
-
-    # compute the metrics using the test set
-    metrics, thresh = binary_cls_metrics(
-        logits=torch.tensor(test_pred),
-        labels=torch.tensor(data_matrices.test_labels),
-        thresh=thresh,
+    test_pred = get_preds(
+        model, data_matrices.test_var_matrix, penalty, regression
     )
+
+    if regression:
+        metrics = get_regression_metrics(
+            logits=torch.tensor(test_pred),
+            labels=torch.tensor(data_matrices.test_labels),
+        )
+    else:
+        # compute the metrics using the test set
+        metrics, thresh = binary_cls_metrics(
+            logits=torch.tensor(test_pred),
+            labels=torch.tensor(data_matrices.test_labels),
+            thresh=thresh,
+        )
+        metrics["threshold"] = torch.tensor(thresh)
     metrics = {k: v.item() for k, v in metrics.items()}
-    metrics["threshold"] = thresh
     # add best params to save them
     metrics.update(best_params)
     return metrics
