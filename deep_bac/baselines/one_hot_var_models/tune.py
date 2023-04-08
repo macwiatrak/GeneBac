@@ -42,7 +42,7 @@ def tune(
     scorer = make_scorer(
         score_fn,
         greater_is_better=True,
-        needs_proba=False if penalty == "elasticnet" else True,
+        needs_proba=False if penalty == "elasticnet" or regression else True,
     )
     logging.info(f"Starting the tuning with nr of folds: {n_folds}")
     clf = GridSearchCV(model, parameters, cv=n_folds, scoring=scorer, n_jobs=-1)
