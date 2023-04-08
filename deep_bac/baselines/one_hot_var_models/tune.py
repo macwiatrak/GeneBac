@@ -90,6 +90,7 @@ def run_grid_search_cv(
         data_matrices=data,
         model=model,
         parameters=params,
+        regression=regression,
     )
     logging.info(f"Best params: {best_params}")
     return best_params

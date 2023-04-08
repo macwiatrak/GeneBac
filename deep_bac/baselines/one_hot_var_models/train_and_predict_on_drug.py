@@ -55,6 +55,7 @@ def train_and_predict(
         model=model,
         parameters=params,
         penalty=penalty,
+        regression=regression,
     )
 
     best_model = get_model(
@@ -82,16 +83,16 @@ def train_and_predict(
 
     # predict on the test set
     test_pred = get_preds(
-        model, data_matrices.test_var_matrix, penalty, regression
+        best_model, data_matrices.test_var_matrix, penalty, regression
     )
 
+    # compute the metrics using the test set
     if regression:
         metrics = get_regression_metrics(
             logits=torch.tensor(test_pred),
             labels=torch.tensor(data_matrices.test_labels),
         )
     else:
-        # compute the metrics using the test set
         metrics, thresh = binary_cls_metrics(
             logits=torch.tensor(test_pred),
             labels=torch.tensor(data_matrices.test_labels),
