@@ -8,7 +8,10 @@ from dataclasses import dataclass
 @dataclass
 class DeepGeneBacConfig:
     gene_encoder_type: Literal[
-        "conv_transformer", "gene_bac", "MD-CNN", "enformer_like"
+        "gene_bac",
+        "MD-CNN",
+        "xpresso",
+        "zrimec_et_al_2020",
     ] = "gene_bac"
     graph_model_type: Literal["transformer", "dense", "GAT", "GCN"] = "dense"
     regression: bool = False
