@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from deep_bac.baselines.md_cnn.md_cnn import MDCNN
+from deep_bac.baselines.xpresso.xpresso import Xpresso
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.metrics import compute_drug_thresholds
 from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
@@ -65,6 +66,9 @@ def get_gene_encoder(config: DeepGeneBacConfig):
             seq_length=config.n_highly_variable_genes * config.max_gene_length,
             n_output=config.n_output,
         )
+
+    if config.gene_encoder_type == "xpresso":
+        return Xpresso()
     raise ValueError(f"Unknown gene encoder type: {config.gene_encoder_type}")
 
 
