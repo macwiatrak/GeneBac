@@ -1,6 +1,6 @@
 import torch
 
-from deep_bac.baselines.xpresso.xpresso import Xpresso
+from deep_bac.baselines.xpresso import Xpresso
 
 
 def test_xpresso():

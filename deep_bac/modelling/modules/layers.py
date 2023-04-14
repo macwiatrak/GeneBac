@@ -23,6 +23,7 @@ class ConvLayer(nn.Module):
         dropout: float = 0.0,
         activation_fn: Callable = nn.GELU(),
         attention_pooling: bool = False,
+        dilation: int = 1,
     ):
         super().__init__()
         self.conv = nn.Conv1d(
@@ -30,6 +31,7 @@ class ConvLayer(nn.Module):
             out_channels=out_channels,
             kernel_size=kernel_size,
             padding=kernel_size // 2,
+            dilation=dilation,
         )
         self.batch_norm = (
             nn.BatchNorm1d(out_channels) if batch_norm else nn.Identity()
