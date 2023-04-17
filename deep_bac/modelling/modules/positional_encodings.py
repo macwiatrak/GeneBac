@@ -86,5 +86,6 @@ class FixedGeneExpressionPositionalEncoding(nn.Module):
                 1, 1, self.dim
             ) * self.coef_linspace.unsqueeze(0)
         pe = torch.ones_like(vals) - vals
-        x = x + pe
+        # x = x + pe
+        x = torch.cat([x, pe], dim=1)
         return x

@@ -59,13 +59,13 @@ def test_model_gene_expr_steps():
 
 def test_model_gene_expr_train_fake_data(tmpdir):
     n_samples = 100
-    seq_length = 2150
+    seq_length = 2560
     n_bottleneck_layer = 32
     max_epochs = 20
     batch_size = 10
 
     config = DeepGeneBacConfig(
-        gene_encoder_type="zrimec_et_al_2020",
+        gene_encoder_type="gene_bac",
         lr=0.0001,
         batch_size=batch_size,
         n_gene_bottleneck_layer=n_bottleneck_layer,
