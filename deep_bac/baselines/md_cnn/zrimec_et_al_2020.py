@@ -45,7 +45,7 @@ class ZrimecEtAlModel(nn.Module):
         self.dense_layers = nn.Sequential(
             *[
                 Flatten(),
-                nn.Linear(76480, 128),
+                nn.Linear(63360, 128),
                 nn.ReLU(),
                 nn.Dropout(dropout),
                 nn.Linear(128, 32),
