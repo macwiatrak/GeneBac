@@ -13,7 +13,7 @@ class GeneBacEncoder(nn.Module):
         self,
         input_dim: int = 4,
         n_filters_init: int = 128,
-        n_repeat_blocks_tower: int = 3,
+        n_repeat_blocks_tower: int = 6,
         filters_mult: float = 1.122,
         n_bottleneck_layer: int = 64,
         batch_norm: bool = True,
@@ -35,7 +35,7 @@ class GeneBacEncoder(nn.Module):
                 ConvLayer(
                     in_channels=curr_n_filters,
                     out_channels=_round(curr_n_filters * filters_mult),
-                    kernel_size=5,
+                    kernel_size=6,
                     pool_size=2,
                     batch_norm=batch_norm,
                 )
@@ -43,7 +43,7 @@ class GeneBacEncoder(nn.Module):
             curr_n_filters = _round(curr_n_filters * filters_mult)
         self.tower = nn.Sequential(*tower_layers)
 
-        seq_depth = 106
+        seq_depth = 14
         self.bottleneck = DenseLayer(
             in_features=curr_n_filters * seq_depth,
             out_features=n_bottleneck_layer,

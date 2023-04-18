@@ -11,7 +11,6 @@ def test_gene_bac_encoder():
     n_filters_init = 256
     n_repeat_blocks_tower = 5
     filters_mult = 1.122
-    n_filters_pre_bottleneck = 227
     n_bottleneck_layer = 64
 
     x = torch.rand(batch_size, in_channels, seq_length)
@@ -20,7 +19,6 @@ def test_gene_bac_encoder():
         n_filters_init=n_filters_init,
         n_repeat_blocks_tower=n_repeat_blocks_tower,
         filters_mult=filters_mult,
-        n_filters_pre_bottleneck=n_filters_pre_bottleneck,
         n_bottleneck_layer=n_bottleneck_layer,
         batch_norm=True,
     )
