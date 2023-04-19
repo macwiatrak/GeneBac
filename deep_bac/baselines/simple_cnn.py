@@ -39,7 +39,7 @@ class SimpleCNN(nn.Module):
         self.dense_layers = nn.Sequential(
             *[
                 Flatten(),
-                nn.Linear(63360, 64),
+                nn.Linear(95 * 32, 64),
                 nn.ReLU(),
                 nn.Dropout(0.2),
                 nn.Linear(64, 1),
