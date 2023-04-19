@@ -80,7 +80,7 @@ class DeepBacGeneExpr(pl.LightningModule):
 
     def eval_step(self, batch: BatchBacInputSample):
         logits, _ = self(batch.input_tensor, batch.tss_indexes)
-        loss = self.loss_fn(logits, batch.labels) + 1e-4
+        loss = self.loss_fn(logits, batch.labels) + 1e-8
         return dict(
             loss=loss,
             logits=logits,
