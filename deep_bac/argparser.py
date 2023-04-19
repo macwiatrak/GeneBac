@@ -20,6 +20,7 @@ class DeepGeneBacArgumentParser(Tap):
         "MD-CNN",
         "xpresso",
         "zrimec_et_al_2020",
+        "simple_cnn",
     ] = "gene_bac"
     graph_model_type: Literal["transformer", "dense", "GAT", "GCN"] = "dense"
     regression: bool = False
