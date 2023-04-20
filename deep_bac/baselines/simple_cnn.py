@@ -20,17 +20,10 @@ class SimpleCNN(nn.Module):
                 ),
                 ConvLayer(
                     in_channels=128,
-                    out_channels=64,
-                    batch_norm=True,
-                    pool_size=2,
-                    kernel_size=3,
-                ),
-                ConvLayer(
-                    in_channels=64,
                     out_channels=32,
                     batch_norm=True,
-                    pool_size=2,
-                    kernel_size=3,
+                    pool_size=4,
+                    kernel_size=6,
                     dropout=0.2,
                 ),
             ]
