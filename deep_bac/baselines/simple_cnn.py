@@ -15,15 +15,23 @@ class SimpleCNN(nn.Module):
                     in_channels=4,
                     out_channels=128,
                     batch_norm=True,
-                    pool_size=6,
+                    pool_size=8,
                     kernel_size=17,
                 ),
                 ConvLayer(
                     in_channels=128,
+                    out_channels=64,
+                    batch_norm=True,
+                    pool_size=2,
+                    kernel_size=3,
+                ),
+                ConvLayer(
+                    in_channels=64,
                     out_channels=32,
                     batch_norm=True,
-                    pool_size=3,
-                    kernel_size=6,
+                    pool_size=2,
+                    kernel_size=3,
+                    dropout=0.2,
                 ),
             ]
         )
@@ -31,7 +39,7 @@ class SimpleCNN(nn.Module):
         self.dense_layers = nn.Sequential(
             *[
                 Flatten(),
-                nn.Linear(142 * 32, 64),
+                nn.Linear(32 * 80, 64),
                 nn.ReLU(),
                 nn.Dropout(0.2),
                 nn.Linear(64, 1),
