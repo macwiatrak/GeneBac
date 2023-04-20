@@ -4,7 +4,7 @@ from typing import Optional
 
 from pytorch_lightning.utilities.seed import seed_everything
 
-from deep_bac.baselines.md_cnn.data_reader import get_mdcnn_data
+from deep_bac.baselines.abr.md_cnn.data_reader import get_mdcnn_data
 from deep_bac.argparser import DeepGeneBacArgumentParser
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno

@@ -1,6 +1,6 @@
 import torch
 
-from deep_bac.baselines.md_cnn.md_cnn import MDCNN
+from deep_bac.baselines import MDCNN
 
 
 def test_md_cnn():

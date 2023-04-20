@@ -4,13 +4,13 @@ from typing import Dict, Literal, List
 import numpy as np
 import pandas as pd
 
-from deep_bac.baselines.one_hot_var_models.argparser import (
+from deep_bac.baselines.abr.one_hot_var_models.argparser import (
     OneHotModelArgumentParser,
 )
-from deep_bac.baselines.one_hot_var_models.train_and_predict_on_drug import (
+from deep_bac.baselines.abr.one_hot_var_models.train_and_predict_on_drug import (
     train_and_predict,
 )
-from deep_bac.baselines.one_hot_var_models.utils import (
+from deep_bac.baselines.abr.one_hot_var_models.utils import (
     dict_metrics_to_df,
     DRUG_TO_IDX,
 )

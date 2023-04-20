@@ -1,6 +1,6 @@
 import torch
 
-from deep_bac.baselines.md_cnn.zrimec_et_al_2020 import ZrimecEtAlModel
+from deep_bac.baselines import ZrimecEtAlModel
 from deep_bac.modelling.modules.utils import count_parameters
 
 

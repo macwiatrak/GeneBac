@@ -6,7 +6,7 @@ from typing import Dict, Tuple, List, Set, Union, Optional
 
 import pandas as pd
 
-from deep_bac.baselines.md_cnn.utils import (
+from deep_bac.baselines.abr.md_cnn.utils import (
     MD_CNN_GENOMIC_LOCI,
     VARIANTS_COLS_TO_USE_MD_CNN,
 )
