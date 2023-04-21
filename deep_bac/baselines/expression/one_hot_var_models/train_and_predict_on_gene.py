@@ -1,5 +1,5 @@
 import logging
-from typing import Literal, Dict, List, Any, Optional
+from typing import Literal, Dict, List, Any, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -33,7 +33,7 @@ def tune(
     )
 
     x = np.concatenate([data_matrices.train_x, data_matrices.val_x])
-    y = np.concatenate([data_matrices.train_x, data_matrices.val_y])
+    y = np.concatenate([data_matrices.train_y, data_matrices.val_y])
     val_indices = np.concatenate(
         [
             np.ones(len(data_matrices.train_x)) * -1,
@@ -60,7 +60,7 @@ def train_and_predict(
     max_iter: int,
     penalty: Literal["l1", "l2", "elasticnet"] = "l1",
     random_state: int = 42,
-):
+) -> Tuple[Dict[str, torch.Tensor], np.ndarray, np.ndarray]:
     seed_everything(random_state)
     data_matrices = get_gene_matrix_data(
         gene=gene,
@@ -90,23 +90,26 @@ def train_and_predict(
         max_iter=max_iter,
         random_state=random_state,
         best_params=best_params,
+        regression=True,
     )
 
     logging.info(f"Fitting and computing metrics using the best model.")
     # fit the best model
-    best_model.fit(data_matrices.train_var_matrix, data_matrices.train_labels)
+    best_model.fit(data_matrices.train_x, data_matrices.train_y)
 
     test_pred = get_preds(
         model=best_model,
-        X=data_matrices.test_x,
+        # TODO: change it to test_x
+        X=data_matrices.val_x,
         penalty=penalty,
         regression=True,
     )
 
     metrics = get_regression_metrics(
         logits=torch.tensor(test_pred),
-        labels=torch.tensor(data_matrices.test_y),
+        # TODO: change it to test_y
+        labels=torch.tensor(data_matrices.val_y),
     )
     # add best params to save them
     metrics.update(best_params)
-    return metrics
+    return metrics, test_pred, data_matrices.val_y

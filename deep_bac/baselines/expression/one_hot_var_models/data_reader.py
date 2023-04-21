@@ -35,21 +35,20 @@ def get_gene_matrix_data(
     expression_df: pd.DataFrame,
     exclude_vars_not_in_train: bool,
 ):
-    # train, val, test = split_train_val_test(
-    #     train_test_split_strain_ids_file_path=train_test_split_strain_ids_file_path,
-    #     df=vars_df,
-    # )
-    # TODO check this works
-    train_x = train_vars_df.loc[gene].values
-    val_x = val_vars_df.loc[gene].values
-    test_x = test_vars_df.loc[gene].values
+    train_x = np.stack(train_vars_df.loc[gene].values)
+    val_x = np.stack(val_vars_df.loc[gene].values)
+    test_x = np.stack(test_vars_df.loc[gene].values)
 
     if exclude_vars_not_in_train:
-        # TODO check this works
         vars_in_train = np.where(train_x.sum(axis=0) > 0)[0]
-        train_x = train_x[:, vars_in_train]
-        val_x = val_x[:, vars_in_train]
-        test_x = test_x[:, vars_in_train]
+        if len(vars_in_train) == 0:
+            train_x = np.zeros((train_x.shape[0], 1))
+            val_x = np.zeros((val_x.shape[0], 1))
+            test_x = np.zeros((test_x.shape[0], 1))
+        else:
+            train_x = train_x[:, vars_in_train]
+            val_x = val_x[:, vars_in_train]
+            test_x = test_x[:, vars_in_train]
 
     gene_expression = expression_df.loc[gene]
     train_y = np.array([gene_expression[s] for s in train_vars_df.columns])

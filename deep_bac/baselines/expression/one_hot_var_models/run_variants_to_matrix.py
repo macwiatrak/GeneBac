@@ -286,7 +286,7 @@ def run(
         set(genes_w_expression) - set(agg_variants.index.tolist())
     )
     genes_to_add_df = pd.DataFrame(
-        {strain: [[0]] * len(genes_to_add) for strain in strains_with_counts},
+        {strain: [[0.0]] * len(genes_to_add) for strain in strains_with_counts},
         index=genes_to_add,
     )
     agg_variants = pd.concat([agg_variants, genes_to_add_df])
