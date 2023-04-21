@@ -96,7 +96,7 @@ def main(args):
     run(
         output_dir=args.output_dir,
         drug_to_idx=DRUG_TO_IDX,
-        train_test_split_unq_ids_file_path=args.train_test_split_unq_ids_file_path,
+        train_test_split_unq_ids_file_path=args.train_test_split_file_path,
         variant_matrix_input_dir=args.variant_matrix_input_dir,
         df_unq_ids_labels_file_path=args.df_unq_ids_labels_file_path,
         max_iter=args.max_iter,

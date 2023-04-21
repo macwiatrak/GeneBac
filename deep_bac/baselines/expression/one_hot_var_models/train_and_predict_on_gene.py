@@ -51,9 +51,9 @@ def tune(
 
 def train_and_predict(
     gene: str,
-    train_vars: pd.DataFrame,
-    val_vars: pd.DataFrame,
-    test_vars: pd.DataFrame,
+    train_vars_df: pd.DataFrame,
+    val_vars_df: pd.DataFrame,
+    test_vars_df: pd.DataFrame,
     expression_df: pd.DataFrame,
     exclude_vars_not_in_train: bool,
     params: Dict[str, List],
@@ -64,9 +64,9 @@ def train_and_predict(
     seed_everything(random_state)
     data_matrices = get_gene_matrix_data(
         gene=gene,
-        train_vars_df=train_vars,
-        val_vars_df=val_vars,
-        test_vars_df=test_vars,
+        train_vars_df=train_vars_df,
+        val_vars_df=val_vars_df,
+        test_vars_df=test_vars_df,
         expression_df=expression_df,
         exclude_vars_not_in_train=exclude_vars_not_in_train,
     )
