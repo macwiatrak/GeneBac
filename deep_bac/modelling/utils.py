@@ -6,9 +6,9 @@ from torch import nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from deep_bac.baselines import MDCNN
-from deep_bac.baselines import ZrimecEtAlModel
-from deep_bac.baselines import Xpresso
+from deep_bac.baselines.abr.md_cnn.md_cnn import MDCNN
+from deep_bac.baselines.abr.md_cnn.zrimec_et_al_2020 import ZrimecEtAlModel
+from deep_bac.baselines.abr.xpresso import Xpresso
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.metrics import compute_drug_thresholds
 from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder

@@ -20,7 +20,12 @@ from deep_bac.baselines.expression.one_hot_var_models.data_reader import (
 from deep_bac.baselines.expression.one_hot_var_models.train_and_predict_on_gene import (
     train_and_predict,
 )
-from deep_bac.modelling.metrics import get_regression_metrics
+from deep_bac.data_preprocessing.utils import get_gene_std_expression
+from deep_bac.modelling.metrics import (
+    get_regression_metrics,
+    get_stats_for_thresholds,
+)
+from deep_bac.utils import get_gene_var_thresholds
 
 
 def run(
@@ -40,6 +45,15 @@ def run(
     )
 
     train, val, test = split_train_val_test(train_test_split_file_path, vars_df)
+
+    gene_std_dict = get_gene_std_expression(
+        df=pd.read_parquet(
+            os.path.join(
+                "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/prom-200-w-rev-comp/train.parquet"
+            )
+        ),
+    )
+    most_variable_genes = list(gene_std_dict.keys())
 
     params = get_tuning_params(penalty, regression=True)
     output_metrics = []
@@ -72,6 +86,17 @@ def run(
     )
     micro_metrics = {f"micro_{k}": v for k, v in micro_metrics.items()}
     logging.info(f"Micro metrics: {micro_metrics}")
+
+    stats_for_thresholds = get_stats_for_thresholds(
+        logits=output_preds,
+        labels=output_y,
+        gene_names=vars_df.index.tolist(),
+        gene_vars_w_thresholds=get_gene_var_thresholds(
+            most_variable_genes=most_variable_genes,
+            gene_var_thresholds=[0.01, 0.02, 0.05, 0.1, 0.25, 0.5],
+        ),
+    )
+    logging.info(f"Stats for thresholds: {stats_for_thresholds}")
 
     pd.DataFrame(output_metrics).to_csv(
         os.path.join(output_dir, f"test_results_{penalty}_{random_state}")

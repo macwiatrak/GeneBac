@@ -283,7 +283,8 @@ def get_stats_for_thresholds(
             dtype=torch.long,
         )
         thresh_stats = get_regression_metrics(
-            logits=logits[gene_mask], labels=labels[gene_mask]
+            logits=logits[gene_mask].view(-1),
+            labels=labels[gene_mask].view(-1),
         )
         thresh_stats = {
             f"{k}_{str(thresh)}": v for k, v in thresh_stats.items()
