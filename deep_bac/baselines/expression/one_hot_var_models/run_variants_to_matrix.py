@@ -1,5 +1,6 @@
 from collections import defaultdict
 from functools import partial
+import numpy as np
 from tqdm import tqdm
 
 import pandas as pd
@@ -162,6 +163,16 @@ def join_vars_and_indels(df_vars, df_indels):
     return pd.concat([df_vars, df_indels])
 
 
+def log1_transform(x):
+    if isinstance(x, float):
+        return np.log(1 + x)
+    return np.log(1 + x[0])
+
+
+def panaroo_to_gene_name(panaraoo_to_pa_orf, x):
+    return panaraoo_to_pa_orf.get(x, None)
+
+
 def run(
     input_dir: str,
     output_dir: str,
@@ -194,6 +205,7 @@ def run(
         lambda row: check_ref_correct_snp(ref_genome, row), axis=1
     )
     ref_correct_snp = df_vars["check_ref_correct"].sum() / len(df_vars)
+    print("SNP ref correct:", ref_correct_snp)
 
     is_variant_in_gene_fn = partial(is_variant_in_gene, ref_gene_seqs_dict)
     df_vars["var_gene_info"] = df_vars["pos"].progress_apply(
@@ -224,6 +236,7 @@ def run(
         lambda row: check_ref_indel(ref_genome, row), axis=1
     )
     ref_correct_indel = df_indels["check_ref_correct"].sum() / len(df_indels)
+    print("INDEL ref correct:", ref_correct_indel)
 
     df_indels["var_gene_info"] = df_indels["pos"].progress_apply(
         is_variant_in_gene_fn
@@ -269,9 +282,36 @@ def run(
     agg_variants = agg_variants[strains_with_counts]
 
     # do intersection
-    # genes_to_add = genes_w_expression agg_variants.index.tolist()
+    genes_to_add = list(
+        set(genes_w_expression) - set(agg_variants.index.tolist())
+    )
+    genes_to_add_df = pd.DataFrame(
+        {strain: [[0]] * len(genes_to_add) for strain in strains_with_counts},
+        index=genes_to_add,
+    )
+    agg_variants = pd.concat([agg_variants, genes_to_add_df])
 
-    # TODO: add genes with no variants
-    # TODO: remove strains with no expression:
-    # TODO: have a dataframe with labels with the same shape (same rows and columns)
-    # TODO: save the data
+    panaroo_to_gene_name_fn = partial(panaroo_to_gene_name, panaraoo_to_pa_orf)
+    df_counts["gene"] = df_counts["feature_id"].apply(panaroo_to_gene_name_fn)
+    df_counts.index = df_counts["gene"]
+    df_counts = df_counts[~df_counts["gene"].isna()]
+    df_counts = df_counts.drop_duplicates(subset=["gene"])
+    df_counts = df_counts[strains_with_counts]
+    df_labels = df_counts.applymap(log1_transform)
+
+    df_labels.to_parquet(
+        os.path.join(output_dir, "gene_expression_vals.parquet")
+    )
+    agg_variants.to_parquet(os.path.join("variants_per_gene.parquet"))
+
+
+def main():
+    run(
+        input_dir=INPUT_DIR,
+        output_dir="/tmp/",
+        promoter_len=200,
+    )
+
+
+if __name__ == "__main__":
+    main()
