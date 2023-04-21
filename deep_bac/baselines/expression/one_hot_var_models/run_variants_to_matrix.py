@@ -302,7 +302,9 @@ def run(
     df_labels.to_parquet(
         os.path.join(output_dir, "gene_expression_vals.parquet")
     )
-    agg_variants.to_parquet(os.path.join("variants_per_gene.parquet"))
+    agg_variants.to_parquet(
+        os.path.join(output_dir, "variants_per_gene.parquet")
+    )
 
 
 def main():
