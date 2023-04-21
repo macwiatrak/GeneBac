@@ -25,7 +25,7 @@ def run(
     num_workers: int = None,
     test: bool = False,
     ckpt_path: Optional[str] = None,
-    gene_var_thresholds: List[float] = [0.1, 0.25, 0.5],
+    gene_var_thresholds: List[float] = [0.01, 0.02, 0.05, 0.1, 0.25],
     test_after_train: bool = False,
     resume_from_ckpt_path: str = None,
 ):
