@@ -1,6 +1,11 @@
+import json
 from collections import defaultdict
 from functools import partial
+from typing import Tuple
+
 import numpy as np
+import torch
+from torch.nn.functional import one_hot
 from tqdm import tqdm
 
 import pandas as pd
@@ -8,6 +13,10 @@ import os
 import gffpandas.gffpandas as gffpd
 
 from pyfastx import Fastx
+
+from deep_bac.baselines.expression.one_hot_var_models.data_reader import (
+    process_one_hot_expression_data,
+)
 
 tqdm.pandas()
 
@@ -173,10 +182,30 @@ def panaroo_to_gene_name(panaraoo_to_pa_orf, x):
     return panaraoo_to_pa_orf.get(x, None)
 
 
+def split_train_val_test(
+    train_test_split_strain_ids_file_path: str,
+    df: pd.DataFrame,
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    with open(train_test_split_strain_ids_file_path, "r") as f:
+        train_test_split_strain_ids = json.load(f)
+
+    train_strain_ids = train_test_split_strain_ids["train"]
+    val_strain_ids = train_test_split_strain_ids["val"]
+    test_strain_ids = train_test_split_strain_ids["test"]
+
+    train = df[df["strain"].isin(train_strain_ids)]
+    val = df[df["strain"].isin(val_strain_ids)]
+    test = df[df["strain"].isin(test_strain_ids)]
+
+    return train, val, test
+
+
 def run(
     input_dir: str,
     output_dir: str,
+    train_test_split_file_path: str,
     promoter_len: int = 200,
+    exclude_vars_not_in_train: bool = False,
 ):
     # process SNPs
     df_counts = pd.read_csv(
@@ -297,21 +326,42 @@ def run(
     df_counts = df_counts[~df_counts["gene"].isna()]
     df_counts = df_counts.drop_duplicates(subset=["gene"])
     df_counts = df_counts[strains_with_counts]
-    df_labels = df_counts.applymap(log1_transform)
+    df_counts = df_counts.applymap(log1_transform)
 
-    df_labels.to_parquet(
-        os.path.join(output_dir, "gene_expression_vals.parquet")
+    # df_counts.to_parquet(
+    #     os.path.join(output_dir, "gene_expression_vals.parquet")
+    # )
+    # agg_variants.to_parquet(
+    #     os.path.join(output_dir, "variants_per_gene.parquet")
+    # )
+
+    # delete redundant items we dont need and which take up memory
+    del ref_gene_seqs_dict
+    del df_vars_indels_cds_w_expression
+    del df_vars_indels_cds
+    del df_vars_cds
+    del df_gene2ref
+    del df_indels
+
+    train_df, val_df, test_df = process_one_hot_expression_data(
+        vars_df=agg_variants,
+        expression_df=df_counts,
+        train_test_split_strain_ids_file_path=train_test_split_file_path,
+        exclude_vars_not_in_train=exclude_vars_not_in_train,
     )
-    agg_variants.to_parquet(
-        os.path.join(output_dir, "variants_per_gene.parquet")
-    )
+
+    train_df.to_parquet(os.path.join(output_dir, "train.parquet"))
+    val_df.to_parquet(os.path.join(output_dir, "val.parquet"))
+    test_df.to_parquet(os.path.join(output_dir, "test.parquet"))
 
 
 def main():
     run(
         input_dir=INPUT_DIR,
-        output_dir="/tmp/",
+        output_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/one-hot/",
+        train_test_split_file_path="/tmp/train_val_test_split_by_strain.json",
         promoter_len=200,
+        exclude_vars_not_in_train=True,
     )
 
 
