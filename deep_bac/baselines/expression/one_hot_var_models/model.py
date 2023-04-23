@@ -45,7 +45,7 @@ class OneHotGeneExpr(pl.LightningModule):
     ) -> torch.Tensor:
         logits = self(batch.x)
 
-        loss = self.loss_fn(logits, batch.y) + 1e-8
+        loss = self.loss_fn(logits, batch.y) + self.l2_reg()
         self.log(
             "train_loss",
             loss,
@@ -58,7 +58,7 @@ class OneHotGeneExpr(pl.LightningModule):
 
     def eval_step(self, batch: OneHotExpressionBatch):
         logits = self(batch.x)
-        loss = self.loss_fn(logits, batch.y) + 1e-4
+        loss = self.loss_fn(logits, batch.y) + self.l2_reg()
         return dict(
             loss=loss,
             logits=logits,
@@ -155,3 +155,7 @@ class OneHotGeneExpr(pl.LightningModule):
             lr=self.config.lr,
         )
         return opt
+
+    def l2_reg(self):
+        l2_norm = self.linear.weight.pow(2).sum()
+        return self.l2_penalty * l2_norm
