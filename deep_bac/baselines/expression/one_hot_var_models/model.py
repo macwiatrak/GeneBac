@@ -38,7 +38,7 @@ class OneHotGeneExpr(pl.LightningModule):
         self,
         x: torch.Tensor,
     ) -> torch.Tensor:
-        return self.linear(x)
+        return self.linear(x).view(-1)
 
     def training_step(
         self, batch: OneHotExpressionBatch, batch_idx: int
@@ -71,7 +71,7 @@ class OneHotGeneExpr(pl.LightningModule):
         self, outputs: List[Dict[str, torch.tensor]], data_split: str
     ) -> Dict[str, float]:
 
-        logits = torch.cat([x["logits"] for x in outputs]).squeeze(-1)
+        logits = torch.cat([x["logits"] for x in outputs])
         labels = torch.cat([x["labels"] for x in outputs])
         gene_names = list(itertools.chain(*[x["gene_names"] for x in outputs]))
         strain_ids = list(itertools.chain(*[x["strain_ids"] for x in outputs]))
@@ -119,7 +119,6 @@ class OneHotGeneExpr(pl.LightningModule):
             stats["loss"],
             prog_bar=True,
             logger=True,
-            batch_size=self.config.batch_size,
             on_step=False,
             on_epoch=True,
         )
@@ -152,7 +151,7 @@ class OneHotGeneExpr(pl.LightningModule):
     def configure_optimizers(self):
         opt = torch.optim.Adam(
             [p for p in self.parameters() if p.requires_grad],
-            lr=self.config.lr,
+            lr=self.lr,
         )
         return opt
 

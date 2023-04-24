@@ -24,7 +24,7 @@ def get_dataloader(
     df: DataFrame,
     batch_size: int,
     shuffle: bool,
-    num_workers: int = None,
+    num_workers: int = 0,
 ):
     dataset = BacGenomeGeneExprDataset(df=df)
     return torch.utils.data.DataLoader(
@@ -52,10 +52,12 @@ class BacGenomeGeneExprDataset(Dataset):
         # TODO check this works
         x = torch.cat(
             [
-                one_hot(gene_idx, dtype=torch.float32),
+                one_hot(
+                    torch.tensor(gene_idx), num_classes=len(self.gene_to_idx)
+                ),
                 torch.tensor(row["x"], dtype=torch.float32),
             ],
-            dim=1,
+            dim=0,
         )
 
         return OneHotExpressionSample(

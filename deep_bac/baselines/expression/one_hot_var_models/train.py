@@ -24,7 +24,7 @@ def run(
     max_epochs: int = 500,
     early_stop_patience: int = 20,
     l2_penalty: float = 0.0,
-    num_workers: int = None,
+    num_workers: int = 0,
     test: bool = False,
 ):
     train_df = pd.read_parquet(os.path.join(input_dir, "train.parquet"))
@@ -41,8 +41,10 @@ def run(
         test_df, batch_size, shuffle=False, num_workers=num_workers
     )
 
+    n_vars = len(train_df.iloc[0]["x"])
+    n_genes = train_df["gene"].nunique()
     model = OneHotGeneExpr(
-        input_dim=len(train_df.iloc[0]["x"]),
+        input_dim=n_vars + n_genes,
         lr=lr,
         l2_penalty=l2_penalty,
     )
@@ -73,13 +75,13 @@ class OneHotModelExpressionDataArgParser(Tap):
     input_dir: str = (
         "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/one-hot/"
     )
-    output_dir: str = "/tmp/test-one-hot-expression"
+    output_dir: str = "/tmp/test-one-hot-expression/"
     lr: float = 0.001
     batch_size: int = 256
     max_epochs: int = 500
     early_stop_patience: int = 10
     l2_penalty: float = 0.0
-    num_workers: int = None
+    num_workers: int = 0
     test: bool = False
 
 
