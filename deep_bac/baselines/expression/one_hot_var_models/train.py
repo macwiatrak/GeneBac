@@ -4,6 +4,7 @@ from typing import List, Literal
 import pandas as pd
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping, TQDMProgressBar
+from pytorch_lightning.utilities.seed import seed_everything
 from tap import Tap
 
 from deep_bac.baselines.expression.one_hot_var_models.dataset import (
@@ -27,7 +28,10 @@ def run(
     num_workers: int = 0,
     test: bool = False,
     gene_var_thresholds: List[float] = [0.01, 0.02, 0.05, 0.1, 0.25, 0.5],
+    random_state: int = 42,
 ):
+    seed_everything(random_state)
+
     train_df = pd.read_parquet(os.path.join(input_dir, "train.parquet"))
     val_df = pd.read_parquet(os.path.join(input_dir, "val.parquet"))
     test_df = pd.read_parquet(os.path.join(input_dir, "test.parquet"))
@@ -95,6 +99,7 @@ class OneHotModelExpressionDataArgParser(Tap):
     l2_penalty: float = 0.0
     num_workers: int = 0
     test: bool = False
+    random_state: int = 42
 
 
 def main(args):
@@ -108,6 +113,7 @@ def main(args):
         l2_penalty=args.l2_penalty,
         num_workers=args.num_workers,
         test=args.test,
+        random_state=args.random_state,
     )
 
 
