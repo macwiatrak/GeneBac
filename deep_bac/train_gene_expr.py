@@ -1,15 +1,17 @@
 import logging
 import os
-from typing import Optional, List
+from typing import Optional, Dict, Tuple
 
+import pandas as pd
 from pytorch_lightning.utilities.seed import seed_everything
 
 from deep_bac.argparser import DeepGeneBacArgumentParser
 from deep_bac.data_preprocessing.data_reader import get_gene_expr_data
+from deep_bac.data_preprocessing.utils import get_gene_std_expression
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
 from deep_bac.modelling.trainer import get_trainer
-from deep_bac.utils import get_gene_var_thresholds
+from deep_bac.utils import get_gene_var_thresholds, GENE_STD_THRESHOLDS_DICT
 
 logging.basicConfig(level=logging.INFO)
 
@@ -25,11 +27,13 @@ def run(
     num_workers: int = None,
     test: bool = False,
     ckpt_path: Optional[str] = None,
-    gene_var_thresholds: List[float] = [0.01, 0.02, 0.05, 0.1, 0.25],
+    gene_std_thresholds: Dict[
+        str, Tuple[float, float]
+    ] = GENE_STD_THRESHOLDS_DICT,
     test_after_train: bool = False,
     resume_from_ckpt_path: str = None,
 ):
-    data, most_variable_genes = get_gene_expr_data(
+    data = get_gene_expr_data(
         input_dir=input_dir,
         max_gene_length=max_gene_length,
         batch_size=config.batch_size,
@@ -49,11 +53,17 @@ def run(
         resume_from_ckpt_path=resume_from_ckpt_path,
         refresh_rate=1000,
     )
+
+    gene_std_dict = get_gene_std_expression(
+        df=pd.read_parquet(os.path.join(input_dir, "val.parquet"))
+    )
+    gene_vars_w_thresholds = get_gene_var_thresholds(
+        gene_std_dict=gene_std_dict,
+        gene_std_thresholds=gene_std_thresholds,
+    )
     model = DeepBacGeneExpr(
         config=config,
-        gene_vars_w_thresholds=get_gene_var_thresholds(
-            most_variable_genes, gene_var_thresholds
-        ),
+        gene_vars_w_thresholds=gene_vars_w_thresholds,
     )
 
     if test:

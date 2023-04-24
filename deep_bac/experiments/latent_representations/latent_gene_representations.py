@@ -51,7 +51,7 @@ def run(
     model.to(device)
     model.eval()
 
-    data, most_variable_genes = get_gene_expr_data(
+    data = get_gene_expr_data(
         input_dir=input_dir,
         max_gene_length=max_gene_length,
         batch_size=batch_size,
