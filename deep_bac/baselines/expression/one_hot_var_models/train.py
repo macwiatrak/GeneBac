@@ -1,19 +1,19 @@
 import os
+from typing import List
 
 import pandas as pd
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping, TQDMProgressBar
 from tap import Tap
 
-from deep_bac.baselines.abr.one_hot_var_models.argparser import (
-    OneHotModelArgumentParser,
-)
 from deep_bac.baselines.expression.one_hot_var_models.dataset import (
     get_dataloader,
 )
 from deep_bac.baselines.expression.one_hot_var_models.model import (
     OneHotGeneExpr,
 )
+from deep_bac.data_preprocessing.utils import get_gene_std_expression
+from deep_bac.utils import get_gene_var_thresholds
 
 
 def run(
@@ -26,6 +26,7 @@ def run(
     l2_penalty: float = 0.0,
     num_workers: int = 0,
     test: bool = False,
+    gene_var_thresholds: List[float] = [0.01, 0.02, 0.05, 0.1, 0.25, 0.5],
 ):
     train_df = pd.read_parquet(os.path.join(input_dir, "train.parquet"))
     val_df = pd.read_parquet(os.path.join(input_dir, "val.parquet"))
@@ -41,12 +42,23 @@ def run(
         test_df, batch_size, shuffle=False, num_workers=num_workers
     )
 
+    gene_std_dict = get_gene_std_expression(
+        df=pd.read_parquet(os.path.join(input_dir, "train.parquet")),
+        gene_col="gene",
+        expression_col="y",
+    )
+    most_variable_genes = list(gene_std_dict.keys())
+
     n_vars = len(train_df.iloc[0]["x"])
     n_genes = train_df["gene"].nunique()
     model = OneHotGeneExpr(
         input_dim=n_vars + n_genes,
         lr=lr,
         l2_penalty=l2_penalty,
+        batch_size=batch_size,
+        gene_vars_w_thresholds=get_gene_var_thresholds(
+            most_variable_genes, gene_var_thresholds
+        ),
     )
     trainer = Trainer(
         default_root_dir=output_dir,

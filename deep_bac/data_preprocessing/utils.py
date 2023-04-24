@@ -172,9 +172,11 @@ def pad_one_hot_seq(
 
 def get_gene_std_expression(
     df: pd.DataFrame,
+    gene_col: str = "gene_name",
+    expression_col: str = "expression_log1",
 ) -> Dict[str, float]:
-    gene_std = df.groupby("gene_name")["expression_log1"].std().to_dict()
-    gene_std_dict = std_dict = {
+    gene_std = df.groupby(gene_col)[expression_col].std().to_dict()
+    gene_std_dict = {
         k: v
         for k, v in sorted(
             gene_std.items(), key=lambda item: item[1], reverse=True

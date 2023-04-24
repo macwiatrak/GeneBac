@@ -22,12 +22,14 @@ class OneHotGeneExpr(pl.LightningModule):
         input_dim: int,
         lr: float,
         l2_penalty: float,
+        batch_size: int,  # for logging
         gene_vars_w_thresholds: Dict[float, List[str]] = None,
     ):
         super().__init__()
         self.lr = lr
         self.l2_penalty = l2_penalty
         self.gene_vars_w_thresholds = gene_vars_w_thresholds
+        self.batch_size = batch_size
 
         self.linear = nn.Linear(input_dim, 1)
         self.loss_fn = nn.MSELoss(reduction="mean")
@@ -53,6 +55,7 @@ class OneHotGeneExpr(pl.LightningModule):
             logger=True,
             on_step=False,
             on_epoch=True,
+            batch_size=self.batch_size,
         )
         return loss
 
@@ -107,6 +110,7 @@ class OneHotGeneExpr(pl.LightningModule):
             prog_bar=True,
             logger=True,
             sync_dist=True,
+            batch_size=self.batch_size,
         )
         return agg_stats
 
@@ -121,6 +125,7 @@ class OneHotGeneExpr(pl.LightningModule):
             logger=True,
             on_step=False,
             on_epoch=True,
+            batch_size=self.batch_size,
         )
         return stats
 
@@ -135,6 +140,7 @@ class OneHotGeneExpr(pl.LightningModule):
             on_epoch=True,
             prog_bar=True,
             logger=True,
+            batch_size=self.batch_size,
         )
         return stats
 
