@@ -65,7 +65,7 @@ def test_model_gene_expr_train_fake_data(tmpdir):
     batch_size = 10
 
     config = DeepGeneBacConfig(
-        gene_encoder_type="zrimec_et_al_2020",
+        gene_encoder_type="gene_bac",
         lr=0.0001,
         batch_size=batch_size,
         n_gene_bottleneck_layer=n_bottleneck_layer,

@@ -33,7 +33,7 @@ class DeepBacGeneExpr(pl.LightningModule):
         self.gene_vars_w_thresholds = gene_vars_w_thresholds
 
         self.gene_encoder = get_gene_encoder(config)
-        self.decoder = nn.Linear(config.n_gene_bottleneck_layer, 1)
+        self.decoder = nn.Linear(config.n_gene_bottleneck_layer * 2, 1)
         self.pos_encoder = FixedGeneExpressionPositionalEncoding(
             dim=config.n_gene_bottleneck_layer
         )
@@ -48,7 +48,11 @@ class DeepBacGeneExpr(pl.LightningModule):
     def forward(
         self, batch_genes_tensor: torch.Tensor, tss_indexes: torch.Tensor = None
     ) -> Tuple[torch.Tensor, torch.Tensor]:
-        if self.config.gene_encoder_type in ["xpresso", "zrimec_et_al_2020"]:
+        if self.config.gene_encoder_type in [
+            "xpresso",
+            "zrimec_et_al_2020",
+            "simple_cnn",
+        ]:
             logits = self.gene_encoder(batch_genes_tensor)
             return logits.view(-1), torch.tensor([])
         # encode each gene
@@ -80,7 +84,7 @@ class DeepBacGeneExpr(pl.LightningModule):
 
     def eval_step(self, batch: BatchBacInputSample):
         logits, _ = self(batch.input_tensor, batch.tss_indexes)
-        loss = self.loss_fn(logits, batch.labels) + 1e-4
+        loss = self.loss_fn(logits, batch.labels) + 1e-8
         return dict(
             loss=loss,
             logits=logits,
