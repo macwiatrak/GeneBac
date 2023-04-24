@@ -14,7 +14,7 @@ import gffpandas.gffpandas as gffpd
 
 from pyfastx import Fastx
 
-from deep_bac.baselines.expression.one_hot_var_models.data_reader import (
+from deep_bac.baselines.expression.one_hot_var_models.data_processing import (
     process_one_hot_expression_data,
 )
 
