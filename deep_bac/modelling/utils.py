@@ -6,8 +6,8 @@ from torch import nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from deep_bac.baselines.abr.md_cnn.md_cnn import MDCNN
-from deep_bac.baselines.simple_cnn import SimpleCNN
+from deep_bac.baselines.abr.md_cnn import MDCNN
+from deep_bac.baselines.expression.simple_cnn import SimpleCNN
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.metrics import compute_drug_thresholds
 from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder

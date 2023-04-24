@@ -1,6 +1,6 @@
 import torch
 
-from deep_bac.baselines.simple_cnn import SimpleCNN
+from deep_bac.baselines.expression.simple_cnn import SimpleCNN
 from deep_bac.modelling.modules.utils import count_parameters
 
 
