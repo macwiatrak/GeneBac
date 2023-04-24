@@ -92,7 +92,7 @@ class OneHotModelExpressionDataArgParser(Tap):
     batch_size: int = 256
     max_epochs: int = 100
     early_stop_patience: int = 10
-    l2_penalty: float = 0.0
+    l2_penalty: float = 0.0001
     num_workers: int = 0
     test: bool = False
 

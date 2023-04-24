@@ -6,10 +6,6 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from deep_bac.baselines.expression.one_hot_var_models.data_types import (
-    ExpressionDataVarMatrices,
-)
-
 
 def split_train_val_test(
     train_test_split_strain_ids_file_path: str,

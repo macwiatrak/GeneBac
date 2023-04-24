@@ -1,5 +1,5 @@
 import itertools
-from typing import List, Dict
+from typing import List, Dict, Literal
 
 import pytorch_lightning as pl
 import torch
@@ -24,6 +24,7 @@ class OneHotGeneExpr(pl.LightningModule):
         l2_penalty: float,
         batch_size: int,  # for logging
         gene_vars_w_thresholds: Dict[float, List[str]] = None,
+        model_type: Literal["linear", "ffnn"] = "linear",
     ):
         super().__init__()
         self.lr = lr
@@ -31,7 +32,20 @@ class OneHotGeneExpr(pl.LightningModule):
         self.gene_vars_w_thresholds = gene_vars_w_thresholds
         self.batch_size = batch_size
 
-        self.linear = nn.Linear(input_dim, 1)
+        if model_type == "linear":
+            self.layers = nn.Linear(input_dim, 1)
+        else:
+            self.layers = nn.Sequential(
+                *[
+                    nn.Linear(input_dim, 512),
+                    nn.ReLU(),
+                    nn.Dropout(0.2),
+                    nn.Linear(512, 64),
+                    nn.ReLU(),
+                    nn.Dropout(0.2),
+                    nn.Linear(64, 1),
+                ]
+            )
         self.loss_fn = nn.MSELoss(reduction="mean")
 
         self.save_hyperparameters(logger=False)
@@ -40,7 +54,7 @@ class OneHotGeneExpr(pl.LightningModule):
         self,
         x: torch.Tensor,
     ) -> torch.Tensor:
-        return self.linear(x).view(-1)
+        return self.layers(x).view(-1)
 
     def training_step(
         self, batch: OneHotExpressionBatch, batch_idx: int
@@ -162,5 +176,5 @@ class OneHotGeneExpr(pl.LightningModule):
         return opt
 
     def l2_reg(self):
-        l2_norm = self.linear.weight.pow(2).sum()
+        l2_norm = self.layers.weight.pow(2).sum()
         return self.l2_penalty * l2_norm
