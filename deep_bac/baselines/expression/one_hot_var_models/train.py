@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Literal
 
 import pandas as pd
 from pytorch_lightning import Trainer
@@ -10,7 +10,7 @@ from deep_bac.baselines.expression.one_hot_var_models.dataset import (
     get_dataloader,
 )
 from deep_bac.baselines.expression.one_hot_var_models.model import (
-    OneHotGeneExpr,
+    LinRegGeneExpr,
 )
 from deep_bac.data_preprocessing.utils import get_gene_std_expression
 from deep_bac.utils import get_gene_var_thresholds
@@ -51,7 +51,7 @@ def run(
 
     n_vars = len(train_df.iloc[0]["x"])
     n_genes = train_df["gene"].nunique()
-    model = OneHotGeneExpr(
+    model = LinRegGeneExpr(
         input_dim=n_vars + n_genes,
         lr=lr,
         l2_penalty=l2_penalty,
@@ -92,7 +92,7 @@ class OneHotModelExpressionDataArgParser(Tap):
     batch_size: int = 256
     max_epochs: int = 100
     early_stop_patience: int = 10
-    l2_penalty: float = 0.0001
+    l2_penalty: float = 0.0
     num_workers: int = 0
     test: bool = False
 

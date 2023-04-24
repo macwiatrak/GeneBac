@@ -16,7 +16,7 @@ from deep_bac.modelling.metrics import (
 )
 
 
-class OneHotGeneExpr(pl.LightningModule):
+class LinRegGeneExpr(pl.LightningModule):
     def __init__(
         self,
         input_dim: int,
@@ -24,7 +24,6 @@ class OneHotGeneExpr(pl.LightningModule):
         l2_penalty: float,
         batch_size: int,  # for logging
         gene_vars_w_thresholds: Dict[float, List[str]] = None,
-        model_type: Literal["linear", "ffnn"] = "linear",
     ):
         super().__init__()
         self.lr = lr
@@ -32,20 +31,8 @@ class OneHotGeneExpr(pl.LightningModule):
         self.gene_vars_w_thresholds = gene_vars_w_thresholds
         self.batch_size = batch_size
 
-        if model_type == "linear":
-            self.layers = nn.Linear(input_dim, 1)
-        else:
-            self.layers = nn.Sequential(
-                *[
-                    nn.Linear(input_dim, 512),
-                    nn.ReLU(),
-                    nn.Dropout(0.2),
-                    nn.Linear(512, 64),
-                    nn.ReLU(),
-                    nn.Dropout(0.2),
-                    nn.Linear(64, 1),
-                ]
-            )
+        self.layers = nn.Linear(input_dim, 1)
+
         self.loss_fn = nn.MSELoss(reduction="mean")
 
         self.save_hyperparameters(logger=False)
