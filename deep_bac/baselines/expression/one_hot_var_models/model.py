@@ -1,5 +1,5 @@
 import itertools
-from typing import List, Dict, Literal
+from typing import List, Dict
 
 import pytorch_lightning as pl
 import torch
@@ -23,7 +23,7 @@ class LinRegGeneExpr(pl.LightningModule):
         lr: float,
         l2_penalty: float,
         batch_size: int,  # for logging
-        gene_vars_w_thresholds: Dict[float, List[str]] = None,
+        gene_vars_w_thresholds: Dict[str, List[str]] = None,
     ):
         super().__init__()
         self.lr = lr
