@@ -10,10 +10,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import make_scorer, r2_score
 from sklearn.model_selection import GridSearchCV
 
-from deep_bac.baselines.one_hot_var_models.data_reader import (
+from deep_bac.baselines.abr.one_hot_var_models.data_reader import (
     get_var_matrix_data,
 )
-from deep_bac.baselines.one_hot_var_models.data_types import DataVarMatrices
+from deep_bac.baselines.abr.one_hot_var_models.data_types import DataVarMatrices
 from deep_bac.modelling.metrics import choose_best_spec_sens_threshold
 
 logging.basicConfig(level=logging.INFO)

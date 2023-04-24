@@ -6,11 +6,11 @@ import pandas as pd
 import torch
 from pytorch_lightning.utilities.seed import seed_everything
 
-from deep_bac.baselines.one_hot_var_models.data_reader import (
+from deep_bac.baselines.abr.one_hot_var_models.data_reader import (
     get_var_matrix_data,
 )
-from deep_bac.baselines.one_hot_var_models.tune import tune, INPUT_DIR
-from deep_bac.baselines.one_hot_var_models.utils import get_model, get_preds
+from deep_bac.baselines.abr.one_hot_var_models.tune import tune, INPUT_DIR
+from deep_bac.baselines.abr.one_hot_var_models.utils import get_model, get_preds
 from deep_bac.modelling.metrics import (
     choose_best_spec_sens_threshold,
     binary_cls_metrics,

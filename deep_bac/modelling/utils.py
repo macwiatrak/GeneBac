@@ -6,10 +6,8 @@ from torch import nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from deep_bac.baselines.md_cnn.md_cnn import MDCNN
+from deep_bac.baselines.abr.md_cnn.md_cnn import MDCNN
 from deep_bac.baselines.simple_cnn import SimpleCNN
-from deep_bac.baselines.zrimec_et_al_2020 import ZrimecEtAlModel
-from deep_bac.baselines.xpresso import Xpresso
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.metrics import compute_drug_thresholds
 from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
@@ -68,12 +66,6 @@ def get_gene_encoder(config: DeepGeneBacConfig):
             seq_length=config.n_highly_variable_genes * config.max_gene_length,
             n_output=config.n_output,
         )
-
-    if config.gene_encoder_type == "xpresso":
-        return Xpresso()
-
-    if config.gene_encoder_type == "zrimec_et_al_2020":
-        return ZrimecEtAlModel()
 
     if config.gene_encoder_type == "simple_cnn":
         return SimpleCNN()

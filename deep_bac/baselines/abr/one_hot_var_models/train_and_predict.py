@@ -4,13 +4,13 @@ from typing import Dict, Literal, List
 import numpy as np
 import pandas as pd
 
-from deep_bac.baselines.one_hot_var_models.argparser import (
+from deep_bac.baselines.abr.one_hot_var_models.argparser import (
     OneHotModelArgumentParser,
 )
-from deep_bac.baselines.one_hot_var_models.train_and_predict_on_drug import (
+from deep_bac.baselines.abr.one_hot_var_models.train_and_predict_on_drug import (
     train_and_predict,
 )
-from deep_bac.baselines.one_hot_var_models.utils import (
+from deep_bac.baselines.abr.one_hot_var_models.utils import (
     dict_metrics_to_df,
     DRUG_TO_IDX,
 )
@@ -96,7 +96,7 @@ def main(args):
     run(
         output_dir=args.output_dir,
         drug_to_idx=DRUG_TO_IDX,
-        train_test_split_unq_ids_file_path=args.train_test_split_unq_ids_file_path,
+        train_test_split_unq_ids_file_path=args.train_test_split_file_path,
         variant_matrix_input_dir=args.variant_matrix_input_dir,
         df_unq_ids_labels_file_path=args.df_unq_ids_labels_file_path,
         max_iter=args.max_iter,

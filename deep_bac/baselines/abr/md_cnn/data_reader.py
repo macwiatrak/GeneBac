@@ -7,7 +7,7 @@ from pandas import DataFrame
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from deep_bac.baselines.md_cnn.dataset import MDCNNDataset
+from deep_bac.baselines.abr.md_cnn.dataset import MDCNNDataset
 from deep_bac.data_preprocessing.data_reader import _collate_samples
 from deep_bac.data_preprocessing.data_types import DataReaderOutput
 
