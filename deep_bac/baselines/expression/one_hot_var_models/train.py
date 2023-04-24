@@ -90,7 +90,7 @@ class OneHotModelExpressionDataArgParser(Tap):
     output_dir: str = "/tmp/test-one-hot-expression/"
     lr: float = 0.001
     batch_size: int = 256
-    max_epochs: int = 500
+    max_epochs: int = 100
     early_stop_patience: int = 10
     l2_penalty: float = 0.0
     num_workers: int = 0
@@ -98,7 +98,7 @@ class OneHotModelExpressionDataArgParser(Tap):
 
 
 def main(args):
-    test_results = run(
+    _ = run(
         input_dir=args.input_dir,
         output_dir=args.output_dir,
         batch_size=args.batch_size,
