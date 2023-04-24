@@ -273,7 +273,7 @@ def get_stats_for_thresholds(
     logits: torch.Tensor,
     labels: torch.tensor,
     gene_names: List[str],
-    gene_vars_w_thresholds: Dict[float, List[str]],
+    gene_vars_w_thresholds: Dict[str, List[str]],
 ):
     output = {}
     for thresh, genes_in_thresh in gene_vars_w_thresholds.items():
@@ -385,7 +385,7 @@ def get_macro_gene_expression_metrics(
 
 
 def get_macro_thresh_metrics(
-    gene_vars_w_thresholds: Dict[float, List[str]],
+    gene_vars_w_thresholds: Dict[str, List[str]],
     per_gene_metrics: Dict[str, Dict],
     ignore_index: int = -100,
 ) -> Dict[str, torch.Tensor]:
