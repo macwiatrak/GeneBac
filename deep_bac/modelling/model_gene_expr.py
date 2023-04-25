@@ -48,11 +48,7 @@ class DeepBacGeneExpr(pl.LightningModule):
     def forward(
         self, batch_genes_tensor: torch.Tensor, tss_indexes: torch.Tensor = None
     ) -> Tuple[torch.Tensor, torch.Tensor]:
-        if self.config.gene_encoder_type in [
-            "xpresso",
-            "zrimec_et_al_2020",
-            "simple_cnn",
-        ]:
+        if self.config.gene_encoder_type == "simple_cnn":
             logits = self.gene_encoder(batch_genes_tensor)
             return logits.view(-1), torch.tensor([])
         # encode each gene
@@ -63,12 +59,12 @@ class DeepBacGeneExpr(pl.LightningModule):
             gene_encodings = self.pos_encoder(gene_encodings, tss_indexes)
         # pass the genes through the graph encoder
         logits = self.decoder(self.dropout(gene_encodings))
-        return logits.view(-1), gene_encodings
+        return logits.view(-1)  # , gene_encodings
 
     def training_step(
         self, batch: BatchBacInputSample, batch_idx: int
     ) -> torch.Tensor:
-        logits, _ = self(batch.input_tensor, batch.tss_indexes)
+        logits = self(batch.input_tensor, batch.tss_indexes)
         # get loss with reduction="none" to compute loss per sample
         loss = self.loss_fn(logits, batch.labels) + 1e-8
         self.log(
@@ -83,7 +79,7 @@ class DeepBacGeneExpr(pl.LightningModule):
         return loss
 
     def eval_step(self, batch: BatchBacInputSample):
-        logits, _ = self(batch.input_tensor, batch.tss_indexes)
+        logits = self(batch.input_tensor, batch.tss_indexes)
         loss = self.loss_fn(logits, batch.labels) + 1e-8
         return dict(
             loss=loss,

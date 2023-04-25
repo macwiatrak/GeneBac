@@ -20,6 +20,7 @@ def test_model_gene_expr_captum():
     n_output = 1
 
     x = torch.rand(batch_size, in_channels, seq_length)
+    tss_indexes = torch.zeros(batch_size)
     baseline = torch.rand(batch_size, in_channels, seq_length)
 
     config = DeepGeneBacConfig(
@@ -33,31 +34,34 @@ def test_model_gene_expr_captum():
 
     ig = IntegratedGradients(model)
     attributions, delta = ig.attribute(
-        x, baseline, return_convergence_delta=True
+        (x, tss_indexes), (baseline, tss_indexes), return_convergence_delta=True
     )
-    assert attributions.shape == x.shape
+    assert attributions[0].shape == x.shape
     assert delta.shape == (batch_size,)
 
     dl = DeepLift(model)
     attributions, delta = dl.attribute(
-        x, baseline, return_convergence_delta=True
+        (x, tss_indexes), (baseline, tss_indexes), return_convergence_delta=True
     )
-    assert attributions.shape == x.shape
+    assert attributions[0].shape == x.shape
     assert delta.shape == (batch_size,)
 
     n_samples = 5
     gs = GradientShap(model)
     attributions, delta = gs.attribute(
-        x, baseline, n_samples=n_samples, return_convergence_delta=True
+        (x, tss_indexes),
+        (baseline, tss_indexes),
+        n_samples=n_samples,
+        return_convergence_delta=True,
     )
-    assert attributions.shape == x.shape
+    assert attributions[0].shape == x.shape
     assert delta.shape == (batch_size * n_samples,)
 
     dls = DeepLiftShap(model)
     attributions, delta = dls.attribute(
-        x, baseline, return_convergence_delta=True
+        (x, tss_indexes), (baseline, tss_indexes), return_convergence_delta=True
     )
-    assert attributions.shape == x.shape
+    assert attributions[0].shape == x.shape
     assert delta.shape == (batch_size * batch_size,)
 
 
