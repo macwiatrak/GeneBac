@@ -141,8 +141,8 @@ DRUG_SPECIFIC_GENES_DICT = {
 
 
 GENE_STD_THRESHOLDS_DICT = dict(
-    high=(1e6, 0.6),
-    medium=(0.6, 0.4),
+    high=(1e6, 0.7),
+    medium=(0.7, 0.4),
     low=(0.4, 0.0),
 )
 
