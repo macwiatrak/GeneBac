@@ -231,6 +231,6 @@ def get_gene_var_thresholds(
     output = defaultdict(list)
     for name, (high, low) in gene_std_thresholds.items():
         output[name] = [
-            gene for gene, std in gene_std_dict.items() if low < std <= high
+            gene for gene, std in gene_std_dict.items() if low <= std < high
         ]
     return output
