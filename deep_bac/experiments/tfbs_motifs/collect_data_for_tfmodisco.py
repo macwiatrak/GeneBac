@@ -24,7 +24,7 @@ def collect_tfmodisco_data(
     dna_tensor = []
     importance_scores = []
     for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
-        if idx > 100:
+        if idx > 20:
             break
         attrs = attr_model_fn.attribute(
             batch.input_tensor.to(device),
@@ -34,9 +34,8 @@ def collect_tfmodisco_data(
         dna_tensor.append(batch.input_tensor)
         importance_scores.append(attrs.detach().cpu())
 
-    dna_tensor = torch.stack(dna_tensor).numpy()
-
-    importance_scores = torch.stack(importance_scores).numpy()
+    dna_tensor = torch.cat(dna_tensor, dim=0).numpy()
+    importance_scores = torch.cat(importance_scores, dim=0).numpy()
     return dna_tensor, importance_scores
 
 
