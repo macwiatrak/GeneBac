@@ -24,7 +24,7 @@ def collect_tfmodisco_data(
     dna_tensor = []
     importance_scores = []
     for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
-        if idx > 20:
+        if idx > 100:
             break
         attrs = attr_model_fn.attribute(
             batch.input_tensor.to(device),
@@ -53,8 +53,8 @@ def run(
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Using device {device}")
-    # model = DeepBacGeneExpr.load_from_checkpoint(ckpt_path)
-    model = DeepBacGeneExpr(config=DeepGeneBacConfig())
+    model = DeepBacGeneExpr.load_from_checkpoint(ckpt_path)
+    # model = DeepBacGeneExpr(config=DeepGeneBacConfig())
     model.to(device)
     model.eval()
     attr_model_fn = DeepLift(model)
@@ -103,14 +103,15 @@ def main(args):
         # input_dir=args.input_dir,
         input_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/prom-200-w-rev-comp/",
         # output_dir=args.output_dir,
-        output_dir="/tmp/modisco-data/",
+        output_dir="/tmp/modisco/",
         max_gene_length=args.max_gene_length,
         shift_max=0,
         pad_value=args.pad_value,
         reverse_complement_prob=0.0,
         num_workers=args.num_workers,
         test=args.test,
-        ckpt_path="/Users/maciejwiatrak/Downloads/epoch=28-val_r2=0.7911.ckpt",
+        # ckpt_path=args.ckpt_path,
+        ckpt_path="/Users/maciejwiatrak/Downloads/epoch=00-val_r2=0.5956.ckpt",
         # batch_size=args.batch_size,
         batch_size=10,
     )
