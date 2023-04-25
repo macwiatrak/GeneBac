@@ -26,7 +26,7 @@ class DeepBacGeneExpr(pl.LightningModule):
     def __init__(
         self,
         config: DeepGeneBacConfig,
-        gene_vars_w_thresholds: Dict[float, List[str]] = None,
+        gene_vars_w_thresholds: Dict[str, List[str]] = None,
     ):
         super().__init__()
         self.config = config

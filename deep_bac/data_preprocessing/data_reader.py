@@ -243,12 +243,7 @@ def get_gene_expr_data(
     reverse_complement_prob: float = 0.0,
     num_workers: int = 8,
     test: bool = False,
-) -> Tuple[DataReaderOutput, List[str]]:
-
-    gene_std_dict = get_gene_std_expression(
-        df=pd.read_parquet(os.path.join(input_dir, "train.parquet")),
-    )
-    most_variable_genes = list(gene_std_dict.keys())
+) -> DataReaderOutput:
 
     train_dataloader, train_set_len = get_gene_expr_dataloader(
         batch_size=batch_size,
@@ -274,13 +269,10 @@ def get_gene_expr_data(
         pin_memory=True,
     )
     if not test:
-        return (
-            DataReaderOutput(
-                train_dataloader=train_dataloader,
-                val_dataloader=val_dataloader,
-                train_set_len=train_set_len,
-            ),
-            most_variable_genes,
+        return DataReaderOutput(
+            train_dataloader=train_dataloader,
+            val_dataloader=val_dataloader,
+            train_set_len=train_set_len,
         )
     test_dataloader, _ = get_gene_expr_dataloader(
         batch_size=batch_size,
@@ -294,14 +286,11 @@ def get_gene_expr_data(
         pin_memory=True,
     )
 
-    return (
-        DataReaderOutput(
-            train_dataloader=train_dataloader,
-            val_dataloader=val_dataloader,
-            test_dataloader=test_dataloader,
-            train_set_len=train_set_len,
-        ),
-        most_variable_genes,
+    return DataReaderOutput(
+        train_dataloader=train_dataloader,
+        val_dataloader=val_dataloader,
+        test_dataloader=test_dataloader,
+        train_set_len=train_set_len,
     )
 
 

@@ -1,7 +1,7 @@
 import json
 import os
 from collections import defaultdict
-from typing import Literal, Optional, Dict, List
+from typing import Literal, Optional, Dict, List, Tuple
 
 from deep_bac.modelling.metrics import (
     DRUG_TO_LABEL_IDX,
@@ -140,6 +140,13 @@ DRUG_SPECIFIC_GENES_DICT = {
 }
 
 
+GENE_STD_THRESHOLDS_DICT = dict(
+    high=(1e6, 0.7),
+    medium=(0.7, 0.4),
+    low=(0.4, 0.0),
+)
+
+
 def get_selected_genes(
     use_drug_specific_genes: Literal["INH", "Walker", "MD-CNN"] = "MD-CNN"
 ):
@@ -216,13 +223,14 @@ def format_and_write_results(
 
 
 def get_gene_var_thresholds(
-    most_variable_genes: List[str],
-    gene_var_thresholds: List[float],
-) -> Optional[Dict]:
-    if not gene_var_thresholds or not most_variable_genes:
+    gene_std_dict: Dict[str, float],
+    gene_std_thresholds: Dict[str, Tuple[float, float]],
+) -> Dict[str, List[str]]:
+    if not gene_std_thresholds or not gene_std_dict:
         return None
     output = defaultdict(list)
-    for threshold in gene_var_thresholds:
-        genes = most_variable_genes[: int(threshold * len(most_variable_genes))]
-        output[threshold] = genes
+    for name, (high, low) in gene_std_thresholds.items():
+        output[name] = [
+            gene for gene, std in gene_std_dict.items() if low <= std < high
+        ]
     return output
