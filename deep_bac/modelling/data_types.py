@@ -37,6 +37,7 @@ class DeepGeneBacConfig:
         "val_f1",
         "val_gmean_spec_sens",
         "val_r2",
+        "val_r2_high",
         "val_spearman",
         "train_loss",
         "train_gmean_spec_sens",

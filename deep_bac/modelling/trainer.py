@@ -32,7 +32,7 @@ def get_trainer(
         config.monitor_metric if config.monitor_metric else "val_loss"
     )
     mode = "min" if "loss" in config.monitor_metric else "max"
-    if config.monitor_metric == "val_r2":
+    if config.monitor_metric in ["val_r2", "val_r2_high"]:
         filename = "{epoch:02d}-{val_r2:.4f}"
     elif config.monitor_metric == "val_gmean_spec_sens":
         filename = "{epoch:02d}-{val_gmean_spec_sens:.4f}"
