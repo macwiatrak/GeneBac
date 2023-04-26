@@ -73,7 +73,9 @@ def run(
             ckpt_path=ckpt_path,
         )
 
-    trainer.fit(model, data.train_dataloader, data.val_dataloader)
+    trainer.fit(
+        model, data.train_dataloader, data.val_dataloader, ckpt_path=ckpt_path
+    )
 
     if test_after_train:
         return trainer.test(
