@@ -108,7 +108,7 @@ def test_model_gene_expr_train_real_data(tmpdir):
     gene_var_thresholds = [0.1, 0.25, 0.5]
 
     config = DeepGeneBacConfig(
-        gene_encoder_type="gene_bac",
+        gene_encoder_type="simple_cnn",
         lr=0.001,
         batch_size=batch_size,
         n_gene_bottleneck_layer=n_bottleneck_layer,
@@ -135,9 +135,9 @@ def test_model_gene_expr_train_real_data(tmpdir):
 
     model = DeepBacGeneExpr(
         config=config,
-        gene_vars_w_thresholds=get_gene_var_thresholds(
-            most_variable_genes, gene_var_thresholds
-        ),
+        # gene_vars_w_thresholds=get_gene_var_thresholds(
+        #     most_variable_genes, gene_var_thresholds
+        # ),
     )
     n_params = count_parameters(model)
     print("Number of trainable model parameters: ", n_params)
