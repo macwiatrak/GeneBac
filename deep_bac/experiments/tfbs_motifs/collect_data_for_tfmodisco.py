@@ -11,8 +11,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from deep_bac.argparser import DeepGeneBacArgumentParser
-from deep_bac.data_preprocessing.data_reader import get_gene_expr_data
-from deep_bac.modelling.data_types import DeepGeneBacConfig
+from deep_bac.data_preprocessing.data_reader import get_gene_expr_dataloader
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
 
 logging.basicConfig(level=logging.INFO)
@@ -24,7 +23,8 @@ def collect_tfmodisco_data(
     dna_tensor = []
     importance_scores = []
     for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
-        if idx > 100:
+        # for testing
+        if idx > 600:
             break
         attrs = attr_model_fn.attribute(
             batch.input_tensor.to(device),
@@ -44,36 +44,37 @@ def run(
     input_dir: str,
     output_dir: str,
     max_gene_length: int = 2560,
-    shift_max: int = 3,
+    shift_max: int = 0,
     pad_value: float = 0.25,
-    reverse_complement_prob: float = 0.0,
     num_workers: int = None,
-    test: bool = False,
     batch_size: int = 128,
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Using device {device}")
     model = DeepBacGeneExpr.load_from_checkpoint(ckpt_path)
+    # for testing
     # model = DeepBacGeneExpr(config=DeepGeneBacConfig())
     model.to(device)
     model.eval()
     attr_model_fn = DeepLift(model)
 
-    data = get_gene_expr_data(
-        input_dir=input_dir,
-        max_gene_length=max_gene_length,
+    dataloader, _ = get_gene_expr_dataloader(
         batch_size=batch_size,
+        bac_genes_df_file_path=os.path.join(input_dir, "val.parquet"),
+        max_gene_length=max_gene_length,
         shift_max=shift_max,
         pad_value=pad_value,
-        reverse_complement_prob=reverse_complement_prob,
+        reverse_complement_prob=0.0,  # set it to 0 during eval
+        shuffle=True,
         num_workers=num_workers if num_workers is not None else os.cpu_count(),
-        test=test,
+        pin_memory=True,
     )
+
     logging.info("Finished loading data")
 
     dna_tensor, importance_scores_tensor = collect_tfmodisco_data(
         attr_model_fn,
-        data.val_dataloader,
+        dataloader,
         device=device,
     )
     logging.info("Finished collecting data on val, saving it now...")
@@ -83,18 +84,6 @@ def run(
         importance_scores_tensor,
     )
     logging.info("Finished saving val data")
-
-    if test:
-        dna_tensor, importance_scores_tensor = collect_tfmodisco_data(
-            attr_model_fn, data.test_dataloader, device=device
-        )
-        logging.info("Finished collecting data on test, saving it now...")
-        np.savez(os.path.join(output_dir, "dna_tensor.npz"), dna_tensor)
-        np.savez(
-            os.path.join(output_dir, "importance_scores_tensor.npz"),
-            importance_scores_tensor,
-        )
-        logging.info("Finished saving test data")
 
 
 def main(args):
@@ -107,13 +96,11 @@ def main(args):
         max_gene_length=args.max_gene_length,
         shift_max=0,
         pad_value=args.pad_value,
-        reverse_complement_prob=0.0,
         num_workers=args.num_workers,
-        test=args.test,
         # ckpt_path=args.ckpt_path,
-        ckpt_path="/Users/maciejwiatrak/Downloads/epoch=00-val_r2=0.5956.ckpt",
+        ckpt_path="/Users/maciejwiatrak/Downloads/epoch=89-val_r2=0.7991.ckpt",
         # batch_size=args.batch_size,
-        batch_size=10,
+        batch_size=100,
     )
 
 
