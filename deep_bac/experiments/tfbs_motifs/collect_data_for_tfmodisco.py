@@ -24,7 +24,7 @@ def collect_tfmodisco_data(
     importance_scores = []
     for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
         # for testing
-        if idx > 600:
+        if idx > 864:
             break
         attrs = attr_model_fn.attribute(
             batch.input_tensor.to(device),
@@ -92,13 +92,13 @@ def main(args):
         # input_dir=args.input_dir,
         input_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/prom-200-w-rev-comp/",
         # output_dir=args.output_dir,
-        output_dir="/tmp/modisco/",
+        output_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/modisco/val_data_sampled/",
         max_gene_length=args.max_gene_length,
         shift_max=0,
         pad_value=args.pad_value,
         num_workers=args.num_workers,
         # ckpt_path=args.ckpt_path,
-        ckpt_path="/Users/maciejwiatrak/Downloads/epoch=89-val_r2=0.7991.ckpt",
+        ckpt_path="/Users/maciejwiatrak/Downloads/epoch=80-val_r2=0.7983.ckpt",
         # batch_size=args.batch_size,
         batch_size=100,
     )
