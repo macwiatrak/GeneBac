@@ -33,7 +33,7 @@ class DeepBacGenePheno(pl.LightningModule):
         self.graph_model = get_genes_to_strain_model(config)
         self.pos_encoder = get_pos_encoder(config)
         self.decoder = nn.Linear(
-            in_features=config.n_gene_bottleneck_layer,
+            in_features=config.n_gene_bottleneck_layer * 2,
             out_features=config.n_output,
         )
 
