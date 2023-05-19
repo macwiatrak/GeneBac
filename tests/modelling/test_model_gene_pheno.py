@@ -129,6 +129,22 @@ def test_model_gene_pheno_train_real_data(tmpdir):
         "../test_data/reference_gene_data.parquet"
     )
 
+    dataloader, gene_to_idx = get_gene_pheno_dataloader(
+        batch_size=batch_size,
+        bac_genes_df_file_path="../test_data/sample_agg_variants.parquet",
+        reference_gene_data_df=reference_gene_data_df,
+        phenotype_dataframe_file_path="../test_data/phenotype_labels_with_binary_labels.parquet",
+        max_gene_length=max_gene_length,
+        selected_genes=selected_genes,
+        regression=regression,
+        shift_max=0,
+        pad_value=0.25,
+        reverse_complement_prob=0.0,
+        shuffle=False,
+        num_workers=0,
+        pin_memory=False,
+    )
+
     config = DeepGeneBacConfig(
         gene_encoder_type="gene_bac",
         graph_model_type="dense",
@@ -145,22 +161,8 @@ def test_model_gene_pheno_train_real_data(tmpdir):
         n_heads=2,
         n_highly_variable_genes=len(selected_genes),
         max_gene_length=max_gene_length,
-    )
-
-    dataloader, gene_to_idx = get_gene_pheno_dataloader(
-        batch_size=batch_size,
-        bac_genes_df_file_path="../test_data/sample_agg_variants.parquet",
-        reference_gene_data_df=reference_gene_data_df,
-        phenotype_dataframe_file_path="../test_data/phenotype_labels_with_binary_labels.parquet",
-        max_gene_length=max_gene_length,
-        selected_genes=selected_genes,
-        regression=regression,
-        shift_max=0,
-        pad_value=0.25,
-        reverse_complement_prob=0.0,
-        shuffle=False,
-        num_workers=0,
-        pin_memory=False,
+        input_dir="../test_data/",
+        gene_to_idx=gene_to_idx,
     )
 
     model = DeepBacGenePheno(config)
