@@ -84,7 +84,8 @@ class BacGenomeGenePhenoDataset(Dataset):
         for idx, gene in enumerate(self.gene_to_id.keys()):
             # append TSS index and gene name
             tss_indexes.append(
-                self.reference_gene_data_df.loc[gene]["tss_pos_genome"]
+                self.reference_gene_data_df.iloc[idx]["tss_pos_genome"]
+                # self.reference_gene_data_df.loc[gene]["tss_pos_genome"]
             )
             gene_names.append(gene)
 
@@ -93,7 +94,8 @@ class BacGenomeGenePhenoDataset(Dataset):
                 seq = unq_id_subset.iloc[idx]["prom_gene_seq_w_variants"]
                 variants_in_gene.append(1)
             else:
-                seq = self.reference_gene_data_df.loc[gene]["seq"]
+                seq = self.reference_gene_data_df.iloc[idx]["seq"]
+                # seq = self.reference_gene_data_df.loc[gene]["seq"]
                 variants_in_gene.append(0)
             # subset it to the max gene length
             one_hot_seq = seq_to_one_hot(seq[: self.max_gene_length])
