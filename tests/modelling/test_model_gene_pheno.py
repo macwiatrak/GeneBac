@@ -147,7 +147,7 @@ def test_model_gene_pheno_train_real_data(tmpdir):
 
     config = DeepGeneBacConfig(
         gene_encoder_type="gene_bac",
-        graph_model_type="dense",
+        graph_model_type="dense",  # try GAT as well
         pos_encoder_type="fixed",
         lr=0.001,
         batch_size=batch_size,
