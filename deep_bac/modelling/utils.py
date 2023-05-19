@@ -92,7 +92,6 @@ def get_genes_to_strain_model(
             Flatten(),
             DenseLayer(
                 in_features=config.n_gene_bottleneck_layer
-                * 2
                 * config.n_highly_variable_genes,
                 out_features=config.n_gene_bottleneck_layer,
                 layer_norm=True,
@@ -107,9 +106,9 @@ def get_genes_to_strain_model(
             gene_to_idx=config.gene_to_idx,
         )
         return GNNModel(
-            input_dim=config.n_gene_bottleneck_layer * 2,
-            hidden_dim=config.n_gene_bottleneck_layer * 2,
-            output_dim=config.n_gene_bottleneck_layer * 2,
+            input_dim=config.n_gene_bottleneck_layer,
+            hidden_dim=config.n_gene_bottleneck_layer,
+            output_dim=config.n_gene_bottleneck_layer,
             n_genes=len(config.gene_to_idx),
             n_layers=config.n_graph_layers,
             n_heads=config.n_heads,
