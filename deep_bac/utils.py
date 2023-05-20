@@ -108,7 +108,7 @@ DRUG_SPECIFIC_GENES_DICT = {
         "ethA",  # ETH, KAN
         "eis",  # KAN
         "gyrB",  # LEV, MOX
-        # "rpoC",  # RFB
+        # "ctpI",
         # "Rv0810c",  # RFB,
         # New and repurposed druga
         "Rv0678",  # BDQ, CLF
