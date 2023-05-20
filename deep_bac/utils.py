@@ -99,7 +99,6 @@ DRUG_SPECIFIC_GENES_DICT = {
         "guaA",  # RIF
         "rpoC",  # RIF
         "proA",
-        "ctpI",
         # Second-line drugs
         "rrs",  # AMI, KAN, LEV, MOX, BDQ
         "gyrA",  # AMI, ETH, KAN, LEV, MOX
