@@ -84,25 +84,25 @@ DRUG_SPECIFIC_GENES_DICT = {
     "cryptic": [
         # First-line drugs
         "embB",  # EMB, RIF, LEV, MOX, RFB
-        "embA",  # EMB
-        "embC",
-        "embR",
+        # "embA",  # EMB
+        # "embC",
+        # "embR",
         "rpoB",  # EMB, INH, RIF, AMI, ETH, KAN, LEV, MOX, RFB, BDQ, LZD
         "katG",  # EMB, INH, RIF, RFB
-        "pncA",  # EMB
+        # "pncA",  # EMB
         "ahpC",  # INH
-        "rpsL",  # INH
+        # "rpsL",  # INH
         "fabG1",  # INH, ETH, CLF
         "inhA",  # INH, ETH
-        "whiB7",  # ETH
+        # "whiB7",  # ETH
         "Rv1565c",  # RIF
         "guaA",  # RIF
-        "rpoC",  # RIF
-        "proA",
+        # "rpoC",  # RIF
+        # "proA",
         # Second-line drugs
         "rrs",  # AMI, KAN, LEV, MOX, BDQ
         "gyrA",  # AMI, ETH, KAN, LEV, MOX
-        "plsC",
+        # "plsC",
         # "echA8",  # AMI
         # "Rv2896c",  # AMI
         "ethA",  # ETH, KAN
