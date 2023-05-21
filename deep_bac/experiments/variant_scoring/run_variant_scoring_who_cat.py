@@ -24,6 +24,9 @@ def run(
     pad_value: float = 0.25,
     reverse_complement_prob: float = 0.0,
 ):
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     reference_gene_data_df = pd.read_parquet(
         reference_gene_data_df_path
     ).set_index("gene")
@@ -70,7 +73,7 @@ def run(
 
     var_scores = []
     with torch.no_grad():
-        for batch in tqdm(batches[:10]):
+        for batch in tqdm(batches):
             scores = model(batch.input_tensor, batch.tss_indexes)[0]
             var_scores.append(scores - ref_scores)
 
