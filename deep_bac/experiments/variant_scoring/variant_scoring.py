@@ -54,14 +54,11 @@ def batch_samples_w_variant(
 ) -> List[BatchBacInputSample]:
     output = []
     for idx, row in variant_df.iterrows():
-        gene = row["gene_name"]
-        seq = reference_gene_data_df.loc[gene]["seq"]
-        seq_w_variansts = row["prom_gene_seq_w_variants"]
+        genes_tensor = []
+        tss_pos_genome = []
         for gene in genes:
-            genes_tensor = []
-            tss_pos_genome = []
-            if gene == row["gene_name"]:
-                seq = seq_w_variansts
+            if gene.lower() == row["gene"].lower():
+                seq = row["prom_gene_seq_w_variants"]
             else:
                 seq = reference_gene_data_df.loc[gene]["seq"]
             # process the sequence
