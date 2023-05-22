@@ -85,23 +85,30 @@ DRUG_SPECIFIC_GENES_DICT = {
         # First-line drugs
         "embB",  # EMB, RIF, LEV, MOX, RFB
         # "embA",  # EMB
+        # "embC",
+        # "embR",
         "rpoB",  # EMB, INH, RIF, AMI, ETH, KAN, LEV, MOX, RFB, BDQ, LZD
         "katG",  # EMB, INH, RIF, RFB
         # "pncA",  # EMB
         "ahpC",  # INH
+        # "rpsL",  # INH
         "fabG1",  # INH, ETH, CLF
         "inhA",  # INH, ETH
+        # "whiB7",  # ETH
         "Rv1565c",  # RIF
         "guaA",  # RIF
+        # "rpoC",  # RIF
+        # "proA",
         # Second-line drugs
         "rrs",  # AMI, KAN, LEV, MOX, BDQ
         "gyrA",  # AMI, ETH, KAN, LEV, MOX
+        # "plsC",
         # "echA8",  # AMI
         # "Rv2896c",  # AMI
         "ethA",  # ETH, KAN
         "eis",  # KAN
         "gyrB",  # LEV, MOX
-        # "rpoC",  # RFB
+        # "ctpI",
         # "Rv0810c",  # RFB,
         # New and repurposed druga
         "Rv0678",  # BDQ, CLF

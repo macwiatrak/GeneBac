@@ -132,6 +132,7 @@ def get_pos_encoder(config: DeepGeneBacConfig):
     if config.pos_encoder_type == "fixed":
         return FixedGeneExpressionPositionalEncoding(
             dim=config.n_gene_bottleneck_layer,
+            agg="sum",
         )
     raise ValueError(f"Unknown pos encoder type: {config.pos_encoder_type}")
 

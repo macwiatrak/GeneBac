@@ -1,4 +1,5 @@
 import math
+from typing import Literal
 
 import torch
 from torch import nn
@@ -57,12 +58,14 @@ class FixedGeneExpressionPositionalEncoding(nn.Module):
         start_coef: float = 3.65,
         scale: float = 10e-5,
         tss_div: int = 1000,
+        agg: Literal["sum", "concat"] = "sum",
     ):
         super().__init__()
         self.dim = dim
         self.start_coef = start_coef
         self.scale = scale
         self.tss_div = tss_div
+        self.aggregation = agg
 
         self.min_range = math.log(start_coef) / math.log(2.0)
         coef_linspace = (
@@ -86,6 +89,8 @@ class FixedGeneExpressionPositionalEncoding(nn.Module):
                 1, 1, self.dim
             ) * self.coef_linspace.unsqueeze(0)
         pe = torch.ones_like(vals) - vals
-        # x = x + pe
-        x = torch.cat([x, pe], dim=1)
+        if self.aggregation == "sum":
+            x = x + pe
+        else:
+            x = torch.cat([x, pe], dim=-1)
         return x

@@ -35,7 +35,8 @@ class DeepBacGeneExpr(pl.LightningModule):
         self.gene_encoder = get_gene_encoder(config)
         self.decoder = nn.Linear(config.n_gene_bottleneck_layer * 2, 1)
         self.pos_encoder = FixedGeneExpressionPositionalEncoding(
-            dim=config.n_gene_bottleneck_layer
+            dim=config.n_gene_bottleneck_layer,
+            agg="concat",
         )
         self.dropout = nn.Dropout(0.2)
         self.activation_fn = nn.ReLU()

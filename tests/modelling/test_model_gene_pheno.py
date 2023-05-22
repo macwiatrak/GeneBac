@@ -129,24 +129,6 @@ def test_model_gene_pheno_train_real_data(tmpdir):
         "../test_data/reference_gene_data.parquet"
     )
 
-    config = DeepGeneBacConfig(
-        gene_encoder_type="gene_bac",
-        graph_model_type="dense",
-        pos_encoder_type="fixed",
-        lr=0.001,
-        batch_size=batch_size,
-        regression=regression,
-        n_gene_bottleneck_layer=n_bottleneck_layer,
-        n_init_filters=n_filters,
-        n_output=n_classes,
-        max_epochs=max_epochs,
-        train_set_len=None,
-        n_graph_layers=1,
-        n_heads=2,
-        n_highly_variable_genes=len(selected_genes),
-        max_gene_length=max_gene_length,
-    )
-
     dataloader, gene_to_idx = get_gene_pheno_dataloader(
         batch_size=batch_size,
         bac_genes_df_file_path="../test_data/sample_agg_variants.parquet",
@@ -161,6 +143,26 @@ def test_model_gene_pheno_train_real_data(tmpdir):
         shuffle=False,
         num_workers=0,
         pin_memory=False,
+    )
+
+    config = DeepGeneBacConfig(
+        gene_encoder_type="gene_bac",
+        graph_model_type="dense",  # try GAT as well
+        pos_encoder_type="fixed",
+        lr=0.001,
+        batch_size=batch_size,
+        regression=regression,
+        n_gene_bottleneck_layer=n_bottleneck_layer,
+        n_init_filters=n_filters,
+        n_output=n_classes,
+        max_epochs=max_epochs,
+        train_set_len=None,
+        n_graph_layers=1,
+        n_heads=2,
+        n_highly_variable_genes=len(selected_genes),
+        max_gene_length=max_gene_length,
+        input_dir="../test_data/",
+        gene_to_idx=gene_to_idx,
     )
 
     model = DeepBacGenePheno(config)

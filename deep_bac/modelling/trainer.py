@@ -38,6 +38,8 @@ def get_trainer(
         filename = "{epoch:02d}-{val_gmean_spec_sens:.4f}"
     elif config.monitor_metric == "train_gmean_spec_sens":
         filename = "{epoch:02d}-{train_gmean_spec_sens:.4f}"
+    elif config.monitor_metric == "train_r2":
+        filename = "{epoch:02d}-{train_r2:.4f}"
     else:
         filename = "{epoch:02d}-{val_loss:.4f}"
 
