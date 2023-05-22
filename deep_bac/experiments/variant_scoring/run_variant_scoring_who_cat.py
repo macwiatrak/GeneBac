@@ -19,7 +19,6 @@ def run(
     output_dir: str,
     variant_df_path: str,
     reference_gene_data_df_path: str,
-    max_gene_length: int = 2560,
     shift_max: int = 0,
     pad_value: float = 0.25,
     reverse_complement_prob: float = 0.0,
@@ -44,7 +43,7 @@ def run(
     ref_input_sample = get_ref_batch(
         genes=list(gene_to_idx.keys()),
         reference_gene_data_df=reference_gene_data_df,
-        max_gene_length=max_gene_length,
+        max_gene_length=config.max_gene_length,
         shift_max=shift_max,
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
@@ -64,7 +63,7 @@ def run(
         variant_df=variant_df,
         genes=list(gene_to_idx.keys()),
         reference_gene_data_df=reference_gene_data_df,
-        max_gene_length=max_gene_length,
+        max_gene_length=config.max_gene_length,
         shift_max=shift_max,
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
@@ -96,9 +95,9 @@ class ArgumentParser(Tap):
 
     # file paths for loading data
     ckpt_path: str = (
-        "/Users/maciejwiatrak/Downloads/epoch=228-train_r2=0.4853.ckpt"
+        "/Users/maciejwiatrak/Downloads/epoch=247-train_r2=0.5309.ckpt"
     )
-    output_dir: str = "/tmp/var-scores/genebac/"
+    output_dir: str = "/tmp/var-scores/md-cnn/"
     variant_df_path: str = (
         "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
         "data/who_cat_mutations_dna_seqs.parquet"
@@ -107,7 +106,6 @@ class ArgumentParser(Tap):
         "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
         "data/reference_gene_data.parquet"
     )
-    max_gene_length: int = 2560
     shift_max: int = 0
     pad_value: float = 0.25
     reverse_complement_prob: float = 0.0
@@ -121,7 +119,6 @@ def main(args):
         output_dir=args.output_dir,
         variant_df_path=args.variant_df_path,
         reference_gene_data_df_path=args.reference_gene_data_df_path,
-        max_gene_length=args.max_gene_length,
         shift_max=args.shift_max,
         pad_value=args.pad_value,
         reverse_complement_prob=args.reverse_complement_prob,
