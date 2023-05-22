@@ -82,6 +82,8 @@ def run(
     variant_df["var_score"] = variant_df.apply(
         lambda row: row["var_scores"][DRUG_TO_LABEL_IDX[row["drug"]]], axis=1
     )
+    # drop redundant column
+    variant_df = variant_df.drop(columns=["var_scores"])
 
     variant_df.to_parquet(
         os.path.join(output_dir, "variants_who_cat_with_scores.parquet")
@@ -94,9 +96,9 @@ class ArgumentParser(Tap):
 
     # file paths for loading data
     ckpt_path: str = (
-        "/Users/maciejwiatrak/Downloads/epoch=202-val_loss=0.0000.ckpt"
+        "/Users/maciejwiatrak/Downloads/epoch=228-train_r2=0.4853.ckpt"
     )
-    output_dir: str = "/tmp/var-scores-output/"
+    output_dir: str = "/tmp/var-scores/genebac/"
     variant_df_path: str = (
         "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
         "data/who_cat_mutations_dna_seqs.parquet"
