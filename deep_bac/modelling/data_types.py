@@ -11,7 +11,6 @@ class DeepGeneBacConfig:
         "gene_bac",
         "MD-CNN",
         "xpresso",
-        "zrimec_et_al_2020",
         "simple_cnn",
     ] = "gene_bac"
     graph_model_type: Literal["transformer", "dense", "GAT", "GCN"] = "GAT"
