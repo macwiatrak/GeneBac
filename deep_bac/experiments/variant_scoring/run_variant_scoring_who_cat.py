@@ -85,7 +85,7 @@ def run(
     variant_df = variant_df.drop(columns=["var_scores"])
 
     variant_df.to_parquet(
-        os.path.join(output_dir, "variants_who_cat_with_scores.parquet")
+        os.path.join(output_dir, "variants_who_cat_with_scores_mdcnn.parquet")
     )
 
 
