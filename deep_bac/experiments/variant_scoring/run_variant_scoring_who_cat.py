@@ -55,6 +55,11 @@ def run(
             ref_input_sample.input_tensor.unsqueeze(0),
             ref_input_sample.tss_index.unsqueeze(0),
         )[0]
+        ref_scores = (
+            torch.sigmoid(ref_scores)
+            if not model.config.regression
+            else ref_scores
+        )
 
     # get variant scores
     variant_df = pd.read_parquet(variant_df_path)
@@ -74,6 +79,9 @@ def run(
     with torch.no_grad():
         for batch in tqdm(batches):
             scores = model(batch.input_tensor, batch.tss_indexes)[0]
+            scores = (
+                torch.sigmoid(scores) if not model.config.regression else scores
+            )
             var_scores.append(scores - ref_scores)
 
     var_scores = [item.numpy() for item in torch.cat(var_scores, dim=0)]
@@ -85,7 +93,9 @@ def run(
     variant_df = variant_df.drop(columns=["var_scores"])
 
     variant_df.to_parquet(
-        os.path.join(output_dir, "variants_who_cat_with_scores_mdcnn.parquet")
+        os.path.join(
+            output_dir, "variants_who_cat_with_scores_genebac_binary.parquet"
+        )
     )
 
 
@@ -94,9 +104,7 @@ class ArgumentParser(Tap):
         super().__init__(underscores_to_dashes=True)
 
     # file paths for loading data
-    ckpt_path: str = (
-        "/Users/maciejwiatrak/Downloads/epoch=247-train_r2=0.5309.ckpt"
-    )
+    ckpt_path: str = "/Users/maciejwiatrak/Downloads/epoch=243-train_gmean_spec_sens=0.8708.ckpt"
     output_dir: str = "/tmp/var-scores/md-cnn/"
     variant_df_path: str = (
         "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
