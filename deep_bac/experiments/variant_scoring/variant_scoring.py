@@ -76,14 +76,13 @@ def batch_samples_w_variant(
             tss_pos_genome.append(
                 reference_gene_data_df.loc[gene]["tss_pos_genome"]
             )
-        drug = one_hot(
-            DRUG_TO_LABEL_IDX[row["drug"]], num_classes=len(DRUG_TO_LABEL_IDX)
-        )
         output.append(
             BacInputSample(
                 input_tensor=torch.stack(genes_tensor),
                 tss_index=torch.tensor(tss_pos_genome, dtype=torch.long),
-                labels=drug,
+                labels=torch.tensor(
+                    DRUG_TO_LABEL_IDX[row["drug"]], dtype=torch.long
+                ),
             )
         )
     batched_data = [
