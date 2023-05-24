@@ -2,8 +2,10 @@ import os
 
 import pandas as pd
 import torch
+from captum.attr import DeepLiftShap, DeepLift
 from pytorch_lightning.utilities.seed import seed_everything
 from tap import Tap
+from torch.nn.functional import one_hot
 from tqdm import tqdm
 
 from deep_bac.experiments.variant_scoring.variant_scoring import (
@@ -26,6 +28,7 @@ def run(
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     reference_gene_data_df = pd.read_parquet(
         reference_gene_data_df_path
     ).set_index("gene")
@@ -36,7 +39,10 @@ def run(
         "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
     )
     model = DeepBacGenePheno.load_from_checkpoint(ckpt_path, config=config)
+    model.to(device)
     model.eval()
+
+    deep_lift = DeepLift(model)
 
     gene_to_idx = model.config.gene_to_idx
 
@@ -52,14 +58,29 @@ def run(
     # get ref variant scores
     with torch.no_grad():
         ref_scores = model(
-            ref_input_sample.input_tensor.unsqueeze(0),
-            ref_input_sample.tss_index.unsqueeze(0),
+            ref_input_sample.input_tensor.unsqueeze(0).to(device),
+            ref_input_sample.tss_index.unsqueeze(0).to(device),
         )
         ref_scores = (
             torch.sigmoid(ref_scores)
             if not model.config.regression
             else ref_scores
-        )
+        ).cpu()
+
+        ref_attr_scores = []
+        for _, idx in DRUG_TO_LABEL_IDX.items():
+            label = one_hot(
+                torch.tensor(idx), num_classes=len(DRUG_TO_LABEL_IDX)
+            )
+            attrs = deep_lift.attribute(
+                ref_input_sample.input_tensor.unsqueeze(0).to(device),
+                target=label.to(device),
+                additional_forward_args=ref_input_sample.tss_index.unsqueeze(
+                    0
+                ).to(device),
+                return_convergence_delta=False,
+            )
+            ref_attr_scores.append(attrs.cpu())
 
     # get variant scores
     variant_df = pd.read_parquet(variant_df_path)
@@ -75,14 +96,27 @@ def run(
         batch_size=config.batch_size,
     )
 
+    deep_lift_shap = DeepLiftShap(model)
     var_scores = []
+    var_attributions = []
     with torch.no_grad():
         for batch in tqdm(batches):
-            scores = model(batch.input_tensor, batch.tss_indexes)
+            scores = model(
+                batch.input_tensor.to(device), batch.tss_indexes.to(device)
+            )
             scores = (
                 torch.sigmoid(scores) if not model.config.regression else scores
             )
-            var_scores.append(scores - ref_scores)
+            var_scores.append(scores.cpu() - ref_scores)
+
+            attributions = deep_lift_shap.attribute(
+                inputs=batch.input_tensor.to(device),
+                baselines=ref_input_sample.input_tensor.unsqueeze(0).to(device),
+                target=batch.labels.to(device),
+                additional_forward_args=batch.tss_indexes.to(device),
+                return_convergence_delta=False,
+            )
+            var_attributions.append(attributions.cpu())
 
     var_scores = [item.numpy() for item in torch.cat(var_scores, dim=0)]
     variant_df["var_scores"] = var_scores
@@ -93,9 +127,7 @@ def run(
     variant_df = variant_df.drop(columns=["var_scores"])
 
     variant_df.to_parquet(
-        os.path.join(
-            output_dir, "variants_who_cat_with_scores_genebac_binary.parquet"
-        )
+        os.path.join(output_dir, "variants_who_cat_with_scores_binary.parquet")
     )
 
 

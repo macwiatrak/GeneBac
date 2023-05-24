@@ -2,6 +2,7 @@ from typing import List
 
 import pandas as pd
 import torch
+from torch.nn.functional import one_hot
 
 from deep_bac.data_preprocessing.data_reader import _collate_samples
 from deep_bac.data_preprocessing.data_types import (
@@ -9,6 +10,7 @@ from deep_bac.data_preprocessing.data_types import (
     BatchBacInputSample,
 )
 from deep_bac.data_preprocessing.dataset import transform_dna_seq
+from deep_bac.modelling.metrics import DRUG_TO_LABEL_IDX
 
 
 def get_ref_batch(
@@ -74,10 +76,14 @@ def batch_samples_w_variant(
             tss_pos_genome.append(
                 reference_gene_data_df.loc[gene]["tss_pos_genome"]
             )
+        drug = one_hot(
+            DRUG_TO_LABEL_IDX[row["drug"]], num_classes=len(DRUG_TO_LABEL_IDX)
+        )
         output.append(
             BacInputSample(
                 input_tensor=torch.stack(genes_tensor),
                 tss_index=torch.tensor(tss_pos_genome, dtype=torch.long),
+                labels=drug,
             )
         )
     batched_data = [
