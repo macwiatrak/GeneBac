@@ -54,7 +54,7 @@ def run(
         ref_scores = model(
             ref_input_sample.input_tensor.unsqueeze(0),
             ref_input_sample.tss_index.unsqueeze(0),
-        )[0]
+        )
         ref_scores = (
             torch.sigmoid(ref_scores)
             if not model.config.regression
@@ -78,7 +78,7 @@ def run(
     var_scores = []
     with torch.no_grad():
         for batch in tqdm(batches):
-            scores = model(batch.input_tensor, batch.tss_indexes)[0]
+            scores = model(batch.input_tensor, batch.tss_indexes)
             scores = (
                 torch.sigmoid(scores) if not model.config.regression else scores
             )
