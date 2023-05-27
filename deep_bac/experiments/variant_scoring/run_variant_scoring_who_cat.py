@@ -62,8 +62,14 @@ def run(
         ref_input_sample.tss_index.unsqueeze(0).to(device),
     )
     ref_scores = (
-        torch.sigmoid(ref_scores) if not model.config.regression else ref_scores
-    ).cpu()
+        (
+            torch.sigmoid(ref_scores)
+            if not model.config.regression
+            else ref_scores
+        )
+        .detach()
+        .cpu()
+    )
 
     ref_attr_scores = []
     for _, idx in DRUG_TO_LABEL_IDX.items():
@@ -75,7 +81,7 @@ def run(
             ),
             return_convergence_delta=False,
         )
-        ref_attr_scores.append(attrs.cpu())
+        ref_attr_scores.append(attrs.detach().cpu())
     ref_attr_scores = torch.cat(ref_attr_scores, dim=0)
     torch.save(
         ref_attr_scores, os.path.join(output_dir, "ref_attributions_bin.pt")
@@ -95,6 +101,7 @@ def run(
         batch_size=config.batch_size,
     )
 
+    var_tensor = []
     var_scores = []
     var_attributions = []
     # with torch.no_grad():
@@ -105,7 +112,7 @@ def run(
         scores = (
             torch.sigmoid(scores) if not model.config.regression else scores
         )
-        var_scores.append(scores.cpu() - ref_scores)
+        var_scores.append(scores.detach().cpu() - ref_scores)
 
         attrs = deep_lift.attribute(
             inputs=batch.input_tensor.to(device),
@@ -114,12 +121,15 @@ def run(
             additional_forward_args=batch.tss_indexes.to(device),
             return_convergence_delta=False,
         )
-        var_attributions.append(attrs.cpu())
+        var_attributions.append(attrs.detach().cpu())
+        var_tensor.append(batch.input_tensor.detach().cpu())
 
     var_attributions = torch.cat(var_attributions, dim=0)
+    var_tensor = torch.cat(var_tensor, dim=0)
     torch.save(
         var_attributions, os.path.join(output_dir, "var_attributions_bin.pt")
     )
+    torch.save(var_tensor, os.path.join(output_dir, "var_tensor.pt"))
 
     # var_scores = [item.numpy() for item in torch.cat(var_scores, dim=0)]
     # variant_df["var_scores"] = var_scores
@@ -127,7 +137,7 @@ def run(
     #     lambda row: row["var_scores"][DRUG_TO_LABEL_IDX[row["drug"]]], axis=1
     # )
     # drop redundant column
-    variant_df = variant_df.drop(columns=["var_scores"])
+    # variant_df = variant_df.drop(columns=["var_scores"])
 
     # variant_df.to_parquet(
     #     os.path.join(output_dir, "variants_who_cat_with_scores_binary_attrs.parquet")
