@@ -44,6 +44,7 @@ def get_and_filter_variants_df(
     if not genes_to_use:
         return df
     df = df[df["GENE"].isin(genes_to_use)]
+    logging.info(f"Nr of unique genes used: {len(df['GENE'].unique())}")
     return df
 
 
@@ -90,7 +91,7 @@ def run(
     output_dir: str,
     use_drug_specific_genes: Literal[
         "INH", "Walker", "MD-CNN", "cryptic"
-    ] = None,
+    ] = "cryptic",
 ):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
