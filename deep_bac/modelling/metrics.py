@@ -71,9 +71,9 @@ def get_regression_metrics(
             "mae": torch.tensor(-100.0),
             "r2": torch.tensor(-100.0),
         }
-
+    pearson = pearson_corrcoef(logits, labels)
     return {
-        "pearson": pearson_corrcoef(logits, labels),
+        "pearson": pearson if not torch.isnan(pearson) else torch.tensor(0.0),
         "spearman": spearman_corrcoef(logits, labels),
         "mse": mean_squared_error(logits, labels),
         "mae": mean_absolute_error(logits, labels),
