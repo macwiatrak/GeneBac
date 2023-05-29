@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Dict, Literal, List
 
 import numpy as np
@@ -53,6 +54,9 @@ def run(
     exclude_vars_not_in_train: bool = False,
     regression: bool = False,
 ):
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     df_unq_ids_labels = pd.read_parquet(df_unq_ids_labels_file_path)
     params = get_tuning_params(penalty, regression)
 
