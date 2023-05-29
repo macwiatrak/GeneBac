@@ -23,13 +23,18 @@ def collect_preds(
     out = defaultdict(list)
     with torch.no_grad():
         for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
-            logits = model(
+            if idx > 2:
+                break
+            logits, strain_embeddings = model(
                 batch.input_tensor.to(model.device),
                 batch.tss_indexes.to(model.device),
             )
             out["strain_id"] += batch.strain_ids  # one list
             out["logits"] += [
                 item.cpu().numpy() for item in logits
+            ]  # a list of numpy arrays
+            out["embedding"] += [
+                item.cpu().numpy() for item in strain_embeddings
             ]  # a list of numpy arrays
             out["labels"] += [
                 item.cpu().numpy() for item in batch.labels
@@ -52,6 +57,9 @@ def run(
         "INH", "Walker", "MD-CNN", "cryptic"
     ] = "cryptic",
 ):
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     selected_genes = get_selected_genes(use_drug_specific_genes)
     logging.info(f"Selected genes: {selected_genes}")
 
@@ -106,12 +114,12 @@ def main(args):
     seed_everything(args.random_state)
     run(
         input_dir=args.input_dir,
-        output_dir=args.output_dir,
+        output_dir="/tmp/preds-output/binary/genebac/",  # args.output_dir,
         shift_max=args.shift_max,
         pad_value=args.pad_value,
         reverse_complement_prob=args.reverse_complement_prob,
         num_workers=args.num_workers,
-        ckpt_path=args.ckpt_path,
+        ckpt_path="/Users/maciejwiatrak/Downloads/epoch=285-train_gmean_spec_sens=0.8652_20901498.ckpt",  # args.ckpt_path,
         use_drug_idx=args.use_drug_idx,
         use_drug_specific_genes=args.use_drug_specific_genes,
     )

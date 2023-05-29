@@ -117,7 +117,7 @@ def test_model_gene_pheno_train_fake_data(tmpdir):
 
 def test_model_gene_pheno_train_real_data(tmpdir):
     n_classes = 14
-    regression = True
+    regression = False
     n_bottleneck_layer = 64
     n_filters = 256
     max_epochs = 10
@@ -168,7 +168,7 @@ def test_model_gene_pheno_train_real_data(tmpdir):
     model = DeepBacGenePheno(config)
     n_params = count_parameters(model)
     print("Number of trainable model parameters: ", n_params)
-    monitor = "train_loss"
+    monitor = "val_gmean_spec_sens"
     logger = BasicLogger()
     trainer = pl.Trainer(
         default_root_dir=os.path.abspath(tmpdir),
