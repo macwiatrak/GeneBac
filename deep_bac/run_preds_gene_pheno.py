@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from collections import defaultdict
@@ -12,6 +13,7 @@ from tqdm import tqdm
 from deep_bac.argparser import DeepGeneBacArgumentParser
 from deep_bac.data_preprocessing.data_reader import get_gene_pheno_data
 from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
+from deep_bac.modelling.utils import get_drug_thresholds
 from deep_bac.utils import get_selected_genes
 
 logging.basicConfig(level=logging.INFO)
@@ -108,6 +110,16 @@ def run(
 
     test_df = collect_preds(model, data.test_dataloader)
     test_df.to_parquet(os.path.join(output_dir, "test_preds.parquet"))
+    logging.info("Finished collecting test preds")
+
+    with open(os.path.join(output_dir, "gene_to_idx.json"), "w") as f:
+        json.dump(config.gene_to_idx, f)
+
+    if not config.regression:
+        drug_thresholds = get_drug_thresholds(model, data.train_dataloader)
+        torch.save(
+            drug_thresholds, os.path.join(output_dir, "drug_thresholds.pt")
+        )
 
 
 def main(args):
