@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Dict, Literal, List
 
 import numpy as np
@@ -24,21 +25,21 @@ def get_tuning_params(
 ) -> Dict[str, List]:
     if penalty == "elasticnet":
         return {
-            "l1_ratio": [0.1, 0.25, 0.5, 0.9],
-            "alpha": [0.01, 0.1, 0.25, 0.5],
+            "l1_ratio": [0.001, 0.01, 0.1, 0.2, 0.5, 0.75],
+            "alpha": [0.1, 0.2, 0.5, 0.75],
         }
 
     if not regression and penalty == "l2":
         return {"C": [0.01, 0.1, 0.5, 1.0]}
 
     if not regression and penalty == "l1":
-        return {"C": [0.01, 0.1, 0.5, 1.0]}
+        return {"C": [0.01, 0.05, 0.1, 0.2]}
 
     if regression and penalty == "l2":
         return {"alpha": [0.01, 0.1, 0.5, 1.0]}
 
     if regression and penalty == "l1":
-        return {"alpha": [0.01, 0.1, 0.5, 1.0]}
+        return {"alpha": [0.01, 0.05, 0.1, 0.2]}
 
 
 def run(
@@ -53,6 +54,9 @@ def run(
     exclude_vars_not_in_train: bool = False,
     regression: bool = False,
 ):
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     df_unq_ids_labels = pd.read_parquet(df_unq_ids_labels_file_path)
     params = get_tuning_params(penalty, regression)
 
