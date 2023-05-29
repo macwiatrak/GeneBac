@@ -1,39 +1,72 @@
 import logging
 import os
-from typing import Optional, Literal
+from collections import defaultdict
+from typing import Literal
 
+import pandas as pd
+import torch
 from pytorch_lightning.utilities.seed import seed_everything
+from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from deep_bac.argparser import DeepGeneBacArgumentParser
 from deep_bac.data_preprocessing.data_reader import get_gene_pheno_data
-from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
-from deep_bac.modelling.trainer import get_trainer
-from deep_bac.utils import get_selected_genes, format_and_write_results
+from deep_bac.utils import get_selected_genes
 
 logging.basicConfig(level=logging.INFO)
 
 
+def collect_preds(
+    model: DeepBacGenePheno, dataloader: DataLoader
+) -> pd.DataFrame:
+    out = defaultdict(list)
+    with torch.no_grad():
+        for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
+            logits = model(
+                batch.input_tensor.to(model.device),
+                batch.tss_indexes.to(model.device),
+            )
+            out["strain_id"] += batch.strain_ids  # one list
+            out["logits"] += [
+                item.cpu().numpy() for item in logits
+            ]  # a list of numpy arrays
+            out["labels"] += [
+                item.cpu().numpy() for item in batch.labels
+            ]  # a list of lists
+
+    df = pd.DataFrame(out)
+    return df
+
+
 def run(
-    config: DeepGeneBacConfig,
+    ckpt_path: str,
     input_dir: str,
     output_dir: str,
     use_drug_idx: int = None,
-    shift_max: int = 3,
+    shift_max: int = 0,
     pad_value: float = 0.25,
-    reverse_complement_prob: float = 0.5,
+    reverse_complement_prob: float = 0.0,
     num_workers: int = None,
-    test: bool = False,
-    ckpt_path: Optional[str] = None,
     use_drug_specific_genes: Literal[
         "INH", "Walker", "MD-CNN", "cryptic"
     ] = "cryptic",
-    test_after_train: bool = False,
-    resume_from_ckpt_path: str = None,
-    fold_idx: int = None,
 ):
     selected_genes = get_selected_genes(use_drug_specific_genes)
     logging.info(f"Selected genes: {selected_genes}")
+
+    config = torch.load(ckpt_path, map_location="cpu")["hyper_parameters"][
+        "config"
+    ]
+    config.input_dir = (
+        "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
+    )
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    logging.info(f"Using device {device}")
+    model = DeepBacGenePheno.load_from_checkpoint(ckpt_path, config=config)
+    model.to(device)
+    model.eval()
 
     data = get_gene_pheno_data(
         input_df_file_path=os.path.join(
@@ -61,70 +94,26 @@ def run(
         reverse_complement_prob=reverse_complement_prob,
         num_workers=num_workers if num_workers is not None else os.cpu_count(),
         selected_genes=selected_genes,
-        test=any([test, test_after_train]),
-        fold_idx=fold_idx,
+        test=True,
     )
-    logging.info(f"Fold index: {fold_idx}")
-    val_dataloader = data.val_dataloader if fold_idx is not None else []
-
     logging.info("Finished loading data")
 
-    config.train_set_len = data.train_set_len
-    if use_drug_idx is not None:
-        config.n_output = 1
-    config.n_highly_variable_genes = (
-        len(selected_genes)
-        if selected_genes
-        else config.n_highly_variable_genes
-    )
-    config.gene_to_idx = data.gene_to_idx
-    logging.info(f"Gene to idx: {config.gene_to_idx}")
-
-    trainer = get_trainer(
-        config, output_dir, resume_from_ckpt_path=resume_from_ckpt_path
-    )
-    model = DeepBacGenePheno(config)
-
-    if test:
-        model = model.load_from_checkpoint(ckpt_path)
-        return trainer.test(
-            model,
-            dataloaders=data.test_dataloader,
-        )
-
-    trainer.fit(model, data.train_dataloader, val_dataloaders=val_dataloader)
-
-    if test_after_train:
-        return trainer.test(
-            model,
-            dataloaders=data.test_dataloader,
-            ckpt_path="best",
-        )
-    return None
+    test_df = collect_preds(model, data.test_dataloader)
+    test_df.to_parquet(os.path.join(output_dir, "test_preds.parquet"))
 
 
 def main(args):
     seed_everything(args.random_state)
-    config = DeepGeneBacConfig.from_dict(args.as_dict())
-    results = run(
-        config=config,
+    run(
         input_dir=args.input_dir,
         output_dir=args.output_dir,
         shift_max=args.shift_max,
         pad_value=args.pad_value,
         reverse_complement_prob=args.reverse_complement_prob,
         num_workers=args.num_workers,
-        test=args.test,
         ckpt_path=args.ckpt_path,
         use_drug_idx=args.use_drug_idx,
         use_drug_specific_genes=args.use_drug_specific_genes,
-        test_after_train=args.test_after_train,
-        resume_from_ckpt_path=args.resume_from_ckpt_path,
-        fold_idx=args.fold_idx,
-    )
-    format_and_write_results(
-        results=results,
-        output_file_path=os.path.join(args.output_dir, "test_results.jsonl"),
     )
 
 
