@@ -33,9 +33,10 @@ def collect_preds(
             out["logits"] += [
                 item.cpu().numpy() for item in logits
             ]  # a list of numpy arrays
-            out["embedding"] += [
-                item.cpu().numpy() for item in strain_embeddings
-            ]  # a list of numpy arrays
+            if strain_embeddings.nelement() != 0:
+                out["embedding"] += [
+                    item.cpu().numpy() for item in strain_embeddings
+                ]  # a list of numpy arrays
             out["labels"] += [
                 item.cpu().numpy() for item in batch.labels
             ]  # a list of lists
