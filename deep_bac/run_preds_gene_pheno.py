@@ -25,8 +25,6 @@ def collect_preds(
     out = defaultdict(list)
     with torch.no_grad():
         for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
-            if idx > 2:
-                break
             logits, strain_embeddings = model(
                 batch.input_tensor.to(model.device),
                 batch.tss_indexes.to(model.device),
