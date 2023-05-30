@@ -110,6 +110,7 @@ def run(
     test_df = collect_preds(model, data.test_dataloader)
     test_df.to_parquet(os.path.join(output_dir, "test_preds.parquet"))
     logging.info("Finished collecting and saving test preds")
+    del test_df
 
     with open(os.path.join(output_dir, "gene_to_idx.json"), "w") as f:
         json.dump(config.gene_to_idx, f)
@@ -123,6 +124,7 @@ def run(
     val_df = collect_preds(model, data.val_dataloader)
     val_df.to_parquet(os.path.join(output_dir, "val_preds.parquet"))
     logging.info("Finished collecting and saving val preds")
+    del val_df
 
     train_df = collect_preds(model, data.train_dataloader)
     train_df.to_parquet(os.path.join(output_dir, "train_preds.parquet"))

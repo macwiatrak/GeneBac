@@ -147,9 +147,9 @@ def get_gene_pheno_data(
         shift_max=shift_max,
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
-        shuffle=True,
+        shuffle=False,
         num_workers=num_workers,
-        pin_memory=True,
+        pin_memory=False,
     )
 
     val_dataloader, _ = get_gene_pheno_dataloader(
