@@ -19,9 +19,7 @@ def run(
     config: DeepGeneBacConfig,
     input_dir: str,
     output_dir: str,
-    n_highly_variable_genes: int = 500,
     use_drug_idx: int = None,
-    max_gene_length: int = 2560,
     shift_max: int = 3,
     pad_value: float = 0.25,
     reverse_complement_prob: float = 0.5,
@@ -54,8 +52,8 @@ def run(
         variance_per_gene_file_path=os.path.join(
             input_dir, "unnormalised_variance_per_gene.csv"
         ),
-        max_gene_length=max_gene_length,
-        n_highly_variable_genes=n_highly_variable_genes,
+        max_gene_length=config.max_gene_length,
+        n_highly_variable_genes=config.n_highly_variable_genes,
         regression=config.regression,
         use_drug_idx=use_drug_idx,
         batch_size=config.batch_size,
@@ -76,7 +74,9 @@ def run(
     if use_drug_idx is not None:
         config.n_output = 1
     config.n_highly_variable_genes = (
-        len(selected_genes) if selected_genes else n_highly_variable_genes
+        len(selected_genes)
+        if selected_genes
+        else config.n_highly_variable_genes
     )
     config.gene_to_idx = data.gene_to_idx
     logging.info(f"Gene to idx: {config.gene_to_idx}")
@@ -87,7 +87,12 @@ def run(
     model = DeepBacGenePheno(config)
 
     if test:
-        model = model.load_from_checkpoint(ckpt_path)
+        model = DeepBacGenePheno.load_from_checkpoint(
+            ckpt_path,
+        )
+        model.drug_thresholds = get_drug_thresholds(
+            model, data.train_dataloader
+        )
         return trainer.test(
             model,
             dataloaders=data.test_dataloader,
@@ -96,10 +101,15 @@ def run(
     trainer.fit(model, data.train_dataloader, val_dataloaders=val_dataloader)
 
     if test_after_train:
+        best_model = DeepBacGenePheno.load_from_checkpoint(
+            trainer.checkpoint_callback.best_model_path
+        )
+        best_model.drug_thresholds = get_drug_thresholds(
+            best_model, data.train_dataloader
+        )
         return trainer.test(
-            model,
+            best_model,
             dataloaders=data.test_dataloader,
-            ckpt_path="best",
         )
     return None
 
@@ -111,8 +121,6 @@ def main(args):
         config=config,
         input_dir=args.input_dir,
         output_dir=args.output_dir,
-        n_highly_variable_genes=args.n_highly_variable_genes,
-        max_gene_length=args.max_gene_length,
         shift_max=args.shift_max,
         pad_value=args.pad_value,
         reverse_complement_prob=args.reverse_complement_prob,

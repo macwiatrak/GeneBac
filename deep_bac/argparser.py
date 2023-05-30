@@ -25,7 +25,7 @@ class DeepGeneBacArgumentParser(Tap):
     graph_model_type: Literal["transformer", "dense", "GAT", "GCN"] = "GAT"
     regression: bool = False
     use_drug_idx: int = None
-    lr: float = 0.0005
+    lr: float = 0.0001
     n_gene_bottleneck_layer: int = 64
     n_init_filters: int = 128
     n_heads: int = 2

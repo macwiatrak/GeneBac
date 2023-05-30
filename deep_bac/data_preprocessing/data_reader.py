@@ -111,6 +111,7 @@ def get_gene_pheno_data(
     num_workers: int = 8,
     test: bool = False,
     fold_idx: int = None,
+    pin_memory: bool = True,
 ):
     reference_gene_data_df = pd.read_parquet(reference_gene_data_df_path)
 
@@ -147,9 +148,9 @@ def get_gene_pheno_data(
         shift_max=shift_max,
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
-        shuffle=True,
+        shuffle=False,
         num_workers=num_workers,
-        pin_memory=True,
+        pin_memory=pin_memory,
     )
 
     val_dataloader, _ = get_gene_pheno_dataloader(
@@ -168,7 +169,7 @@ def get_gene_pheno_data(
         reverse_complement_prob=0.0,  # set it to 0 during eval
         shuffle=False,
         num_workers=num_workers,
-        pin_memory=True,
+        pin_memory=pin_memory,
     )
     if not test:
         return DataReaderOutput(
@@ -193,7 +194,7 @@ def get_gene_pheno_data(
         reverse_complement_prob=0.0,  # set it to 0 during eval
         shuffle=False,
         num_workers=num_workers,
-        pin_memory=True,
+        pin_memory=pin_memory,
     )
 
     return DataReaderOutput(
