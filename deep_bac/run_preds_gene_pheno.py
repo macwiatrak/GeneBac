@@ -104,6 +104,7 @@ def run(
         num_workers=num_workers if num_workers is not None else os.cpu_count(),
         selected_genes=selected_genes,
         test=True,
+        pin_memory=False,
     )
     logging.info("Finished loading data")
 
