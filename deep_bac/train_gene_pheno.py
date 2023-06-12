@@ -89,6 +89,7 @@ def run(
     model = DeepBacGenePheno(config)
 
     if gene_encoder_ckpt_path is not None:
+        print("Loading gene encoder weights")
         gene_enc_sd = torch.load(gene_encoder_ckpt_path, map_location="cpu")[
             "state_dict"
         ]
