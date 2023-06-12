@@ -3,6 +3,7 @@ import os
 from typing import Optional, Dict, Tuple
 
 import pandas as pd
+import torch
 from pytorch_lightning.utilities.seed import seed_everything
 
 from deep_bac.argparser import DeepGeneBacArgumentParser
@@ -32,6 +33,7 @@ def run(
     ] = GENE_STD_THRESHOLDS_DICT,
     test_after_train: bool = False,
     resume_from_ckpt_path: str = None,
+    gene_encoder_ckpt_path: str = None,
 ):
     data = get_gene_expr_data(
         input_dir=input_dir,
@@ -65,6 +67,17 @@ def run(
         config=config,
         gene_vars_w_thresholds=gene_vars_w_thresholds,
     )
+
+    if gene_encoder_ckpt_path is not None:
+        gene_enc_sd = torch.load(gene_encoder_ckpt_path, map_location="cpu")[
+            "state_dict"
+        ]
+        gene_encoder_sd = {
+            k.lstrip("gene_encoder."): v
+            for k, v in gene_enc_sd.items()
+            if k.startswith("gene_encoder")
+        }
+        model.gene_encoder.load_state_dict(gene_encoder_sd)
 
     if test:
         return trainer.test(
@@ -102,6 +115,7 @@ def main(args):
         ckpt_path=args.ckpt_path,
         test_after_train=args.test_after_train,
         resume_from_ckpt_path=args.resume_from_ckpt_path,
+        gene_encoder_ckpt_path=args.gene_encoder_ckpt_path,
     )
 
 

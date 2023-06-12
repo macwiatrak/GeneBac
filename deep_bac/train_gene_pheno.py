@@ -2,6 +2,7 @@ import logging
 import os
 from typing import Optional, Literal
 
+import torch
 from pytorch_lightning.utilities.seed import seed_everything
 
 from deep_bac.argparser import DeepGeneBacArgumentParser
@@ -32,6 +33,7 @@ def run(
     test_after_train: bool = False,
     resume_from_ckpt_path: str = None,
     fold_idx: int = None,
+    gene_encoder_ckpt_path: str = None,
 ):
     selected_genes = get_selected_genes(use_drug_specific_genes)
     logging.info(f"Selected genes: {selected_genes}")
@@ -86,6 +88,17 @@ def run(
     )
     model = DeepBacGenePheno(config)
 
+    if gene_encoder_ckpt_path is not None:
+        gene_enc_sd = torch.load(gene_encoder_ckpt_path, map_location="cpu")[
+            "state_dict"
+        ]
+        gene_encoder_sd = {
+            k.lstrip("gene_encoder."): v
+            for k, v in gene_enc_sd.items()
+            if k.startswith("gene_encoder")
+        }
+        model.gene_encoder.load_state_dict(gene_encoder_sd)
+
     if test:
         model = DeepBacGenePheno.load_from_checkpoint(
             ckpt_path,
@@ -132,6 +145,7 @@ def main(args):
         test_after_train=args.test_after_train,
         resume_from_ckpt_path=args.resume_from_ckpt_path,
         fold_idx=args.fold_idx,
+        gene_encoder_ckpt_path=args.gene_encoder_ckpt_path,
     )
     format_and_write_results(
         results=results,
