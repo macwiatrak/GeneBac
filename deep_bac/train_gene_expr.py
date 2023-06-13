@@ -3,7 +3,6 @@ import os
 from typing import Optional, Dict, Tuple
 
 import pandas as pd
-import torch
 from pytorch_lightning.utilities.seed import seed_everything
 
 from deep_bac.argparser import DeepGeneBacArgumentParser
@@ -12,7 +11,11 @@ from deep_bac.data_preprocessing.utils import get_gene_std_expression
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
 from deep_bac.modelling.trainer import get_trainer
-from deep_bac.utils import get_gene_var_thresholds, GENE_STD_THRESHOLDS_DICT
+from deep_bac.utils import (
+    get_gene_var_thresholds,
+    GENE_STD_THRESHOLDS_DICT,
+    fetch_gene_encoder_weights,
+)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -69,15 +72,8 @@ def run(
     )
 
     if gene_encoder_ckpt_path is not None:
-        print("Loading gene encoder weights")
-        gene_enc_sd = torch.load(gene_encoder_ckpt_path, map_location="cpu")[
-            "state_dict"
-        ]
-        gene_encoder_sd = {
-            k.lstrip("gene_encoder."): v
-            for k, v in gene_enc_sd.items()
-            if k.startswith("gene_encoder")
-        }
+        logging.info("Loading gene encoder weights")
+        gene_encoder_sd = fetch_gene_encoder_weights(gene_encoder_ckpt_path)
         model.gene_encoder.load_state_dict(gene_encoder_sd)
 
     if test:

@@ -3,6 +3,8 @@ import os
 from collections import defaultdict
 from typing import Literal, Optional, Dict, List, Tuple
 
+import torch
+
 from deep_bac.modelling.metrics import (
     DRUG_TO_LABEL_IDX,
     REGRESSION_METRICS,
@@ -241,3 +243,13 @@ def get_gene_var_thresholds(
             gene for gene, std in gene_std_dict.items() if low <= std < high
         ]
     return output
+
+
+def fetch_gene_encoder_weights(ckpt_path: str) -> Dict[str, torch.Tensor]:
+    gene_enc_sd = torch.load(ckpt_path, map_location="cpu")["state_dict"]
+    gene_encoder_sd = {
+        k.lstrip("gene_encoder."): v
+        for k, v in gene_enc_sd.items()
+        if k.startswith("gene_encoder")
+    }
+    return gene_encoder_sd
