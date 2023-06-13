@@ -104,9 +104,13 @@ def run(
         model = DeepBacGenePheno.load_from_checkpoint(
             ckpt_path,
         )
-        model.drug_thresholds = get_drug_thresholds(
-            model, data.train_dataloader
-        )
+
+        # get thresholds only if the problem is binary
+        # classification
+        if not config.regression:
+            model.drug_thresholds = get_drug_thresholds(
+                model, data.train_dataloader
+            )
         return trainer.test(
             model,
             dataloaders=data.test_dataloader,
@@ -118,9 +122,13 @@ def run(
         best_model = DeepBacGenePheno.load_from_checkpoint(
             trainer.checkpoint_callback.best_model_path
         )
-        best_model.drug_thresholds = get_drug_thresholds(
-            best_model, data.train_dataloader
-        )
+
+        # get thresholds only if the problem is binary
+        # classification
+        if not config.regression:
+            best_model.drug_thresholds = get_drug_thresholds(
+                best_model, data.train_dataloader
+            )
         return trainer.test(
             best_model,
             dataloaders=data.test_dataloader,
