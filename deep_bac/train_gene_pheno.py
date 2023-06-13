@@ -10,7 +10,11 @@ from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 from deep_bac.modelling.trainer import get_trainer
 from deep_bac.modelling.utils import get_drug_thresholds
-from deep_bac.utils import get_selected_genes, format_and_write_results
+from deep_bac.utils import (
+    get_selected_genes,
+    format_and_write_results,
+    fetch_gene_encoder_weights,
+)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -32,6 +36,7 @@ def run(
     test_after_train: bool = False,
     resume_from_ckpt_path: str = None,
     fold_idx: int = None,
+    gene_encoder_ckpt_path: str = None,
 ):
     selected_genes = get_selected_genes(use_drug_specific_genes)
     logging.info(f"Selected genes: {selected_genes}")
@@ -86,13 +91,22 @@ def run(
     )
     model = DeepBacGenePheno(config)
 
+    if gene_encoder_ckpt_path is not None:
+        logging.info("Loading gene encoder weights")
+        gene_encoder_sd = fetch_gene_encoder_weights(gene_encoder_ckpt_path)
+        model.gene_encoder.load_state_dict(gene_encoder_sd)
+
     if test:
         model = DeepBacGenePheno.load_from_checkpoint(
             ckpt_path,
         )
-        model.drug_thresholds = get_drug_thresholds(
-            model, data.train_dataloader
-        )
+
+        # get thresholds only if the problem is binary
+        # classification
+        if not config.regression:
+            model.drug_thresholds = get_drug_thresholds(
+                model, data.train_dataloader
+            )
         return trainer.test(
             model,
             dataloaders=data.test_dataloader,
@@ -104,9 +118,13 @@ def run(
         best_model = DeepBacGenePheno.load_from_checkpoint(
             trainer.checkpoint_callback.best_model_path
         )
-        best_model.drug_thresholds = get_drug_thresholds(
-            best_model, data.train_dataloader
-        )
+
+        # get thresholds only if the problem is binary
+        # classification
+        if not config.regression:
+            best_model.drug_thresholds = get_drug_thresholds(
+                best_model, data.train_dataloader
+            )
         return trainer.test(
             best_model,
             dataloaders=data.test_dataloader,
@@ -132,6 +150,7 @@ def main(args):
         test_after_train=args.test_after_train,
         resume_from_ckpt_path=args.resume_from_ckpt_path,
         fold_idx=args.fold_idx,
+        gene_encoder_ckpt_path=args.gene_encoder_ckpt_path,
     )
     format_and_write_results(
         results=results,

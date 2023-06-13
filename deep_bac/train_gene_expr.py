@@ -11,7 +11,11 @@ from deep_bac.data_preprocessing.utils import get_gene_std_expression
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
 from deep_bac.modelling.trainer import get_trainer
-from deep_bac.utils import get_gene_var_thresholds, GENE_STD_THRESHOLDS_DICT
+from deep_bac.utils import (
+    get_gene_var_thresholds,
+    GENE_STD_THRESHOLDS_DICT,
+    fetch_gene_encoder_weights,
+)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -32,6 +36,7 @@ def run(
     ] = GENE_STD_THRESHOLDS_DICT,
     test_after_train: bool = False,
     resume_from_ckpt_path: str = None,
+    gene_encoder_ckpt_path: str = None,
 ):
     data = get_gene_expr_data(
         input_dir=input_dir,
@@ -65,6 +70,11 @@ def run(
         config=config,
         gene_vars_w_thresholds=gene_vars_w_thresholds,
     )
+
+    if gene_encoder_ckpt_path is not None:
+        logging.info("Loading gene encoder weights")
+        gene_encoder_sd = fetch_gene_encoder_weights(gene_encoder_ckpt_path)
+        model.gene_encoder.load_state_dict(gene_encoder_sd)
 
     if test:
         return trainer.test(
@@ -102,6 +112,7 @@ def main(args):
         ckpt_path=args.ckpt_path,
         test_after_train=args.test_after_train,
         resume_from_ckpt_path=args.resume_from_ckpt_path,
+        gene_encoder_ckpt_path=args.gene_encoder_ckpt_path,
     )
 
 
