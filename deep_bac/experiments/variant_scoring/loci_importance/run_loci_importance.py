@@ -34,9 +34,9 @@ def run(
     config = torch.load(ckpt_path, map_location="cpu")["hyper_parameters"][
         "config"
     ]
-    config.input_dir = (
-        "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
-    )
+    # config.input_dir = (
+    #     "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
+    # )
     model = DeepBacGenePheno.load_from_checkpoint(ckpt_path, config=config)
     model.to(device)
     model.eval()
