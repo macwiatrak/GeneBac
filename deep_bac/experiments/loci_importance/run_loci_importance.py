@@ -24,7 +24,7 @@ def run(
     shift_max: int = 0,
     pad_value: float = 0.25,
     reverse_complement_prob: float = 0.0,
-    num_workers: int = 4,
+    num_workers: int = 0,
 ):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
