@@ -34,9 +34,9 @@ def run(
     config = torch.load(ckpt_path, map_location="cpu")["hyper_parameters"][
         "config"
     ]
-    # config.input_dir = (
-    #     "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
-    # )
+    config.input_dir = (
+        "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
+    )
     model = DeepBacGenePheno.load_from_checkpoint(ckpt_path, config=config)
     model.to(device)
     model.eval()
@@ -74,20 +74,20 @@ def run(
 
     loci_importance = defaultdict(list)
     loci_importance_sum = defaultdict(list)
-    for drug, idx in DRUG_TO_LABEL_IDX.items():
+    for drug, drug_idx in DRUG_TO_LABEL_IDX.items():
         # skip PAS drug as we have too few samples anyway
         if drug == "PAS":
             continue
 
-        for idx, batch in enumerate(tqdm(data.test_dataloader)):
-            labels = batch.labels[:, idx].cpu()
+        for batch in tqdm(data.test_dataloader):
+            labels = batch.labels[:, drug_idx].cpu()
             label_mask = torch.where(
                 labels != -100.0, torch.ones_like(labels), 0
             ).unsqueeze(-1)
             attrs = (
                 deep_lift.attribute(
                     inputs=batch.input_tensor.to(device),
-                    target=idx,
+                    target=drug_idx,
                     additional_forward_args=batch.tss_indexes.to(device),
                     return_convergence_delta=False,
                 )
@@ -97,11 +97,11 @@ def run(
 
             attrs_sum = attrs.sum(dim=-2).sum(dim=-1)
             attrs_sum = attrs_sum * label_mask
-            loci_importance[idx].append(attrs_sum)
+            loci_importance[drug_idx].append(attrs_sum)
 
             attrs_abs_sum = attrs.abs().sum(dim=-2).sum(dim=-1)
             attrs_abs_sum = attrs_abs_sum * label_mask
-            loci_importance_sum[idx].append(attrs_abs_sum)
+            loci_importance_sum[drug_idx].append(attrs_abs_sum)
         logging.info(f"Finished processing data for drug {drug}")
 
     attrs_sum = torch.stack(
