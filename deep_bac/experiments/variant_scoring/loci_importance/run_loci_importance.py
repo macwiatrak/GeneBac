@@ -126,17 +126,6 @@ class ArgumentParser(Tap):
     )
     ckpt_path: str = "/Users/maciejwiatrak/Downloads/epoch=285-train_gmean_spec_sens=0.8652.ckpt"
     output_dir: str = "/tmp/var-scores/genebac/bin/"
-    variant_df_path: str = (
-        "/Users/maciejwiatrak/DeepBac/deep_bac/experiments/variant_scoring/"
-        "data/vars_who_cat_for_deeplift_binary.parquet"
-    )
-    #     "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
-    #     "data/who_cat_mutations_dna_seqs.parquet"
-    # )
-    reference_gene_data_df_path: str = (
-        "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
-        "data/reference_gene_data.parquet"
-    )
     shift_max: int = 0
     pad_value: float = 0.25
     reverse_complement_prob: float = 0.0
