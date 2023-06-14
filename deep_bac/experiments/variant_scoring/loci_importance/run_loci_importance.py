@@ -74,8 +74,17 @@ def run(
 
     loci_importance = defaultdict(list)
     loci_importance_sum = defaultdict(list)
-    for batch in tqdm(data.test_dataloader):
-        for _, idx in DRUG_TO_LABEL_IDX.items():
+    for idx, batch in enumerate(tqdm(data.test_dataloader)):
+        if idx > 2:
+            break
+        for drug, idx in DRUG_TO_LABEL_IDX.items():
+            # skip PAS drug as we have too few samples anyway
+            if drug == "PAS":
+                continue
+            labels = batch.labels[:, idx]
+            label_mask = torch.where(
+                labels != -100.0, torch.ones_like(labels), 0
+            ).unsqueeze(-1)
             attrs = (
                 deep_lift.attribute(
                     inputs=batch.input_tensor.to(device),
@@ -87,19 +96,12 @@ def run(
                 .cpu()
             )
 
-            # TODO: check the sum is correct here
-            attrs_sum = attrs.sum(dim=1)
-            attrs_sum = torch.where(
-                batch.labels == -100.0, torch.zeros_like(attrs_sum), attrs_sum
-            )
+            attrs_sum = attrs.sum(dim=-2).sum(dim=-1)
+            attrs_sum = attrs_sum * label_mask
             loci_importance[idx].append(attrs_sum)
 
-            attrs_abs_sum = attrs.abs().sum(dim=1)
-            attrs_abs_sum = torch.where(
-                batch.labels == -100.0,
-                torch.zeros_like(attrs_abs_sum),
-                attrs_abs_sum,
-            )
+            attrs_abs_sum = attrs.abs().sum(dim=-2).sum(dim=-1)
+            attrs_abs_sum = attrs_abs_sum * label_mask
             loci_importance_sum[idx].append(attrs_abs_sum)
 
     attrs_sum = torch.stack(
@@ -124,8 +126,10 @@ class ArgumentParser(Tap):
     input_dir: str = (
         "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
     )
-    ckpt_path: str = "/Users/maciejwiatrak/Downloads/epoch=285-train_gmean_spec_sens=0.8652.ckpt"
-    output_dir: str = "/tmp/var-scores/genebac/bin/"
+    ckpt_path: str = (
+        "/Users/maciejwiatrak/Downloads/epoch=248-train_r2=0.4890_20810503.ckpt"
+    )
+    output_dir: str = "/tmp/loci-importance/"
     shift_max: int = 0
     pad_value: float = 0.25
     reverse_complement_prob: float = 0.0
