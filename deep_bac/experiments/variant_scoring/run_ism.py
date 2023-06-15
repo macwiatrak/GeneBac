@@ -29,7 +29,7 @@ def run(
             pad_value=pad_value,
             reverse_complement_prob=reverse_complement_prob,
             output_dir=output_dir,
-            ism_region=(0, 10),  # do ISM on the whole gene
+            ism_region=None,  # do ISM on the whole gene
         )
         torch.save(
             ism_scores, os.path.join(output_dir, f"{loci}_{idx}_ism_scores.pt")
