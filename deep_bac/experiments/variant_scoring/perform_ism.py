@@ -83,6 +83,7 @@ def perform_ism(
     # )
     model = DeepBacGenePheno.load_from_checkpoint(ckpt_path, config=config)
     model.eval()
+    model.to(device)
 
     gene_to_idx = model.config.gene_to_idx
 
