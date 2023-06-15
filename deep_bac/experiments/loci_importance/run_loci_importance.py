@@ -1,6 +1,5 @@
 import logging
 import os
-from collections import defaultdict
 
 import torch
 from captum.attr import DeepLift
@@ -72,14 +71,14 @@ def run(
 
     deep_lift = DeepLift(model)
 
-    loci_importance = defaultdict(list)
-    loci_importance_sum = defaultdict(list)
     for drug, drug_idx in DRUG_TO_LABEL_IDX.items():
+        drug_loci_importance_abs_sum = []
+        drug_loci_importance_sum = []
         # skip PAS drug as we have too few samples anyway
         if drug == "PAS":
             continue
 
-        for batch in tqdm(data.test_dataloader):
+        for idx, batch in enumerate(tqdm(data.test_dataloader)):
             labels = batch.labels[:, drug_idx].cpu()
             label_mask = torch.where(
                 labels != -100.0, torch.ones_like(labels), 0
@@ -97,25 +96,21 @@ def run(
 
             attrs_sum = attrs.sum(dim=-2).sum(dim=-1)
             attrs_sum = attrs_sum * label_mask
-            loci_importance[drug_idx].append(attrs_sum)
+            drug_loci_importance_sum.append(attrs_sum)
 
             attrs_abs_sum = attrs.abs().sum(dim=-2).sum(dim=-1)
             attrs_abs_sum = attrs_abs_sum * label_mask
-            loci_importance_sum[drug_idx].append(attrs_abs_sum)
-        logging.info(f"Finished processing data for drug {drug}")
+            drug_loci_importance_abs_sum.append(attrs_abs_sum)
 
-    attrs_sum = torch.stack(
-        [torch.cat(items) for _, items in loci_importance.items()]
-    )
-    torch.save(attrs_sum, os.path.join(output_dir, "loci_importance_sum.pt"))
-    del attrs_sum
-
-    attrs_abs_sum = torch.stack(
-        [torch.cat(items) for _, items in loci_importance_sum.items()]
-    )
-    torch.save(
-        attrs_abs_sum, os.path.join(output_dir, "loci_importance_abs_sum.pt")
-    )
+        torch.save(
+            torch.cat(drug_loci_importance_sum),
+            os.path.join(output_dir, f"{drug}_loci_importance_sum.pt"),
+        )
+        torch.save(
+            torch.cat(drug_loci_importance_abs_sum),
+            os.path.join(output_dir, f"{drug}_loci_importance_abs_sum.pt"),
+        )
+        logging.info(f"Finished processing and saving data for drug: {drug}")
 
 
 class ArgumentParser(Tap):
