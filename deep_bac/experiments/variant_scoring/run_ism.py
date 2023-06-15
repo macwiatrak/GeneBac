@@ -52,10 +52,9 @@ def perform_ism(
                 nucleotide_pos_batch.to(device), tss_indexes_batch
             ).cpu()
             scores = torch.sigmoid(scores) if not regression else scores
-            # TODO: check this works
-            delta = scores - ref_scores.unsqueeze(0)
+            delta = scores - ref_scores
         output.append(delta)
-    return torch.stack(output)
+    return torch.cat(output, dim=0)
 
 
 def run(
@@ -124,6 +123,9 @@ def run(
         regression=model.config.regression,
     )
     torch.save(ism_scores, os.path.join(output_dir, "ism_scores.pt"))
+    torch.save(
+        ref_input_sample.input_tensor, os.path.join(output_dir, "ref_tensor.pt")
+    )
 
 
 def main(args):

@@ -105,7 +105,7 @@ class VariantScoringArgumentParser(Tap):
 
     # file paths for loading data
     ckpt_path: str = "/Users/maciejwiatrak/Downloads/epoch=248-train_r2=0.4890_20810503 (1).ckpt"
-    output_dir: str = "/tmp/var-scores/md-cnn/"
+    output_dir: str = "/tmp/ism-sample/"
     variant_df_path: str = (
         "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
         "data/who_cat_mutations_dna_seqs.parquet"
