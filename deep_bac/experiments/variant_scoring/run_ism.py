@@ -20,7 +20,7 @@ def run(
     pad_value: float = 0.25,
     reverse_complement_prob: float = 0.0,
 ):
-    for idx, loci in enumerate(tqdm(DRUG_SPECIFIC_GENES_DICT["cryptic"])):
+    for idx, loci in enumerate(DRUG_SPECIFIC_GENES_DICT["cryptic"]):
         ism_scores = perform_ism(
             ckpt_path=ckpt_path,
             reference_gene_data_df_path=reference_gene_data_df_path,
