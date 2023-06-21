@@ -31,7 +31,9 @@ def run(
     test: bool = False,
     ckpt_path: Optional[str] = None,
     use_drug_specific_genes: Literal[
-        "INH", "Walker", "MD-CNN", "cryptic"
+        "cryptic",
+        "PA_GWAS_top_3",
+        "PA_GWAS_top_5",
     ] = "cryptic",
     test_after_train: bool = False,
     resume_from_ckpt_path: str = None,

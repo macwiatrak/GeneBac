@@ -90,7 +90,9 @@ def run(
     input_dir: str,
     output_dir: str,
     use_drug_specific_genes: Literal[
-        "INH", "Walker", "MD-CNN", "cryptic"
+        "cryptic",
+        "PA_GWAS_top_3",
+        "PA_GWAS_top_5",
     ] = "cryptic",
 ):
     if not os.path.exists(output_dir):

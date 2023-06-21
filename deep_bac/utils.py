@@ -198,7 +198,11 @@ GENE_STD_THRESHOLDS_DICT = dict(
 
 
 def get_selected_genes(
-    use_drug_specific_genes: Literal["INH", "Walker", "MD-CNN"] = "MD-CNN"
+    use_drug_specific_genes: Literal[
+        "cryptic",
+        "PA_GWAS_top_3",
+        "PA_GWAS_top_5",
+    ] = "cryptic",
 ):
     if not use_drug_specific_genes:
         return None

@@ -52,7 +52,11 @@ def run(
     reverse_complement_prob: float = 0.0,
     num_workers: int = None,
     test: bool = True,
-    use_drug_specific_genes: Literal["INH", "Walker", "MD-CNN"] = "MD-CNN",
+    use_drug_specific_genes: Literal[
+        "cryptic",
+        "PA_GWAS_top_3",
+        "PA_GWAS_top_5",
+    ] = "cryptic",
     batch_size: int = 32,
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
