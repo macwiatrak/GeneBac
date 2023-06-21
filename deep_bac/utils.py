@@ -146,6 +146,47 @@ DRUG_SPECIFIC_GENES_DICT = {
         "Rv2749",
         "gid",
     ],
+    "PA_GWAS_top_5": [
+        "PA0004",
+        "PA0005",
+        "PA0313",
+        "PA0424",
+        "PA0425",
+        "PA0762",
+        "PA0958",
+        "PA1097",
+        "PA1120",
+        "PA2020",
+        "PA2494",
+        "PA3047",
+        "PA3112",
+        "PA3168",
+        "PA3574",
+        "PA4266",
+        "PA4270",
+        "PA4379",
+        "PA4418",
+        "PA4522",
+        "PA4725",
+        "PA4726",
+        "PA4777",
+        "PA4964",
+    ],
+    "PA_GWAS_top_3": [
+        "PA0005",
+        "PA0424",
+        "PA1097",
+        "PA1120",
+        "PA2020",
+        "PA3047",
+        "PA3168",
+        "PA3574",
+        "PA4379",
+        "PA4522",
+        "PA4725",
+        "PA4777",
+        "PA4964",
+    ],
 }
 
 
@@ -157,7 +198,11 @@ GENE_STD_THRESHOLDS_DICT = dict(
 
 
 def get_selected_genes(
-    use_drug_specific_genes: Literal["INH", "Walker", "MD-CNN"] = "MD-CNN"
+    use_drug_specific_genes: Literal[
+        "cryptic",
+        "PA_GWAS_top_3",
+        "PA_GWAS_top_5",
+    ] = "cryptic",
 ):
     if not use_drug_specific_genes:
         return None

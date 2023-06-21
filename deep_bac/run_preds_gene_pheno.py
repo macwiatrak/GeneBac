@@ -55,7 +55,9 @@ def run(
     reverse_complement_prob: float = 0.0,
     num_workers: int = None,
     use_drug_specific_genes: Literal[
-        "INH", "Walker", "MD-CNN", "cryptic"
+        "cryptic",
+        "PA_GWAS_top_3",
+        "PA_GWAS_top_5",
     ] = "cryptic",
 ):
     if not os.path.exists(output_dir):
