@@ -43,7 +43,7 @@ class GeneBacEncoder(nn.Module):
             curr_n_filters = _round(curr_n_filters * filters_mult)
         self.tower = nn.Sequential(*tower_layers)
 
-        seq_depth = 14
+        seq_depth = 16
         self.bottleneck = DenseLayer(
             in_features=curr_n_filters * seq_depth,
             out_features=n_bottleneck_layer,
