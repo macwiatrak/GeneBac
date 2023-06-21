@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple, Union
+from typing import List, Dict, Union
 
 import numpy as np
 import pytorch_lightning as pl
@@ -54,7 +54,7 @@ class DeepBacGenePheno(pl.LightningModule):
         self,
         batch_genes_tensor: torch.Tensor,
         tss_indexes: torch.Tensor = None,
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> torch.Tensor:
         # x: (batch_size, n_genes, in_channels, seq_length)
         batch_size, n_genes, n_channels, seq_length = batch_genes_tensor.shape
 
@@ -68,7 +68,7 @@ class DeepBacGenePheno(pl.LightningModule):
                 )
             )
             # add dummy torch tensor for compatibility with other models
-            return logits, torch.Tensor([])
+            return logits
         # reshape the input to allow the convolutional layer to work
         x = batch_genes_tensor.view(
             batch_size * n_genes, n_channels, seq_length
@@ -87,12 +87,12 @@ class DeepBacGenePheno(pl.LightningModule):
             self.dropout(self.activation_fn(gene_encodings))
         )
         logits = self.decoder(strain_encodings)
-        return logits, strain_encodings
+        return logits
 
     def training_step(
         self, batch: BatchBacInputSample, batch_idx: int
     ) -> Union[Dict, None]:
-        logits, _ = self(batch.input_tensor, batch.tss_indexes)
+        logits = self(batch.input_tensor, batch.tss_indexes)
         # get loss with reduction="none" to compute loss per sample
         loss = self.loss_fn(logits.view(-1), batch.labels.view(-1))
         # remove loss for samples with no label and compute mean
@@ -124,7 +124,7 @@ class DeepBacGenePheno(pl.LightningModule):
         )
 
     def eval_step(self, batch: BatchBacInputSample):
-        logits, _ = self(batch.input_tensor, batch.tss_indexes)
+        logits = self(batch.input_tensor, batch.tss_indexes)
         loss = self.loss_fn(logits.view(-1), batch.labels.view(-1))
         # remove loss for samples with no label and compute mean
         loss = remove_ignore_index(loss, batch.labels.view(-1))

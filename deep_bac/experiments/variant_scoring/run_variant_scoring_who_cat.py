@@ -99,13 +99,13 @@ def run(
     )
 
 
-class ArgumentParser(Tap):
+class VariantScoringArgumentParser(Tap):
     def __init__(self):
         super().__init__(underscores_to_dashes=True)
 
     # file paths for loading data
-    ckpt_path: str = "/Users/maciejwiatrak/Downloads/epoch=243-train_gmean_spec_sens=0.8708.ckpt"
-    output_dir: str = "/tmp/var-scores/md-cnn/"
+    ckpt_path: str = "/Users/maciejwiatrak/Downloads/epoch=248-train_r2=0.4890_20810503 (1).ckpt"
+    output_dir: str = "/tmp/ism-sample/"
     variant_df_path: str = (
         "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
         "data/who_cat_mutations_dna_seqs.parquet"
@@ -134,5 +134,5 @@ def main(args):
 
 
 if __name__ == "__main__":
-    args = ArgumentParser().parse_args()
+    args = VariantScoringArgumentParser().parse_args()
     main(args)
