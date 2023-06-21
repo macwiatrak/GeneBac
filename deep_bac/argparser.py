@@ -68,3 +68,4 @@ class DeepGeneBacArgumentParser(Tap):
     resume_from_ckpt_path: str = None
     fold_idx: int = None
     gene_encoder_ckpt_path: str = None
+    freeze_encoder: bool = False

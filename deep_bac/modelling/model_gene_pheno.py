@@ -48,6 +48,11 @@ class DeepBacGenePheno(pl.LightningModule):
             else nn.BCEWithLogitsLoss(reduction="none")
         )
 
+        if config.freeze_encoder:
+            print("Freezing the gene encoder")
+            for param in self.gene_encoder.parameters():
+                param.requires_grad = False
+
         self.save_hyperparameters(logger=False)
 
     def forward(

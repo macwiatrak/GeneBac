@@ -47,3 +47,4 @@ class DeepGeneBacConfig:
     pos_encoder_type: Literal["learnable", "fixed"] = None
     input_dir: str = None
     gene_to_idx: Dict[str, int] = None
+    freeze_encoder: bool = False
