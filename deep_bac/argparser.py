@@ -2,7 +2,8 @@ from typing import Literal
 
 from tap import Tap
 
-INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"  # "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data/"
+INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
+# "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data/"
 
 
 class DeepGeneBacArgumentParser(Tap):
@@ -23,7 +24,7 @@ class DeepGeneBacArgumentParser(Tap):
         "simple_cnn",
     ] = "gene_bac"
     graph_model_type: Literal["transformer", "dense", "GAT", "GCN"] = "GAT"
-    regression: bool = False  # True
+    regression: bool = False
     use_drug_idx: int = None
     lr: float = 0.0001
     n_gene_bottleneck_layer: int = 64
@@ -68,4 +69,3 @@ class DeepGeneBacArgumentParser(Tap):
     resume_from_ckpt_path: str = None
     fold_idx: int = None
     gene_encoder_ckpt_path: str = None
-    freeze_encoder: bool = False
