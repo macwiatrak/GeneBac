@@ -2,7 +2,8 @@ from typing import Literal
 
 from tap import Tap
 
-INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data/"
+INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
+# "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data/"
 
 
 class DeepGeneBacArgumentParser(Tap):
@@ -58,12 +59,12 @@ class DeepGeneBacArgumentParser(Tap):
         "train_loss",
         "train_gmean_spec_sens",
         "train_r2",
-    ] = "train_gmean_spec_sens"
+    ] = "train_r2"
     use_drug_specific_genes: Literal[
         "cryptic",
         "PA_GWAS_top_3",
         "PA_GWAS_top_5",
-    ] = "cryptic"
+    ] = "PA_GWAS_top_5"  # "cryptic"
     pos_encoder_type: Literal["learnable", "fixed"] = "fixed"
     resume_from_ckpt_path: str = None
     fold_idx: int = None
