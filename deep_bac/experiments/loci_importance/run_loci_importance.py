@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from deep_bac.data_preprocessing.data_reader import get_gene_pheno_data
 
-from deep_bac.modelling.metrics import DRUG_TO_LABEL_IDX
+from deep_bac.modelling.metrics import MTB_DRUG_TO_LABEL_IDX
 from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 from deep_bac.utils import get_selected_genes
 
@@ -71,7 +71,7 @@ def run(
 
     deep_lift = DeepLift(model)
 
-    for drug, drug_idx in DRUG_TO_LABEL_IDX.items():
+    for drug, drug_idx in MTB_DRUG_TO_LABEL_IDX.items():
         drug_loci_importance_abs_sum = []
         drug_loci_importance_sum = []
         # skip PAS drug as we have too few samples anyway

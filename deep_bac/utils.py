@@ -6,7 +6,7 @@ from typing import Literal, Optional, Dict, List, Tuple
 import torch
 
 from deep_bac.modelling.metrics import (
-    DRUG_TO_LABEL_IDX,
+    MTB_DRUG_TO_LABEL_IDX,
     REGRESSION_METRICS,
     BINARY_CLS_METRICS,
     FIRST_LINE_DRUGS,
@@ -222,7 +222,7 @@ def get_drug_line(drug: str):
 def format_predictions(
     predictions: Dict,
     metrics_list: List[str],
-    drug_to_idx_dict: Dict[str, int] = DRUG_TO_LABEL_IDX,
+    drug_to_idx_dict: Dict[str, int] = MTB_DRUG_TO_LABEL_IDX,
     split: Literal["train", "val", "test"] = "test",
 ):
     output = defaultdict(list)
@@ -256,7 +256,7 @@ def format_and_write_results(
             metrics_list=BINARY_CLS_METRICS
             if f"{split}_auroc" in res
             else REGRESSION_METRICS,
-            drug_to_idx_dict=DRUG_TO_LABEL_IDX,
+            drug_to_idx_dict=MTB_DRUG_TO_LABEL_IDX,
             split=split,
         )
         for res in results
