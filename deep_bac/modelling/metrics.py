@@ -97,23 +97,6 @@ PA_DRUG_TO_DRUG_CLASS = {
 }
 
 
-MTB_DRUGS_OF_INTEREST = [
-    "INH",
-    "RIF",
-    "EMB",
-    "AMI",
-    "ETH",
-    "KAN",
-    "LEV",
-    "MXF",
-    "RFB",
-    "BDQ",
-    "CFZ",
-    "DLM",
-    "LZD",
-]
-
-
 def get_regression_metrics(
     logits: torch.Tensor, labels: torch.Tensor
 ) -> Dict[str, torch.Tensor]:
@@ -276,10 +259,7 @@ def compute_agg_stats(
             metrics[f"{metric}"] = get_macro_metric(
                 metrics_dict=drug_metrics,
                 metric=metric,
-                # use only first line drugs for macro metrics
-                drug_idxs=[
-                    MTB_DRUG_TO_LABEL_IDX[idx] for idx in MTB_DRUGS_OF_INTEREST
-                ],
+                drug_idxs=list(range(labels.shape[1])),
             )
         metrics.update(drug_metrics)
         return metrics, torch.tensor(threshes)
@@ -310,9 +290,7 @@ def compute_agg_stats(
             metrics_dict=drug_metrics,
             metric=metric,
             # use only first & second line drugs for macro metrics
-            drug_idxs=[
-                MTB_DRUG_TO_LABEL_IDX[idx] for idx in MTB_DRUGS_OF_INTEREST
-            ],
+            drug_idxs=list(range(labels.shape[1])),
         )
     metrics.update(drug_metrics)
     return metrics, torch.tensor([])
