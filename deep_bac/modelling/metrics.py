@@ -61,15 +61,39 @@ PA_DRUG_TO_LABEL_IDX = {
     "Levofloxacin": 13,
 }
 
-FIRST_LINE_DRUGS = ["INH", "RIF", "EMB"]
 
-SECOND_LINE_DRUGS = ["AMI", "ETH", "KAN", "LEV", "MXF", "RFB"]
+MTB_DRUG_TO_DRUG_CLASS = {
+    "MXF": "Second",
+    "BDQ": "New and repurposed",
+    "KAN": "Second",
+    "CFZ": "New and repurposed",
+    "AMI": "Second",
+    "PAS": "New and repurposed",
+    "DLM": "New and repurposed",
+    "RFB": "Second",
+    "LZD": "New and repurposed",
+    "EMB": "First",
+    "LEV": "Second",
+    "ETH": "Second",
+    "INH": "First",
+    "RIF": "First",
+}
 
-NEW_AND_REPURPOSED_DRUGS = ["BDQ", "CFZ", "DLM", "LZD"]
-
-DRUGS_OF_INTEREST = (
-    FIRST_LINE_DRUGS + SECOND_LINE_DRUGS + NEW_AND_REPURPOSED_DRUGS
-)
+MTB_DRUGS_OF_INTEREST = [
+    "INH",
+    "RIF",
+    "EMB",
+    "AMI",
+    "ETH",
+    "KAN",
+    "LEV",
+    "MXF",
+    "RFB",
+    "BDQ",
+    "CFZ",
+    "DLM",
+    "LZD",
+]
 
 
 def get_regression_metrics(
@@ -236,7 +260,7 @@ def compute_agg_stats(
                 metric=metric,
                 # use only first line drugs for macro metrics
                 drug_idxs=[
-                    MTB_DRUG_TO_LABEL_IDX[idx] for idx in DRUGS_OF_INTEREST
+                    MTB_DRUG_TO_LABEL_IDX[idx] for idx in MTB_DRUGS_OF_INTEREST
                 ],
             )
         metrics.update(drug_metrics)
@@ -268,7 +292,9 @@ def compute_agg_stats(
             metrics_dict=drug_metrics,
             metric=metric,
             # use only first & second line drugs for macro metrics
-            drug_idxs=[MTB_DRUG_TO_LABEL_IDX[idx] for idx in DRUGS_OF_INTEREST],
+            drug_idxs=[
+                MTB_DRUG_TO_LABEL_IDX[idx] for idx in MTB_DRUGS_OF_INTEREST
+            ],
         )
     metrics.update(drug_metrics)
     return metrics, torch.tensor([])

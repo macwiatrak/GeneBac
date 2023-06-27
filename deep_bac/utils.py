@@ -9,9 +9,7 @@ from deep_bac.modelling.metrics import (
     MTB_DRUG_TO_LABEL_IDX,
     REGRESSION_METRICS,
     BINARY_CLS_METRICS,
-    FIRST_LINE_DRUGS,
-    SECOND_LINE_DRUGS,
-    NEW_AND_REPURPOSED_DRUGS,
+    MTB_DRUG_TO_DRUG_CLASS,
 )
 
 DRUG_SPECIFIC_GENES_DICT = {
@@ -209,20 +207,11 @@ def get_selected_genes(
     return DRUG_SPECIFIC_GENES_DICT[use_drug_specific_genes]
 
 
-def get_drug_line(drug: str):
-    if drug in FIRST_LINE_DRUGS:
-        return "First"
-    if drug in SECOND_LINE_DRUGS:
-        return "Second"
-    if drug in NEW_AND_REPURPOSED_DRUGS:
-        return "New and repurposed"
-    return None
-
-
 def format_predictions(
     predictions: Dict,
     metrics_list: List[str],
     drug_to_idx_dict: Dict[str, int] = MTB_DRUG_TO_LABEL_IDX,
+    drug_to_drug_class: Dict[str, str] = MTB_DRUG_TO_DRUG_CLASS,
     split: Literal["train", "val", "test"] = "test",
 ):
     output = defaultdict(list)
@@ -236,7 +225,7 @@ def format_predictions(
             output["metric"].append(metric)
 
     output["split"] = [split] * len(output["drug"])
-    output["drug_class"] = [get_drug_line(drug) for drug in output["drug"]]
+    output["drug_class"] = [drug_to_drug_class[drug] for drug in output["drug"]]
     return output
 
 
