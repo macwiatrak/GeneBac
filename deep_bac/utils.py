@@ -141,7 +141,9 @@ def format_predictions(
             output["metric"].append(metric)
 
     output["split"] = [split] * len(output["drug"])
-    output["drug_class"] = [drug_to_drug_class[drug] for drug in output["drug"]]
+    output["drug_class"] = [
+        drug_to_drug_class.get(drug, None) for drug in output["drug"]
+    ]
     return output
 
 
