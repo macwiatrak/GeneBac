@@ -79,6 +79,24 @@ MTB_DRUG_TO_DRUG_CLASS = {
     "RIF": "First",
 }
 
+PA_DRUG_TO_DRUG_CLASS = {
+    "Tobramycin": "First",
+    "Ciprofloxacin": "First",
+    "Meropenem": "First",
+    "Ceftazidime": "First",
+    "Colistin": "First",  # "Second"
+    "TicarClav": "Second",
+    "PiperacillinTazobactam": "First",  # "Second",
+    "Aztreonam": "Second",
+    "Imipenem": "First",  # "Second"
+    "Amikacin": "Second",  # "First"
+    "Gentamicin": "First",  # "Second"
+    "Piperacillin": "Second",
+    "Cefepime": "Second",
+    "Levofloxacin": "Second",  # "First"
+}
+
+
 MTB_DRUGS_OF_INTEREST = [
     "INH",
     "RIF",

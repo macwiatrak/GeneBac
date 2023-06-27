@@ -12,7 +12,7 @@ from sklearn.linear_model import (
 
 from deep_bac.modelling.metrics import MTB_DRUG_TO_DRUG_CLASS
 
-DRUG_TO_IDX = {
+MTB_DRUG_TO_IDX = {
     "MXF": 0,
     "BDQ": 1,
     "KAN": 2,

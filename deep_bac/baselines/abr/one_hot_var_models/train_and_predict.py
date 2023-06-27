@@ -13,9 +13,14 @@ from deep_bac.baselines.abr.one_hot_var_models.train_and_predict_on_drug import 
 )
 from deep_bac.baselines.abr.one_hot_var_models.utils import (
     dict_metrics_to_df,
-    DRUG_TO_IDX,
+    MTB_DRUG_TO_IDX,
 )
-from deep_bac.modelling.metrics import BINARY_CLS_METRICS, REGRESSION_METRICS
+from deep_bac.modelling.metrics import (
+    BINARY_CLS_METRICS,
+    REGRESSION_METRICS,
+    PA_DRUG_TO_LABEL_IDX,
+    PA_DRUG_TO_DRUG_CLASS,
+)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -79,7 +84,12 @@ def run(
         output_metrics.append(test_metrics)
 
     output_dfs = [
-        dict_metrics_to_df(test_metrics, drug, split="test")
+        dict_metrics_to_df(
+            test_metrics,
+            drug,
+            split="test",
+            drug_to_drug_class=PA_DRUG_TO_DRUG_CLASS,
+        )
         for test_metrics, drug in zip(output_metrics, drug_to_idx.keys())
     ]
     pd.concat(output_dfs).to_csv(
@@ -99,7 +109,7 @@ def run(
 def main(args):
     run(
         output_dir=args.output_dir,
-        drug_to_idx=DRUG_TO_IDX,
+        drug_to_idx=PA_DRUG_TO_LABEL_IDX,  # MTB_DRUG_TO_IDX,
         train_test_split_unq_ids_file_path=args.train_test_split_file_path,
         variant_matrix_input_dir=args.variant_matrix_input_dir,
         df_unq_ids_labels_file_path=args.df_unq_ids_labels_file_path,
