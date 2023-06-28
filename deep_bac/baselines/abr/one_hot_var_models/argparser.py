@@ -19,10 +19,10 @@ class OneHotModelArgumentParser(Tap):
         INPUT_DIR, "train_test_cv_split_unq_ids.json"
     )
     variant_matrix_input_dir: str = os.path.join(INPUT_DIR, "one-hot")
-    output_dir: str = os.path.join(INPUT_DIR, "one-hot", "results")
+    output_dir: str = os.path.join(INPUT_DIR, "one-hot", "results", "binary")
     # model hyperparameters
     max_iter: int = 500
     penalty: Literal["l1", "l2", "elasticnet"] = "l1"
     random_state: int = 42
     exclude_vars_not_in_train: bool = True
-    regression: bool = True
+    regression: bool = False
