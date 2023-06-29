@@ -194,7 +194,7 @@ class DeepBacGenePheno(pl.LightningModule):
                 # this particular lr has been recommended in the initial paper
                 # and has been empirically found to work the best on the data
                 # used in this project
-                lr=self.config.lr,  # np.exp(-1.0 * 9),
+                lr=np.exp(-1.0 * 9),
             )
         else:
             opt = torch.optim.AdamW(
