@@ -10,7 +10,7 @@ from deep_bac.experiments.variant_scoring.variant_scoring import (
     get_ref_batch,
     batch_samples_w_variant,
 )
-from deep_bac.modelling.metrics import DRUG_TO_LABEL_IDX
+from deep_bac.modelling.metrics import MTB_DRUG_TO_LABEL_IDX
 from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 
 
@@ -87,7 +87,8 @@ def run(
     var_scores = [item.numpy() for item in torch.cat(var_scores, dim=0)]
     variant_df["var_scores"] = var_scores
     variant_df["var_score"] = variant_df.apply(
-        lambda row: row["var_scores"][DRUG_TO_LABEL_IDX[row["drug"]]], axis=1
+        lambda row: row["var_scores"][MTB_DRUG_TO_LABEL_IDX[row["drug"]]],
+        axis=1,
     )
     # drop redundant column
     variant_df = variant_df.drop(columns=["var_scores"])

@@ -3,7 +3,8 @@ from typing import Literal
 
 from tap import Tap
 
-INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data/"
+INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
+# "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data/"
 
 
 class OneHotModelArgumentParser(Tap):
@@ -17,11 +18,11 @@ class OneHotModelArgumentParser(Tap):
     train_test_split_file_path: str = os.path.join(
         INPUT_DIR, "train_test_cv_split_unq_ids.json"
     )
-    variant_matrix_input_dir: str = "/tmp/variant-matrix-cryptic-loci-updated/"
-    output_dir: str = "/tmp/binary/"
+    variant_matrix_input_dir: str = os.path.join(INPUT_DIR, "one-hot")
+    output_dir: str = os.path.join(INPUT_DIR, "one-hot", "results", "binary")
     # model hyperparameters
     max_iter: int = 500
     penalty: Literal["l1", "l2", "elasticnet"] = "l1"
     random_state: int = 42
-    exclude_vars_not_in_train: bool = False
+    exclude_vars_not_in_train: bool = True
     regression: bool = False

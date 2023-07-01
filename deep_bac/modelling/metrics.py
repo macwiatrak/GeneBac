@@ -27,7 +27,7 @@ BINARY_CLS_METRICS = [
 ]
 REGRESSION_METRICS = ["pearson", "spearman", "mse", "mae", "r2"]
 
-DRUG_TO_LABEL_IDX = {
+MTB_DRUG_TO_LABEL_IDX = {
     "MXF": 0,
     "BDQ": 1,
     "KAN": 2,
@@ -44,15 +44,57 @@ DRUG_TO_LABEL_IDX = {
     "RIF": 13,
 }
 
-FIRST_LINE_DRUGS = ["INH", "RIF", "EMB"]
+PA_DRUG_TO_LABEL_IDX = {
+    "Tobramycin": 0,
+    "Ciprofloxacin": 1,
+    "Meropenem": 2,
+    "Ceftazidime": 3,
+    "Colistin": 4,
+    "TicarClav": 5,
+    "PiperacillinTazobactam": 6,
+    "Aztreonam": 7,
+    "Imipenem": 8,
+    "Amikacin": 9,
+    "Gentamicin": 10,
+    "Piperacillin": 11,
+    "Cefepime": 12,
+    "Levofloxacin": 13,
+}
 
-SECOND_LINE_DRUGS = ["AMI", "ETH", "KAN", "LEV", "MXF", "RFB"]
 
-NEW_AND_REPURPOSED_DRUGS = ["BDQ", "CFZ", "DLM", "LZD"]
+MTB_DRUG_TO_DRUG_CLASS = {
+    "MXF": "Second",
+    "BDQ": "New and repurposed",
+    "KAN": "Second",
+    "CFZ": "New and repurposed",
+    "AMI": "Second",
+    "PAS": "New and repurposed",
+    "DLM": "New and repurposed",
+    "RFB": "Second",
+    "LZD": "New and repurposed",
+    "EMB": "First",
+    "LEV": "Second",
+    "ETH": "Second",
+    "INH": "First",
+    "RIF": "First",
+}
 
-DRUGS_OF_INTEREST = (
-    FIRST_LINE_DRUGS + SECOND_LINE_DRUGS + NEW_AND_REPURPOSED_DRUGS
-)
+PA_DRUG_TO_DRUG_CLASS = {
+    "Tobramycin": "First",
+    "Ciprofloxacin": "First",
+    "Meropenem": "First",
+    "Ceftazidime": "First",
+    "Colistin": "First",  # "Second"
+    "TicarClav": "Second",
+    "PiperacillinTazobactam": "First",  # "Second",
+    "Aztreonam": "Second",
+    "Imipenem": "First",  # "Second"
+    "Amikacin": "Second",  # "First"
+    "Gentamicin": "First",  # "Second"
+    "Piperacillin": "Second",
+    "Cefepime": "Second",
+    "Levofloxacin": "Second",  # "First"
+}
 
 
 def get_regression_metrics(
@@ -217,8 +259,7 @@ def compute_agg_stats(
             metrics[f"{metric}"] = get_macro_metric(
                 metrics_dict=drug_metrics,
                 metric=metric,
-                # use only first line drugs for macro metrics
-                drug_idxs=[DRUG_TO_LABEL_IDX[idx] for idx in DRUGS_OF_INTEREST],
+                drug_idxs=list(range(labels.shape[1])),
             )
         metrics.update(drug_metrics)
         return metrics, torch.tensor(threshes)
@@ -249,7 +290,7 @@ def compute_agg_stats(
             metrics_dict=drug_metrics,
             metric=metric,
             # use only first & second line drugs for macro metrics
-            drug_idxs=[DRUG_TO_LABEL_IDX[idx] for idx in DRUGS_OF_INTEREST],
+            drug_idxs=list(range(labels.shape[1])),
         )
     metrics.update(drug_metrics)
     return metrics, torch.tensor([])

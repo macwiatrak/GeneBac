@@ -10,10 +10,9 @@ from sklearn.linear_model import (
     Ridge,
 )
 
-from deep_bac.utils import get_drug_line
+from deep_bac.modelling.metrics import MTB_DRUG_TO_DRUG_CLASS
 
-
-DRUG_TO_IDX = {
+MTB_DRUG_TO_IDX = {
     "MXF": 0,
     "BDQ": 1,
     "KAN": 2,
@@ -90,6 +89,7 @@ def dict_metrics_to_df(
     metrics: Dict[str, float],
     drug: str,
     split: Literal["train", "val", "test"] = "test",
+    drug_to_drug_class: Dict[str, str] = MTB_DRUG_TO_DRUG_CLASS,
 ) -> pd.DataFrame:
     """Converts the metrics dictionary to a dataframe."""
     output = defaultdict(list)
@@ -98,5 +98,5 @@ def dict_metrics_to_df(
         output["metric"].append(metric)
         output["drug"].append(drug)
         output["split"].append(split)
-        output["drug_class"] = get_drug_line(drug)
+        output["drug_class"] = drug_to_drug_class[drug]
     return pd.DataFrame(output)
