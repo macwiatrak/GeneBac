@@ -46,7 +46,7 @@ def run(
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
         num_workers=num_workers if num_workers is not None else os.cpu_count(),
-        test=test,
+        test=any([test, test_after_train]),
     )
     logging.info("Finished loading data")
 
