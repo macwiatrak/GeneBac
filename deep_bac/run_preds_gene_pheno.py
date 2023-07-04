@@ -69,10 +69,10 @@ def run(
     config = torch.load(ckpt_path, map_location="cpu")["hyper_parameters"][
         "config"
     ]
-    config.input_dir = (
-        "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
-        # "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
-    )
+    # config.input_dir = (
+    #     "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
+    #     # "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
+    # )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Using device {device}")
