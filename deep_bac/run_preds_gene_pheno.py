@@ -25,7 +25,7 @@ def collect_preds(
     out = defaultdict(list)
     with torch.no_grad():
         for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
-            logits, strain_embeddings = model(
+            logits = model(
                 batch.input_tensor.to(model.device),
                 batch.tss_indexes.to(model.device),
             )
@@ -33,10 +33,10 @@ def collect_preds(
             out["logits"] += [
                 item.cpu().numpy() for item in logits
             ]  # a list of numpy arrays
-            if strain_embeddings.nelement() != 0:
-                out["embedding"] += [
-                    item.cpu().numpy() for item in strain_embeddings
-                ]  # a list of numpy arrays
+            # if strain_embeddings.nelement() != 0:
+            #     out["embedding"] += [
+            #         item.cpu().numpy() for item in strain_embeddings
+            #     ]  # a list of numpy arrays
             out["labels"] += [
                 item.cpu().numpy() for item in batch.labels
             ]  # a list of lists
@@ -69,9 +69,10 @@ def run(
     config = torch.load(ckpt_path, map_location="cpu")["hyper_parameters"][
         "config"
     ]
-    # config.input_dir = (
-    #     "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
-    # )
+    config.input_dir = (
+        "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
+        # "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
+    )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Using device {device}")
@@ -124,14 +125,16 @@ def run(
             drug_thresholds, os.path.join(output_dir, "drug_thresholds.pt")
         )
 
-    val_df = collect_preds(model, data.val_dataloader)
-    val_df.to_parquet(os.path.join(output_dir, "val_preds.parquet"))
-    logging.info("Finished collecting and saving val preds")
-    del val_df
-
     train_df = collect_preds(model, data.train_dataloader)
     train_df.to_parquet(os.path.join(output_dir, "train_preds.parquet"))
     logging.info("Finished collecting and saving train preds")
+    del train_df
+
+    if data.val_dataloader is not None:
+        val_df = collect_preds(model, data.val_dataloader)
+        val_df.to_parquet(os.path.join(output_dir, "val_preds.parquet"))
+        logging.info("Finished collecting and saving val preds")
+        del val_df
 
 
 def main(args):
