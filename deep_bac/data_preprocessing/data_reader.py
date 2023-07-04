@@ -84,7 +84,6 @@ def get_gene_pheno_dataloader(
         reverse_complement_prob=reverse_complement_prob,
         use_drug_idx=use_drug_idx,
     )
-    print("len unique_ids", len(unique_ids), "dataset len", dataset.__len__())
     dataloader = DataLoader(
         dataset=dataset,
         batch_size=batch_size,
@@ -156,7 +155,6 @@ def get_gene_pheno_data(
         pin_memory=pin_memory,
     )
 
-    print("val unique ids:", val_unique_ids)
     val_dataloader, _ = get_gene_pheno_dataloader(
         batch_size=2
         * batch_size,  # double the batch size during eval for speed up
