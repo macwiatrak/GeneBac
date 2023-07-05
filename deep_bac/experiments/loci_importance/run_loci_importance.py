@@ -20,6 +20,12 @@ from deep_bac.utils import get_selected_genes
 logging.basicConfig(level=logging.INFO)
 
 
+def merge_itrs(*itrs):
+    for itr in itrs:
+        for v in itr:
+            yield v
+
+
 def run(
     input_dir: str,
     ckpt_path: str,
@@ -84,6 +90,8 @@ def run(
 
     deep_lift = DeepLift(model)
 
+    dataloader = merge_itrs(data.train_dataloader, data.test_dataloader)
+
     for drug, drug_idx in PA_DRUG_TO_LABEL_IDX.items():
         drug_loci_importance_abs_sum = []
         drug_loci_importance_sum = []
@@ -91,7 +99,7 @@ def run(
         if drug == "PAS":
             continue
 
-        for idx, batch in enumerate(tqdm(data.test_dataloader)):
+        for idx, batch in enumerate(tqdm(dataloader)):
             labels = batch.labels[:, drug_idx].cpu()
             label_mask = torch.where(
                 labels != -100.0, torch.ones_like(labels), 0
