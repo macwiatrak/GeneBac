@@ -90,8 +90,6 @@ def run(
 
     deep_lift = DeepLift(model)
 
-    dataloader = merge_itrs(data.train_dataloader, data.test_dataloader)
-
     for drug, drug_idx in PA_DRUG_TO_LABEL_IDX.items():
         drug_loci_importance_abs_sum = []
         drug_loci_importance_sum = []
@@ -99,6 +97,7 @@ def run(
         if drug == "PAS":
             continue
 
+        dataloader = merge_itrs(data.train_dataloader, data.test_dataloader)
         for idx, batch in enumerate(tqdm(dataloader)):
             labels = batch.labels[:, drug_idx].cpu()
             label_mask = torch.where(
