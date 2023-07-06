@@ -147,6 +147,27 @@ def format_predictions(
     return output
 
 
+def write_results(
+    results: List[Optional[Dict]] = None,
+    output_file_path: str = None,
+):
+    if not results or not output_file_path:
+        return
+
+    if not os.path.isfile(output_file_path):
+        with open(output_file_path, "w") as f:
+            for res in results:
+                f.write(json.dumps(res) + "\n")
+    else:
+        with open(output_file_path, "r") as f:
+            existing_results = [json.loads(line) for line in f.readlines()]
+
+        existing_results += results
+        with open(output_file_path, "w") as f:
+            for result in existing_results:
+                f.write(json.dumps(result) + "\n")
+
+
 def format_and_write_results(
     results: List[Optional[Dict]] = None,
     output_file_path: str = None,
@@ -169,18 +190,7 @@ def format_and_write_results(
         for res in results
     ]
 
-    if not os.path.isfile(output_file_path):
-        with open(output_file_path, "w") as f:
-            for res in results:
-                f.write(json.dumps(res) + "\n")
-    else:
-        with open(output_file_path, "r") as f:
-            existing_results = [json.loads(line) for line in f.readlines()]
-
-        existing_results += results
-        with open(output_file_path, "w") as f:
-            for result in existing_results:
-                f.write(json.dumps(result) + "\n")
+    write_results(results, output_file_path)
 
 
 def get_gene_var_thresholds(

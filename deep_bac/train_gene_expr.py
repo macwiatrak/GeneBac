@@ -15,6 +15,7 @@ from deep_bac.utils import (
     get_gene_var_thresholds,
     GENE_STD_THRESHOLDS_DICT,
     fetch_gene_encoder_weights,
+    write_results,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -99,7 +100,7 @@ def run(
 def main(args):
     seed_everything(args.random_state)
     config = DeepGeneBacConfig.from_dict(args.as_dict())
-    _ = run(
+    results = run(
         config=config,
         input_dir=args.input_dir,
         output_dir=args.output_dir,
@@ -113,6 +114,10 @@ def main(args):
         test_after_train=args.test_after_train,
         resume_from_ckpt_path=args.resume_from_ckpt_path,
         gene_encoder_ckpt_path=args.gene_encoder_ckpt_path,
+    )
+    write_results(
+        results=results,
+        output_file_path=os.path.join(args.output_dir, "test_results.jsonl"),
     )
 
 
