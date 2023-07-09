@@ -231,7 +231,7 @@ def get_gene_expr_dataloader(
         batch_size=batch_size,
         shuffle=shuffle,
         num_workers=num_workers,
-        pin_memory=pin_memory,
+        pin_memory=False,
         collate_fn=_collate_samples,
     )
     return dataloader, dataset.__len__()
