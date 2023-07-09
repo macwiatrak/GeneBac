@@ -25,7 +25,7 @@ def collect_preds(
     out = defaultdict(list)
     with torch.no_grad():
         for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
-            logits = model(
+            logits, strain_embeddings = model(
                 batch.input_tensor.to(model.device),
                 batch.tss_indexes.to(model.device),
             )
@@ -33,10 +33,10 @@ def collect_preds(
             out["logits"] += [
                 item.cpu().numpy() for item in logits
             ]  # a list of numpy arrays
-            # if strain_embeddings.nelement() != 0:
-            #     out["embedding"] += [
-            #         item.cpu().numpy() for item in strain_embeddings
-            #     ]  # a list of numpy arrays
+            if strain_embeddings.nelement() != 0:
+                out["embedding"] += [
+                    item.cpu().numpy() for item in strain_embeddings
+                ]  # a list of numpy arrays
             out["labels"] += [
                 item.cpu().numpy() for item in batch.labels
             ]  # a list of lists
@@ -69,10 +69,10 @@ def run(
     config = torch.load(ckpt_path, map_location="cpu")["hyper_parameters"][
         "config"
     ]
-    # config.input_dir = (
-    #     "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
-    #     # "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
-    # )
+    config.input_dir = (
+        "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
+        # "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
+    )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Using device {device}")

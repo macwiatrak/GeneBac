@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Tuple
 
 import numpy as np
 import pytorch_lightning as pl
@@ -54,7 +54,7 @@ class DeepBacGenePheno(pl.LightningModule):
         self,
         batch_genes_tensor: torch.Tensor,
         tss_indexes: torch.Tensor = None,
-    ) -> torch.Tensor:
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         # x: (batch_size, n_genes, in_channels, seq_length)
         batch_size, n_genes, n_channels, seq_length = batch_genes_tensor.shape
 
@@ -87,12 +87,12 @@ class DeepBacGenePheno(pl.LightningModule):
             self.dropout(self.activation_fn(gene_encodings))
         )
         logits = self.decoder(strain_encodings)
-        return logits
+        return logits, strain_encodings
 
     def training_step(
         self, batch: BatchBacInputSample, batch_idx: int
     ) -> Union[Dict, None]:
-        logits = self(batch.input_tensor, batch.tss_indexes)
+        logits, _ = self(batch.input_tensor, batch.tss_indexes)
         # get loss with reduction="none" to compute loss per sample
         loss = self.loss_fn(logits.view(-1), batch.labels.view(-1))
         # remove loss for samples with no label and compute mean
@@ -124,7 +124,7 @@ class DeepBacGenePheno(pl.LightningModule):
         )
 
     def eval_step(self, batch: BatchBacInputSample):
-        logits = self(batch.input_tensor, batch.tss_indexes)
+        logits, _ = self(batch.input_tensor, batch.tss_indexes)
         loss = self.loss_fn(logits.view(-1), batch.labels.view(-1))
         # remove loss for samples with no label and compute mean
         loss = remove_ignore_index(loss, batch.labels.view(-1))
