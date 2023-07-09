@@ -19,8 +19,8 @@ logging.basicConfig(level=logging.INFO)
 
 def collect_tfmodisco_data(
     attr_model_fn: Callable, dataloader: DataLoader, device: str
-) -> Tuple[csr_matrix, csr_matrix]:
-    dna_tensor = []
+) -> csr_matrix:  # Tuple[csr_matrix, csr_matrix]:
+    # dna_tensor = []
     importance_scores = []
     for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
         attrs = attr_model_fn.attribute(
@@ -28,12 +28,12 @@ def collect_tfmodisco_data(
             additional_forward_args=batch.tss_indexes.to(device),
             return_convergence_delta=False,
         )
-        dna_tensor.append(batch.input_tensor)
+        # dna_tensor.append(batch.input_tensor)
         importance_scores.append(attrs.detach().cpu())
 
-    dna_tensor = torch.cat(dna_tensor, dim=0).numpy()
+    # dna_tensor = torch.cat(dna_tensor, dim=0).numpy()
     importance_scores = torch.cat(importance_scores, dim=0).numpy()
-    return dna_tensor, importance_scores
+    return importance_scores
 
 
 def run(
@@ -55,36 +55,7 @@ def run(
     model.eval()
     attr_model_fn = DeepLift(model)
 
-    test_dataloader, _ = get_gene_expr_dataloader(
-        batch_size=batch_size,
-        bac_genes_df_file_path=os.path.join(input_dir, "test.parquet"),
-        max_gene_length=max_gene_length,
-        shift_max=shift_max,
-        pad_value=pad_value,
-        reverse_complement_prob=0.0,  # set it to 0 during eval
-        shuffle=False,
-        num_workers=num_workers if num_workers is not None else os.cpu_count(),
-        pin_memory=True,
-    )
-
-    logging.info("Finished loading data")
-
-    dna_tensor, importance_scores_tensor = collect_tfmodisco_data(
-        attr_model_fn,
-        test_dataloader,
-        device=device,
-    )
-    logging.info("Finished collecting data on test, saving it now...")
-    np.save(os.path.join(output_dir, "test_dna_tensor.npy"), dna_tensor)
-    np.save(
-        os.path.join(output_dir, "test_importance_scores_tensor.npy"),
-        importance_scores_tensor,
-    )
-    logging.info("Finished saving test data")
-    del dna_tensor
-    del importance_scores_tensor
-
-    val_dataloader, _ = get_gene_expr_dataloader(
+    dataloader, _ = get_gene_expr_dataloader(
         batch_size=batch_size,
         bac_genes_df_file_path=os.path.join(input_dir, "val.parquet"),
         max_gene_length=max_gene_length,
@@ -96,20 +67,50 @@ def run(
         pin_memory=True,
     )
 
-    logging.info("Finished loading data")
+    logging.info("Finished loading val data")
 
-    dna_tensor, importance_scores_tensor = collect_tfmodisco_data(
+    importance_scores_tensor = collect_tfmodisco_data(
         attr_model_fn,
-        val_dataloader,
+        dataloader,
         device=device,
     )
     logging.info("Finished collecting data on val, saving it now...")
-    np.save(os.path.join(output_dir, "val_dna_tensor.npy"), dna_tensor)
+    # np.save(os.path.join(output_dir, "val_dna_tensor.npy"), dna_tensor)
     np.save(
         os.path.join(output_dir, "val_importance_scores_tensor.npy"),
         importance_scores_tensor,
     )
     logging.info("Finished saving val data")
+    del importance_scores_tensor
+
+    dataloader, _ = get_gene_expr_dataloader(
+        batch_size=batch_size,
+        bac_genes_df_file_path=os.path.join(input_dir, "test.parquet"),
+        max_gene_length=max_gene_length,
+        shift_max=shift_max,
+        pad_value=pad_value,
+        reverse_complement_prob=0.0,  # set it to 0 during eval
+        shuffle=False,
+        num_workers=num_workers if num_workers is not None else os.cpu_count(),
+        pin_memory=True,
+    )
+
+    logging.info("Finished loading test data")
+
+    importance_scores_tensor = collect_tfmodisco_data(
+        attr_model_fn,
+        dataloader,
+        device=device,
+    )
+    logging.info("Finished collecting data on test, saving it now...")
+    # np.save(os.path.join(output_dir, "test_dna_tensor.npy"), dna_tensor)
+    np.save(
+        os.path.join(output_dir, "test_importance_scores_tensor.npy"),
+        importance_scores_tensor,
+    )
+    logging.info("Finished saving test data")
+    # del dna_tensor
+    del importance_scores_tensor
 
 
 def main(args):
