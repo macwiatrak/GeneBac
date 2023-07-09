@@ -23,9 +23,6 @@ def collect_tfmodisco_data(
     dna_tensor = []
     importance_scores = []
     for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
-        # for testing
-        if idx > 864:
-            break
         attrs = attr_model_fn.attribute(
             batch.input_tensor.to(device),
             additional_forward_args=batch.tss_indexes.to(device),
@@ -58,14 +55,14 @@ def run(
     model.eval()
     attr_model_fn = DeepLift(model)
 
-    dataloader, _ = get_gene_expr_dataloader(
+    test_dataloader, _ = get_gene_expr_dataloader(
         batch_size=batch_size,
-        bac_genes_df_file_path=os.path.join(input_dir, "val.parquet"),
+        bac_genes_df_file_path=os.path.join(input_dir, "test.parquet"),
         max_gene_length=max_gene_length,
         shift_max=shift_max,
         pad_value=pad_value,
         reverse_complement_prob=0.0,  # set it to 0 during eval
-        shuffle=True,
+        shuffle=False,
         num_workers=num_workers if num_workers is not None else os.cpu_count(),
         pin_memory=True,
     )
@@ -74,13 +71,42 @@ def run(
 
     dna_tensor, importance_scores_tensor = collect_tfmodisco_data(
         attr_model_fn,
-        dataloader,
+        test_dataloader,
+        device=device,
+    )
+    logging.info("Finished collecting data on test, saving it now...")
+    np.save(os.path.join(output_dir, "test_dna_tensor.npy"), dna_tensor)
+    np.save(
+        os.path.join(output_dir, "test_importance_scores_tensor.npy"),
+        importance_scores_tensor,
+    )
+    logging.info("Finished saving test data")
+    del dna_tensor
+    del importance_scores_tensor
+
+    val_dataloader, _ = get_gene_expr_dataloader(
+        batch_size=batch_size,
+        bac_genes_df_file_path=os.path.join(input_dir, "val.parquet"),
+        max_gene_length=max_gene_length,
+        shift_max=shift_max,
+        pad_value=pad_value,
+        reverse_complement_prob=0.0,  # set it to 0 during eval
+        shuffle=False,
+        num_workers=num_workers if num_workers is not None else os.cpu_count(),
+        pin_memory=True,
+    )
+
+    logging.info("Finished loading data")
+
+    dna_tensor, importance_scores_tensor = collect_tfmodisco_data(
+        attr_model_fn,
+        val_dataloader,
         device=device,
     )
     logging.info("Finished collecting data on val, saving it now...")
-    np.save(os.path.join(output_dir, "dna_tensor.npy"), dna_tensor)
+    np.save(os.path.join(output_dir, "val_dna_tensor.npy"), dna_tensor)
     np.save(
-        os.path.join(output_dir, "importance_scores_tensor.npy"),
+        os.path.join(output_dir, "val_importance_scores_tensor.npy"),
         importance_scores_tensor,
     )
     logging.info("Finished saving val data")
@@ -89,18 +115,18 @@ def run(
 def main(args):
     seed_everything(args.random_state)
     run(
-        # input_dir=args.input_dir,
-        input_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/prom-200-w-rev-comp/",
-        # output_dir=args.output_dir,
-        output_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/modisco/val_data_sampled/",
+        input_dir=args.input_dir,
+        # input_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/prom-200-w-rev-comp/",
+        output_dir=args.output_dir,
+        # output_dir="/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/modisco/val_data_sampled/",
         max_gene_length=args.max_gene_length,
         shift_max=0,
         pad_value=args.pad_value,
         num_workers=args.num_workers,
-        # ckpt_path=args.ckpt_path,
-        ckpt_path="/Users/maciejwiatrak/Downloads/epoch=80-val_r2=0.7983.ckpt",
-        # batch_size=args.batch_size,
-        batch_size=100,
+        ckpt_path=args.ckpt_path,
+        # ckpt_path="/Users/maciejwiatrak/Downloads/epoch=80-val_r2=0.7983.ckpt",
+        batch_size=args.batch_size,
+        # batch_size=100,
     )
 
 
