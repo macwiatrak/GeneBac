@@ -147,7 +147,7 @@ def get_drug_thresholds(model, dataloader: DataLoader):
     logging.info(f"Calculating optimal thresholds.")
     with torch.no_grad():
         for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
-            logits = model(
+            logits, _ = model(
                 batch.input_tensor.to(model.device),
                 batch.tss_indexes.to(model.device),
             )
