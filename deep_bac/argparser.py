@@ -2,8 +2,8 @@ from typing import Literal
 
 from tap import Tap
 
-INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
-# "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data/"
+# INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
+INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data/"
 
 
 class DeepGeneBacArgumentParser(Tap):
@@ -19,9 +19,6 @@ class DeepGeneBacArgumentParser(Tap):
     gene_encoder_type: Literal[
         "gene_bac",
         "MD-CNN",
-        "xpresso",
-        "zrimec_et_al_2020",
-        "simple_cnn",
     ] = "gene_bac"
     graph_model_type: Literal["transformer", "dense", "GAT", "GCN"] = "GAT"
     regression: bool = False

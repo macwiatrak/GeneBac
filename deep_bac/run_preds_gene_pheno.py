@@ -69,10 +69,10 @@ def run(
     config = torch.load(ckpt_path, map_location="cpu")["hyper_parameters"][
         "config"
     ]
-    # config.input_dir = (
-    #     "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
-    #     # "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
-    # )
+    config.input_dir = (
+        # "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
+        "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
+    )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Using device {device}")
@@ -91,7 +91,8 @@ def run(
             input_dir, "phenotype_labels_with_binary_labels.parquet"
         ),
         train_val_test_split_indices_file_path=os.path.join(
-            input_dir, "train_test_cv_split_unq_ids.json"
+            input_dir,
+            "train_test_cv_split_unq_ids.json",  # "train_test_split_unq_ids_ablated_lineage1.json"
         ),
         variance_per_gene_file_path=os.path.join(
             input_dir, "unnormalised_variance_per_gene.csv"
@@ -141,14 +142,14 @@ def main(args):
     seed_everything(args.random_state)
     run(
         input_dir=args.input_dir,
-        output_dir=args.output_dir,
+        output_dir="/Users/maciejwiatrak/Downloads/",  # args.output_dir,
         shift_max=args.shift_max,
         pad_value=args.pad_value,
         reverse_complement_prob=args.reverse_complement_prob,
         num_workers=args.num_workers,
-        ckpt_path=args.ckpt_path,
+        ckpt_path="/Users/maciejwiatrak/Downloads/epoch=248-train_r2=0.4890_20810503.ckpt",  # args.ckpt_path,
         use_drug_idx=args.use_drug_idx,
-        use_drug_specific_genes=args.use_drug_specific_genes,
+        use_drug_specific_genes="cryptic",  # args.use_drug_specific_genes,
     )
 
 
