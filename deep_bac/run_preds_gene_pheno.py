@@ -92,7 +92,7 @@ def run(
         ),
         train_val_test_split_indices_file_path=os.path.join(
             input_dir,
-            "train_test_cv_split_unq_ids.json",  # "train_test_split_unq_ids_ablated_lineage1.json"
+            "train_test_split_unq_ids_ablated_lineage3.json",  # "train_test_cv_split_unq_ids.json",
         ),
         variance_per_gene_file_path=os.path.join(
             input_dir, "unnormalised_variance_per_gene.csv"
@@ -142,12 +142,12 @@ def main(args):
     seed_everything(args.random_state)
     run(
         input_dir=args.input_dir,
-        output_dir="/Users/maciejwiatrak/Downloads/",  # args.output_dir,
+        output_dir="/Users/maciejwiatrak/Downloads/ablation-lineage3-preds/",  # args.output_dir,
         shift_max=args.shift_max,
         pad_value=args.pad_value,
         reverse_complement_prob=args.reverse_complement_prob,
         num_workers=args.num_workers,
-        ckpt_path="/Users/maciejwiatrak/Downloads/epoch=248-train_r2=0.4890_20810503.ckpt",  # args.ckpt_path,
+        ckpt_path="/Users/maciejwiatrak/Downloads/epoch=297-train_r2=0.4732.ckpt",  # args.ckpt_path,
         use_drug_idx=args.use_drug_idx,
         use_drug_specific_genes="cryptic",  # args.use_drug_specific_genes,
     )
