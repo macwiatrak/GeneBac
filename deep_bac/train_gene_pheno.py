@@ -54,7 +54,7 @@ def run(
             input_dir, "phenotype_labels_with_binary_labels.parquet"
         ),
         train_val_test_split_indices_file_path=os.path.join(
-            input_dir, "train_test_split_unq_ids_subset_0.2.json"
+            input_dir, "train_test_split_unq_ids_subset_0.5.json"
         ),
         variance_per_gene_file_path=os.path.join(
             input_dir, "unnormalised_variance_per_gene.csv"
