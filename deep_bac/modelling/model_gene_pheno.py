@@ -87,7 +87,7 @@ class DeepBacGenePheno(pl.LightningModule):
             self.dropout(self.activation_fn(gene_encodings))
         )
         logits = self.decoder(strain_encodings)
-        return logits
+        return logits, strain_encodings
 
     def training_step(
         self, batch: BatchBacInputSample, batch_idx: int

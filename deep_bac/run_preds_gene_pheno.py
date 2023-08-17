@@ -25,7 +25,7 @@ def collect_preds(
     out = defaultdict(list)
     with torch.no_grad():
         for idx, batch in enumerate(tqdm(dataloader, mininterval=5)):
-            logits = model(
+            logits, strain_embeddings = model(
                 batch.input_tensor.to(model.device),
                 batch.tss_indexes.to(model.device),
             )
@@ -33,10 +33,10 @@ def collect_preds(
             out["logits"] += [
                 item.cpu().numpy() for item in logits
             ]  # a list of numpy arrays
-            # if strain_embeddings.nelement() != 0:
-            #     out["embedding"] += [
-            #         item.cpu().numpy() for item in strain_embeddings
-            #     ]  # a list of numpy arrays
+            if strain_embeddings.nelement() != 0:
+                out["embedding"] += [
+                    item.cpu().numpy() for item in strain_embeddings
+                ]  # a list of numpy arrays
             out["labels"] += [
                 item.cpu().numpy() for item in batch.labels
             ]  # a list of lists
