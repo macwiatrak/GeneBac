@@ -111,14 +111,14 @@ def run(
     )
     logging.info("Finished loading data")
 
-    # test_df = collect_preds(model, data.test_dataloader)
-    # test_df.to_parquet(os.path.join(output_dir, "test_preds.parquet"))
-    # logging.info("Finished collecting and saving test preds")
-    # del test_df
-    #
-    # with open(os.path.join(output_dir, "gene_to_idx.json"), "w") as f:
-    #     json.dump(config.gene_to_idx, f)
-    #
+    test_df = collect_preds(model, data.test_dataloader)
+    test_df.to_parquet(os.path.join(output_dir, "test_preds.parquet"))
+    logging.info("Finished collecting and saving test preds")
+    del test_df
+
+    with open(os.path.join(output_dir, "gene_to_idx.json"), "w") as f:
+        json.dump(config.gene_to_idx, f)
+
     # if not config.regression:
     #     drug_thresholds = get_drug_thresholds(model, data.train_dataloader)
     #     torch.save(
