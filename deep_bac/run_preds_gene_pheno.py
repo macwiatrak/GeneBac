@@ -70,8 +70,8 @@ def run(
         "config"
     ]
     # config.input_dir = (
-    #     "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
-    #     # "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
+    #     #"/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
+    #     "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
     # )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -111,10 +111,10 @@ def run(
     )
     logging.info("Finished loading data")
 
-    # test_df = collect_preds(model, data.test_dataloader)
-    # test_df.to_parquet(os.path.join(output_dir, "test_preds.parquet"))
-    # logging.info("Finished collecting and saving test preds")
-    # del test_df
+    test_df = collect_preds(model, data.test_dataloader)
+    test_df.to_parquet(os.path.join(output_dir, "test_preds.parquet"))
+    logging.info("Finished collecting and saving test preds")
+    del test_df
     #
     # with open(os.path.join(output_dir, "gene_to_idx.json"), "w") as f:
     #     json.dump(config.gene_to_idx, f)
