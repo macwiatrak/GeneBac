@@ -78,9 +78,9 @@ def perform_ism(
     config = torch.load(ckpt_path, map_location="cpu")["hyper_parameters"][
         "config"
     ]
-    # config.input_dir = (
-    #     "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
-    # )
+    config.input_dir = (
+        "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
+    )
     model = DeepBacGenePheno.load_from_checkpoint(ckpt_path, config=config)
     model.eval()
     model.to(device)
@@ -141,7 +141,7 @@ def main(args):
         pad_value=args.pad_value,
         reverse_complement_prob=args.reverse_complement_prob,
         loci="rpoB",
-        ism_region=(0, 50),
+        ism_region=(1300, 1500),
     )
 
 

@@ -26,6 +26,10 @@ def run(
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
+    # get variant scores
+    variant_df = pd.read_parquet(variant_df_path)
+
+    # get reference gene data df
     reference_gene_data_df = pd.read_parquet(
         reference_gene_data_df_path
     ).set_index("gene")
@@ -61,8 +65,6 @@ def run(
             else ref_scores
         )
 
-    # get variant scores
-    variant_df = pd.read_parquet(variant_df_path)
     # batch data
     batches = batch_samples_w_variant(
         variant_df=variant_df,
@@ -95,7 +97,7 @@ def run(
 
     variant_df.to_parquet(
         os.path.join(
-            output_dir, "variants_who_cat_with_scores_genebac_binary.parquet"
+            output_dir, "variants_who_cat_with_scores_genebac_reg.parquet"
         )
     )
 
