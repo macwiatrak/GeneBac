@@ -72,13 +72,13 @@ def run(
         shift_max=shift_max,
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
-        batch_size=config.batch_size,
+        batch_size=64,  # config.batch_size,
     )
 
     var_scores = []
     with torch.no_grad():
         for batch in tqdm(batches):
-            scores = model(batch.input_tensor, batch.tss_indexes)[0]
+            scores = model(batch.input_tensor, batch.tss_indexes)
             scores = (
                 torch.sigmoid(scores) if not model.config.regression else scores
             )
@@ -95,7 +95,8 @@ def run(
 
     variant_df.to_parquet(
         os.path.join(
-            output_dir, "variants_who_cat_with_scores_genebac_binary.parquet"
+            output_dir,
+            "variants_who_cat_with_scores_genebac_regression.parquet",
         )
     )
 
@@ -109,7 +110,7 @@ class VariantScoringArgumentParser(Tap):
     output_dir: str = "/tmp/ism-sample/"
     variant_df_path: str = (
         "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
-        "data/who_cat_mutations_dna_seqs.parquet"
+        "data/who_cat_mutations_dna_seqs_100prom.parquet"
     )
     reference_gene_data_df_path: str = (
         "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"

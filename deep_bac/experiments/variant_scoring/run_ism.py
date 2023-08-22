@@ -1,9 +1,7 @@
 import os
-from typing import Tuple
 
 import torch
 from pytorch_lightning.utilities.seed import seed_everything
-from tqdm import tqdm
 
 from deep_bac.experiments.variant_scoring.perform_ism import perform_ism
 from deep_bac.experiments.variant_scoring.run_variant_scoring_who_cat import (

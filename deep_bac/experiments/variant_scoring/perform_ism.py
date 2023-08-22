@@ -8,6 +8,7 @@ from torch.nn.functional import one_hot
 from tqdm import tqdm
 
 from deep_bac.data_preprocessing.data_types import BacInputSample
+from deep_bac.data_preprocessing.dataset import transform_dna_seq
 from deep_bac.experiments.variant_scoring.run_variant_scoring_who_cat import (
     VariantScoringArgumentParser,
 )
@@ -19,11 +20,17 @@ def compute_ism_scores(
     ref_scores: torch.Tensor,
     ref_input_sample: BacInputSample,
     model: Optional[DeepBacGenePheno],
+    ref_gene_seq: str,
     loci_idx: int,
     ism_region: Tuple[int, int] = None,
     device: str = "cpu",
     regression: bool = True,
+    max_gene_length: int = 2560,
+    shift_max: int = 0,
+    pad_value: float = 0.25,
+    reverse_complement_prob: float = 0.0,
 ) -> torch.Tensor:
+    # TODO: check this works as expected
     tss_indexes_batch = (
         ref_input_sample.tss_index.unsqueeze(0).repeat(4, 1).to(device)
     )
@@ -38,12 +45,22 @@ def compute_ism_scores(
     for nucleotide_pos in tqdm(range(ism_region[0], ism_region[1])):
         nucleotide_pos_batch = []
         # iterate through each bp at each position
-        for nucleotide in range(4):
-            item = one_hot(torch.tensor(nucleotide), num_classes=4).type_as(
-                ref_input_sample.input_tensor
+        for nucleotide in ["a", "c", "g", "t"]:
+            seq = (
+                ref_gene_seq[:nucleotide_pos]
+                + nucleotide
+                + ref_gene_seq[nucleotide_pos + 1 :]
+            )
+            # process the sequence
+            padded_one_hot_seq = transform_dna_seq(
+                max_gene_length=max_gene_length,
+                shift_max=shift_max,
+                pad_value=pad_value,
+                reverse_complement_prob=reverse_complement_prob,
+                seq=seq,
             )
             mutated_input_tensor = ref_input_sample.input_tensor.clone()
-            mutated_input_tensor[loci_idx, :, nucleotide_pos] = item
+            mutated_input_tensor[loci_idx] = padded_one_hot_seq
             nucleotide_pos_batch.append(mutated_input_tensor)
 
         nucleotide_pos_batch = torch.stack(nucleotide_pos_batch)
@@ -78,15 +95,15 @@ def perform_ism(
     config = torch.load(ckpt_path, map_location="cpu")["hyper_parameters"][
         "config"
     ]
-    # config.input_dir = (
-    #     "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
-    # )
+    config.input_dir = (
+        "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
+    )
     model = DeepBacGenePheno.load_from_checkpoint(ckpt_path, config=config)
     model.eval()
     model.to(device)
 
     gene_to_idx = model.config.gene_to_idx
-
+    loci_seq = reference_gene_data_df.loc[loci, "seq"]
     loci_idx = gene_to_idx.get(loci, None)
     if loci_idx is None:
         raise ValueError(
@@ -122,6 +139,7 @@ def perform_ism(
         ism_region=ism_region,
         device=device,
         regression=model.config.regression,
+        ref_gene_seq=loci_seq,
     )
     print("max ISM score value:", ism_scores.max())
     return ism_scores
@@ -135,13 +153,13 @@ def main(args):
     seed_everything(args.random_state)
     perform_ism(
         ckpt_path=args.ckpt_path,
-        output_dir=args.output_dir,
+        output_dir="/tmp/ism-sample/",  # args.output_dir,
         reference_gene_data_df_path=args.reference_gene_data_df_path,
         shift_max=args.shift_max,
         pad_value=args.pad_value,
         reverse_complement_prob=args.reverse_complement_prob,
         loci="rpoB",
-        ism_region=(0, 50),
+        ism_region=(1200, 1600),
     )
 
 
