@@ -4,7 +4,6 @@ from typing import Optional, Tuple
 import pandas as pd
 import torch
 from pytorch_lightning.utilities.seed import seed_everything
-from torch.nn.functional import one_hot
 from tqdm import tqdm
 
 from deep_bac.data_preprocessing.data_types import BacInputSample
