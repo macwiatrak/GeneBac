@@ -5,12 +5,12 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import TQDMProgressBar, ModelCheckpoint
 
-from deep_bac.data_preprocessing.data_reader import get_gene_pheno_dataloader
-from deep_bac.data_preprocessing.data_types import BatchBacInputSample
-from deep_bac.modelling.data_types import DeepGeneBacConfig
-from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
-from deep_bac.modelling.modules.utils import count_parameters
-from deep_bac.modelling.utils import get_drug_thresholds
+from genebac.data_preprocessing.data_reader import get_gene_pheno_dataloader
+from genebac.data_preprocessing.data_types import BatchBacInputSample
+from genebac.modelling.data_types import DeepGeneBacConfig
+from genebac.modelling.model_gene_pheno import DeepBacGenePheno
+from genebac.modelling.modules.utils import count_parameters
+from genebac.modelling.utils import get_drug_thresholds
 from tests.modelling.helpers import get_test_gene_reg_dataloader, BasicLogger
 
 
@@ -86,6 +86,7 @@ def test_model_gene_pheno_train_fake_data(tmpdir):
         n_heads=2,
         n_highly_variable_genes=n_genes,
         max_gene_length=seq_length,
+        pos_encoder_type="fixed",
     )
 
     dataloader = get_test_gene_reg_dataloader(

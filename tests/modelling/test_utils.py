@@ -1,6 +1,6 @@
 import torch
 
-from deep_bac.modelling.utils import remove_ignore_index
+from genebac.modelling.utils import remove_ignore_index
 
 
 def test_remove_ignore_index():

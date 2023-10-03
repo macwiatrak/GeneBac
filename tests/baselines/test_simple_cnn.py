@@ -1,7 +1,7 @@
 import torch
 
-from deep_bac.baselines.expression.simple_cnn import SimpleCNN
-from deep_bac.modelling.modules.utils import count_parameters
+from genebac.baselines.expression.simple_cnn import SimpleCNN
+from genebac.modelling.modules.utils import count_parameters
 
 
 def test_simple_cnn():

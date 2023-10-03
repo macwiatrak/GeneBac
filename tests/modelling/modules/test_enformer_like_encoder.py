@@ -1,7 +1,7 @@
 import torch
 
-from deep_bac.modelling.modules.enformer_like_encoder import EnformerLikeEncoder
-from deep_bac.modelling.modules.utils import count_parameters
+from genebac.modelling.modules.enformer_like_encoder import EnformerLikeEncoder
+from genebac.modelling.modules.utils import count_parameters
 
 
 def test_enformer_like_encoder():

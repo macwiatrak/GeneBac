@@ -1,6 +1,6 @@
 import torch
 
-from deep_bac.modelling.modules.layers import ConvLayer, DenseLayer
+from genebac.modelling.modules.layers import ConvLayer, DenseLayer
 
 
 def test_conv_layer():

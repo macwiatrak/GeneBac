@@ -6,9 +6,9 @@ from captum.attr import (
     DeepLiftShap,
 )
 
-from deep_bac.modelling.data_types import DeepGeneBacConfig
-from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
-from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
+from genebac.modelling.data_types import DeepGeneBacConfig
+from genebac.modelling.model_gene_expr import DeepBacGeneExpr
+from genebac.modelling.model_gene_pheno import DeepBacGenePheno
 
 
 def test_model_gene_expr_captum():

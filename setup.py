@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name="deep_bac",
+    name="genebac",
     packages=find_packages(),
     package_data={
         "gene_set_discovery": ["py.typed", "**/*.json", "**/*.yaml"],

@@ -1,8 +1,8 @@
 import torch
 from torch import nn
 
-from deep_bac.modelling.modules.gnn import GNNModel, get_edge_data
-from deep_bac.utils import DRUG_SPECIFIC_GENES_DICT
+from genebac.modelling.modules.gnn import GNNModel, get_edge_data
+from genebac.utils import DRUG_SPECIFIC_GENES_DICT
 
 
 def test_gnn_encoder_forward():

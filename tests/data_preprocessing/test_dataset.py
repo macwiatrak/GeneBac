@@ -1,6 +1,6 @@
 import torch
 
-from deep_bac.data_preprocessing.dataset import (
+from genebac.data_preprocessing.dataset import (
     BacGenomeGenePhenoDataset,
     BacGenomeGeneExprDataset,
 )

@@ -1,6 +1,6 @@
 import torch
 
-from deep_bac.data_preprocessing.utils import seq_to_one_hot, pad_one_hot_seq
+from genebac.data_preprocessing.utils import seq_to_one_hot, pad_one_hot_seq
 
 
 def test_seq_to_one_hot():
@@ -21,4 +21,5 @@ def test_pad_one_hot_seq():
     assert one_hot_padded.shape == (max_length, 4)
     assert one_hot_padded.sum() == max_length
     assert torch.all(
-        one_hot_padded[len(seq):].eq(torch.full((to_pad, 4), pad_value)))
+        one_hot_padded[len(seq) :].eq(torch.full((to_pad, 4), pad_value))
+    )

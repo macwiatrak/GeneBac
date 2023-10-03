@@ -2,13 +2,13 @@ import pandas as pd
 import torch
 import pytorch_lightning as pl
 
-from deep_bac.data_preprocessing.data_reader import get_gene_expr_dataloader
-from deep_bac.data_preprocessing.data_types import BatchBacInputSample
-from deep_bac.data_preprocessing.utils import get_gene_std_expression
-from deep_bac.modelling.data_types import DeepGeneBacConfig
-from deep_bac.modelling.model_gene_expr import DeepBacGeneExpr
-from deep_bac.modelling.modules.utils import count_parameters
-from deep_bac.utils import get_gene_var_thresholds
+from genebac.data_preprocessing.data_reader import get_gene_expr_dataloader
+from genebac.data_preprocessing.data_types import BatchBacInputSample
+from genebac.data_preprocessing.utils import get_gene_std_expression
+from genebac.modelling.data_types import DeepGeneBacConfig
+from genebac.modelling.model_gene_expr import DeepBacGeneExpr
+from genebac.modelling.modules.utils import count_parameters
+from genebac.utils import get_gene_var_thresholds
 from tests.modelling.helpers import BasicLogger, get_test_gene_expr_dataloader
 
 

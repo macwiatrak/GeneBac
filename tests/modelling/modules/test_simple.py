@@ -1,6 +1,6 @@
 import torch
 
-from deep_bac.modelling.modules.simple_conv import SimpleConvEncoder
+from genebac.modelling.modules.simple_conv import SimpleConvEncoder
 
 
 def test_simple_encoder():

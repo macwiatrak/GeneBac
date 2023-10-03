@@ -1,6 +1,6 @@
 import torch
 
-from deep_bac.modelling.modules.graph_transformer import GraphTransformer
+from genebac.modelling.modules.graph_transformer import GraphTransformer
 
 
 def test_graph_transformer():

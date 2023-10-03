@@ -1,6 +1,6 @@
 from captum.attr import DeepLift, IntegratedGradients
 
-from deep_bac.experiments.importance_scores.importance_scores import (
+from genebac.experiments.importance_scores.importance_scores import (
     get_importance_scores,
 )
 

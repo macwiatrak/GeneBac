@@ -1,6 +1,6 @@
 import torch
 
-from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
+from genebac.modelling.modules.conv_transformer import ConvTransformerEncoder
 
 
 def test_conv_transformer():
