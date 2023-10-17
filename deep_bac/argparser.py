@@ -61,7 +61,7 @@ class DeepGeneBacArgumentParser(Tap):
         "cryptic",
         "PA_GWAS_top_3",
         "PA_GWAS_top_5",
-    ] = "PA_GWAS_top_5"  # "cryptic"
+    ] = "cryptic"
     pos_encoder_type: Literal["learnable", "fixed"] = "fixed"
     resume_from_ckpt_path: str = None
     fold_idx: int = None
