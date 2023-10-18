@@ -20,7 +20,9 @@ class DeepGeneBacArgumentParser(Tap):
         "gene_bac",
         "MD-CNN",
     ] = "gene_bac"
-    graph_model_type: Literal["transformer", "dense", "GAT", "GCN"] = "GAT"
+    graph_model_type: Literal[
+        "transformer", "dense", "GAT", "GCN", "gene_avg"
+    ] = "GAT"
     regression: bool = False
     use_drug_idx: int = None
     lr: float = 0.0001

@@ -1,5 +1,6 @@
 import logging
 import os
+from functools import partial
 
 import torch
 from torch import nn
@@ -38,6 +39,10 @@ def remove_ignore_index(
     loss = loss.sum() / mask.sum()
     loss = loss if not torch.isnan(loss) else None
     return loss
+
+
+def tensor_mean_fn(dim: int, x):
+    return x.mean(dim=dim)
 
 
 def get_gene_encoder(config: DeepGeneBacConfig):
@@ -117,6 +122,9 @@ def get_genes_to_strain_model(
             edge_features=edge_features,
             dropout_rate=config.dropout_rate,
         )
+
+    if config.graph_model_type == "gene_avg":
+        return partial(tensor_mean_fn, 1)
     raise ValueError(f"Unknown graph model type: {config.graph_model_type}")
 
 
