@@ -150,11 +150,16 @@ class GNNModel(nn.Module):
             else self.same_edge_features
         )
 
-        bs, n_nodes, dim = node_features.shape
-        node_features = node_features.view(bs * n_nodes, dim)
-        edge_index = batch_edge_index(edge_index, bs, n_nodes).to(
-            node_features.device
-        )
+        node_features_shape = node_features.shape
+        if len(node_features_shape) == 3:
+            bs, n_nodes, dim = node_features_shape
+            node_features = node_features.view(bs * n_nodes, dim)
+            edge_index = batch_edge_index(edge_index, bs, n_nodes).to(
+                node_features.device
+            )
+        else:
+            bs = 1
+            n_nodes, dim = node_features_shape
 
         if len(edge_features.shape) == 1:
             edge_features = edge_features.repeat(bs).to(node_features.device)
@@ -169,7 +174,8 @@ class GNNModel(nn.Module):
                 x = l(node_features, edge_index, edge_features)
             else:
                 x = l(node_features)
+
         x = x.view(bs, n_nodes, -1)
         x = self.dense(self.dropout(self.activation_fn(x)))
-        # x = x.mean(dim=1)
+        x = x.mean(dim=1)
         return x
