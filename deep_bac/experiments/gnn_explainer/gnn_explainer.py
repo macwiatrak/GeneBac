@@ -46,6 +46,7 @@ def run(
     config = torch.load(ckpt_path, map_location="cpu")["hyper_parameters"][
         "config"
     ]
+    # set the
     config.input_dir = (
         #     "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
         "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
@@ -106,7 +107,7 @@ def run(
     # seq_length = 2560
     # regression = True
     # batch_size = 10
-    #
+
     # dataloader = get_test_gene_reg_dataloader(
     #     n_samples=n_samples,
     #     n_genes=n_genes,
@@ -131,10 +132,7 @@ def run(
         for item in node_embeddings:
             explanation = explainer(item, edge_index)
 
-            # min max normalise the node mask scores
             node_mask = explanation.node_stores[0]["node_mask"].squeeze(-1)
-            node_mask -= node_mask.min()
-            node_mask /= node_mask.max()
             node_mask_output.append(node_mask)
 
             edge_mask = explanation.edge_stores[0]["edge_mask"]
@@ -151,8 +149,8 @@ def run(
             )
             idx += 1
             # run it only on a subset of the test set
-            if idx > 500:
-                break
+            # if idx > 500:
+            #     break
 
     node_mask_output = torch.stack(node_mask_output)
     edge_mask_output = torch.stack(edge_mask_output)

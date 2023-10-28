@@ -40,10 +40,10 @@ def visualize_graph_via_networkx(
             ),
         )
     if node_size_list is not None:
-        node_size = [node_size_list[idx] * 1000 for idx in pos.keys()]
+        node_size = [node_size_list[idx] * 800 for idx in pos.keys()]
 
     nodes = nx.draw_networkx_nodes(
-        g, pos, node_size=node_size, node_color="green", margins=0.1, alpha=0.4
+        g, pos, node_size=node_size, node_color="blue", margins=0.1, alpha=0.4
     )
     nodes.set_edgecolor("black")
 
