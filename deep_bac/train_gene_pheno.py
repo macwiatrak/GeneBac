@@ -55,8 +55,6 @@ def run(
             input_dir, "phenotype_labels_with_binary_labels.parquet"
         ),
         train_val_test_split_indices_file_path=os.path.join(
-            # input_dir,
-            # "train_test_split_unq_ids_subset_0.5.json"
             input_dir,
             "train_test_cv_split_unq_ids.json",
         ),
@@ -103,13 +101,6 @@ def run(
         model.gene_encoder.load_state_dict(gene_encoder_sd)
 
     if test:
-        # config = torch.load(ckpt_path, map_location="cpu")["hyper_parameters"][
-        #     "config"
-        # ]
-        # config.input_dir = (
-        #     # "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
-        #     "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
-        # )
         model = DeepBacGenePheno.load_from_checkpoint(ckpt_path)
 
         # get thresholds only if the problem is binary
