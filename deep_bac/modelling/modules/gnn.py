@@ -171,5 +171,4 @@ class GNNModel(nn.Module):
                 x = l(node_features)
         x = x.view(bs, n_nodes, -1)
         x = self.dense(self.dropout(self.activation_fn(x)))
-        # x = x.mean(dim=1)
         return x
