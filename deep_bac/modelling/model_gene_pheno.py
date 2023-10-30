@@ -229,3 +229,39 @@ class DeepBacGenePheno(pl.LightningModule):
             num_training_steps=num_train_steps,
         )
         return scheduler
+
+    def get_gene_encodings(
+        self,
+        batch_genes_tensor: torch.Tensor,
+        tss_indexes: torch.Tensor = None,
+    ) -> torch.Tensor:
+        # x: (batch_size, n_genes, in_channels, seq_length)
+        batch_size, n_genes, n_channels, seq_length = batch_genes_tensor.shape
+
+        # if using the MD-CNN for benchmarking
+        if self.model_type == "MD-CNN":
+            logits = self.gene_encoder(
+                batch_genes_tensor.view(
+                    batch_size,
+                    n_channels,
+                    n_genes * seq_length,
+                )
+            )
+            # add dummy torch tensor for compatibility with other models
+            return logits
+        # reshape the input to allow the convolutional layer to work
+        x = batch_genes_tensor.view(
+            batch_size * n_genes, n_channels, seq_length
+        )
+        # encode each gene
+        gene_encodings = self.gene_encoder(x)
+        # reshape to out: (batch_size, n_genes, n_bottleneck_layer)
+        gene_encodings = gene_encodings.view(
+            batch_size, n_genes, self.n_bottleneck_layer
+        )
+        # add positional encodings
+        if tss_indexes is not None:
+            gene_encodings = self.pos_encoder(gene_encodings, tss_indexes)
+        # pass the genes through the graph encoder
+        gene_encodings = self.dropout(self.activation_fn(gene_encodings))
+        return gene_encodings
