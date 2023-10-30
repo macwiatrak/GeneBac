@@ -101,24 +101,6 @@ def run(
     )
     logging.info("Finished loading data")
 
-    # n_samples = 20
-    # n_genes = 20
-    # n_classes = 14
-    # seq_length = 2560
-    # regression = True
-    # batch_size = 10
-
-    # dataloader = get_test_gene_reg_dataloader(
-    #     n_samples=n_samples,
-    #     n_genes=n_genes,
-    #     n_classes=n_classes,
-    #     seq_length=seq_length,
-    #     regression=regression,
-    #     batch_size=batch_size,
-    # )
-
-    # batch = next(iter(dataloader))
-
     edge_mask_output = []
     node_mask_output = []
     idx = 0
@@ -147,10 +129,6 @@ def run(
                 labels=list(config.gene_to_idx.keys()),
                 path=os.path.join(output_dir, "graphs", f"graph_{idx}.png"),
             )
-            idx += 1
-            # run it only on a subset of the test set
-            # if idx > 500:
-            #     break
 
     node_mask_output = torch.stack(node_mask_output)
     edge_mask_output = torch.stack(edge_mask_output)
