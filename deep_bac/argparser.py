@@ -13,7 +13,6 @@ class DeepGeneBacArgumentParser(Tap):
     # file paths for loading data
     input_dir: str = INPUT_DIR
     output_dir: str = "/tmp/cryptic-model-output/"
-    n_highly_variable_genes: int = 500
     # model arguments
     batch_size: int = 1
     gene_encoder_type: Literal[

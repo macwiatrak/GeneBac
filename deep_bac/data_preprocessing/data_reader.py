@@ -100,8 +100,6 @@ def get_gene_pheno_data(
     reference_gene_data_df_path: str,
     phenotype_df_file_path: str,
     train_val_test_split_indices_file_path: str,
-    variance_per_gene_file_path: str,
-    n_highly_variable_genes: int = 500,
     selected_genes: List = None,
     regression: bool = False,
     use_drug_idx: int = None,
@@ -116,11 +114,6 @@ def get_gene_pheno_data(
     pin_memory: bool = True,
 ):
     reference_gene_data_df = pd.read_parquet(reference_gene_data_df_path)
-
-    if selected_genes is None:
-        selected_genes = pd.read_csv(variance_per_gene_file_path)[
-            "Gene"
-        ].tolist()[:n_highly_variable_genes]
 
     with open(train_val_test_split_indices_file_path, "r") as f:
         train_val_test_split_indices = json.load(f)

@@ -63,7 +63,7 @@ def get_gene_encoder(config: DeepGeneBacConfig):
 
     if config.gene_encoder_type == "MD-CNN":
         return MDCNN(
-            seq_length=config.n_highly_variable_genes * config.max_gene_length,
+            seq_length=config.n_genes * config.max_gene_length,
             n_output=config.n_output,
         )
 
@@ -82,7 +82,7 @@ def get_genes_to_strain_model(
     if config.graph_model_type == "transformer":
         return GraphTransformer(
             n_gene_bottleneck_layer=config.n_gene_bottleneck_layer,
-            n_genes=config.n_highly_variable_genes,
+            n_genes=config.n_genes,
             n_layers=config.n_graph_layers,
             n_heads=config.n_heads,
         )
@@ -91,8 +91,7 @@ def get_genes_to_strain_model(
         return nn.Sequential(
             Flatten(),
             DenseLayer(
-                in_features=config.n_gene_bottleneck_layer
-                * config.n_highly_variable_genes,
+                in_features=config.n_gene_bottleneck_layer * config.n_genes,
                 out_features=config.n_gene_bottleneck_layer,
                 layer_norm=True,
             ),
@@ -127,7 +126,7 @@ def get_pos_encoder(config: DeepGeneBacConfig):
     if config.pos_encoder_type == "learnable":
         return LearnablePositionalEncoding(
             dim=config.n_gene_bottleneck_layer,
-            n_genes=config.n_highly_variable_genes,
+            n_genes=config.n_genes,
         )
     if config.pos_encoder_type == "fixed":
         return FixedGeneExpressionPositionalEncoding(

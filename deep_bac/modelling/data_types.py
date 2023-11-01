@@ -17,6 +17,7 @@ class DeepGeneBacConfig:
     regression: bool = False
     lr: float = 0.001
     batch_size: int = 1
+    n_genes: int = 20
     n_gene_bottleneck_layer: int = 64
     n_init_filters: int = 128
     n_heads: int = 2
@@ -43,7 +44,6 @@ class DeepGeneBacConfig:
         "train_gmean_spec_sens",
         "train_r2",
     ] = "train_gmean_spec_sens"
-    n_highly_variable_genes: int = 500
     pos_encoder_type: Literal["learnable", "fixed"] = None
     input_dir: str = None
     gene_to_idx: Dict[str, int] = None

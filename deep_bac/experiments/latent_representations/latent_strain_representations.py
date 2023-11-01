@@ -44,7 +44,6 @@ def run(
     ckpt_path: str,
     input_dir: str,
     output_dir: str,
-    n_highly_variable_genes: int = 500,
     use_drug_idx: int = None,
     max_gene_length: int = 2560,
     shift_max: int = 3,
@@ -81,11 +80,7 @@ def run(
         train_val_test_split_indices_file_path=os.path.join(
             input_dir, "train_val_test_split_unq_ids.json"
         ),
-        variance_per_gene_file_path=os.path.join(
-            input_dir, "unnormalised_variance_per_gene.csv"
-        ),
         max_gene_length=max_gene_length,
-        n_highly_variable_genes=n_highly_variable_genes,
         regression=model.config.regression,
         use_drug_idx=use_drug_idx,
         batch_size=batch_size,
@@ -123,7 +118,6 @@ def main(args):
     run(
         input_dir=args.input_dir,
         output_dir=args.output_dir,
-        n_highly_variable_genes=args.n_highly_variable_genes,
         max_gene_length=args.max_gene_length,
         shift_max=args.shift_max,
         pad_value=args.pad_value,

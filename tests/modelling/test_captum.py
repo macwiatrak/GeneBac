@@ -83,7 +83,6 @@ def test_model_gene_reg_captum():
         regression=False,
         n_gene_bottleneck_layer=n_bottleneck_layer,
         n_output=n_output,
-        n_highly_variable_genes=n_genes,
         pos_encoder_type="fixed",
     )
 

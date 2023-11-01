@@ -94,11 +94,7 @@ def run(
             input_dir,
             "train_test_split_unq_ids_ablated_lineage3.json",  # "train_test_cv_split_unq_ids.json",
         ),
-        variance_per_gene_file_path=os.path.join(
-            input_dir, "unnormalised_variance_per_gene.csv"
-        ),
         max_gene_length=config.max_gene_length,
-        n_highly_variable_genes=config.n_highly_variable_genes,
         regression=config.regression,
         use_drug_idx=use_drug_idx,
         batch_size=config.batch_size,
