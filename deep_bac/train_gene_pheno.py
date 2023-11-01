@@ -10,11 +10,15 @@ from deep_bac.data_preprocessing.data_reader import get_gene_pheno_data
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 from deep_bac.modelling.trainer import get_trainer
-from deep_bac.modelling.utils import get_drug_thresholds
+from deep_bac.modelling.utils import (
+    get_drug_thresholds,
+    GENE_INTERACTIONS_FILE_PATH,
+)
 from deep_bac.utils import (
     get_selected_genes,
     format_and_write_results,
     fetch_gene_encoder_weights,
+    load_trained_pheno_model,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -33,8 +37,8 @@ def run(
     ckpt_path: Optional[str] = None,
     use_drug_specific_genes: Literal[
         "cryptic",
-        "PA_GWAS_top_3",
-        "PA_GWAS_top_5",
+        "PA_small",
+        "PA_medium",
     ] = "cryptic",
     test_after_train: bool = False,
     resume_from_ckpt_path: str = None,
@@ -94,7 +98,10 @@ def run(
         model.gene_encoder.load_state_dict(gene_encoder_sd)
 
     if test:
-        model = DeepBacGenePheno.load_from_checkpoint(ckpt_path)
+        model = load_trained_pheno_model(
+            ckpt_path=ckpt_path,
+            input_dir=input_dir,
+        )
 
         # get thresholds only if the problem is binary
         # classification

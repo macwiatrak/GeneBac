@@ -11,56 +11,36 @@ from deep_bac.modelling.metrics import (
     BINARY_CLS_METRICS,
     MTB_DRUG_TO_DRUG_CLASS,
 )
+from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 
 DRUG_SPECIFIC_GENES_DICT = {
     # take 5 top loci for each drug
     "cryptic": [
         # First-line drugs
         "embB",  # EMB, RIF, LEV, MOX, RFB
-        # "embA",  # EMB
-        # "embC",
-        # "embR",
         "rpoB",  # EMB, INH, RIF, AMI, ETH, KAN, LEV, MOX, RFB, BDQ, LZD
         "katG",  # EMB, INH, RIF, RFB
-        # "pncA",  # EMB
         "ahpC",  # INH
-        # "rpsL",  # INH
         "fabG1",  # INH, ETH, CLF
         "inhA",  # INH, ETH
-        # "whiB7",  # ETH
         "Rv1565c",  # RIF
         "guaA",  # RIF
-        # "rpoC",  # RIF
-        # "proA",
         # Second-line drugs
         "rrs",  # AMI, KAN, LEV, MOX, BDQ
         "gyrA",  # AMI, ETH, KAN, LEV, MOX
-        # "plsC",
-        # "echA8",  # AMI
-        # "Rv2896c",  # AMI
         "ethA",  # ETH, KAN
         "eis",  # KAN
         "gyrB",  # LEV, MOX
-        # "ctpI",
-        # "Rv0810c",  # RFB,
         # New and repurposed druga
         "Rv0678",  # BDQ, CLF
-        # "atpE",  # BDQ
-        # "pgi",  # BDQ,
         "cyp142",  # CLF
-        # "Rv3188",  # CLF,
-        # "Rv3327",  # CLF
         "ddn",  # DLM
         "fadE22",  # DLM
         "fba",  # DLM
-        # "Rv2180c",  # DLM
-        # "gap",  # DLM
         "rplC",  # LZD
         "emrB",  # LZD
-        # "Rv3552",  # LZD
-        # "add",  # LZD
     ],
-    "PA_GWAS_top_5": [
+    "PA_small": [
         "PA0004",
         "PA0005",
         "PA0313",
@@ -86,7 +66,7 @@ DRUG_SPECIFIC_GENES_DICT = {
         "PA4777",
         "PA4964",
     ],
-    "PA_GWAS_top_3": [
+    "PA_medium": [
         "PA0005",
         "PA0424",
         "PA1097",
@@ -114,8 +94,8 @@ GENE_STD_THRESHOLDS_DICT = dict(
 def get_selected_genes(
     use_drug_specific_genes: Literal[
         "cryptic",
-        "PA_GWAS_top_3",
-        "PA_GWAS_top_5",
+        "PA_small",
+        "PA_medium",
     ] = "cryptic",
 ):
     if not use_drug_specific_genes:
@@ -215,3 +195,18 @@ def fetch_gene_encoder_weights(ckpt_path: str) -> Dict[str, torch.Tensor]:
         if k.startswith("gene_encoder")
     }
     return gene_encoder_sd
+
+
+def load_trained_pheno_model(
+    ckpt_path: str,
+    input_dir: str,
+) -> DeepBacGenePheno:
+    """This is a function which fixes the issue
+    with loading a trained model with different path
+    to the file with the gene interactions"""
+    config = torch.load(ckpt_path, map_location="cpu")["hyper_parameters"][
+        "config"
+    ]
+    config.input_dir = input_dir
+    model = DeepBacGenePheno.load_from_checkpoint(ckpt_path, config=config)
+    return model

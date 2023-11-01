@@ -57,8 +57,8 @@ class DeepGeneBacArgumentParser(Tap):
     ] = "train_r2"
     use_drug_specific_genes: Literal[
         "cryptic",
-        "PA_GWAS_top_3",
-        "PA_GWAS_top_5",
+        "PA_small",
+        "PA_medium",
     ] = "cryptic"
     pos_encoder_type: Literal["learnable", "fixed"] = "fixed"
     resume_from_ckpt_path: str = None

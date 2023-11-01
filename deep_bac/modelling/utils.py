@@ -23,6 +23,8 @@ from deep_bac.modelling.modules.positional_encodings import (
 from deep_bac.modelling.modules.gene_bac_encoder import GeneBacEncoder
 from deep_bac.modelling.modules.utils import Flatten
 
+GENE_INTERACTIONS_FILE_PATH = "ppi_interactions_string.tsv"
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -100,7 +102,7 @@ def get_genes_to_strain_model(
     if config.graph_model_type == "GAT" or config.graph_model_type == "GCN":
         edge_indices, edge_features = get_edge_data(
             edge_file_path=os.path.join(
-                config.input_dir, "ppi_interactions_string.tsv"
+                config.input_dir, GENE_INTERACTIONS_FILE_PATH
             ),
             gene_to_idx=config.gene_to_idx,
         )

@@ -20,15 +20,18 @@ pip install .
 ## Antibiotic resistance prediction
 To train the GeneBac model for antibiotic resistance prediction, run:
 ```bash
-python deep_bac/train_gene_pheno.py --input-dir <input_dir> --output-dir <output_dir> 
+python deep_bac/train_gene_pheno.py --regression --input-dir <input_dir> --output-dir <output_dir> 
 ```
-We provide a processed [CRyPTIC _Mycobacterium Tuberculosis_](insert_link) dataset of `12,460` strains for training and evaluation on 
-[Google drive](insert_link) (5 GB). The folder contains processed DNA sequences with variants integrated into the sequence as well as 
+For other arguments like `batch size` etc., see `deep_bac/argparser.py` or run `python deep_bac/train_gene_pheno.py -h`. 
+We provide a processed [CRyPTIC _Mycobacterium Tuberculosis_](http://ftp.ebi.ac.uk/pub/databases/cryptic/release_june2022/reproducibility/data_tables/cryptic-analysis-group/) dataset of `12,460` strains for training and evaluation on 
+[Google drive](https://drive.google.com/file/d/1b8CgpIhaVQfyxqA6D3z05mNqsHeJW5T0/view?usp=sharing) (6.7 GB). The folder contains processed DNA sequences with variants integrated into the sequence as well as 
  training, test and cross-validation splits.
+
+All the training were done with CUDA 10.2 on a single V100 or A100 GPU and takes less then 12 hours to train.
 
 To evaluate the GeneBac model for antibiotic resistance prediction, run:
 ```bash
-python deep_bac/train_gene_pheno.py --test --input-dir <input_dir> --output-dir <output_dir> --ckpt-path <path_to_the_trained_model_checkpoint>
+python deep_bac/train_gene_pheno.py --test --regression --input-dir <input_dir> --output-dir <output_dir> --ckpt-path <path_to_the_trained_model_checkpoint>
 ```
 
 ## Variant effect scoring
@@ -62,7 +65,7 @@ To train the GeneBac model for gene expression prediction, run:
 python deep_bac/train_gene_expr.py --input-dir <input_dir> --output-dir <output_dir> ...
 ```
 We provide a processed gene expression dataset of `396` _Pseudomonas aeruginosa_ strains 
-on [Google drive](insert_link_here), where each gene in a strain is a separate example. 
+on [Google drive](https://drive.google.com/file/d/1ZAzapi9C07E81spqxZBCEjATIJevEaor/view?usp=sharing) (220 MB), where each gene in a strain is a separate example. 
 The folder contains processed DNA sequences with variants integrated into the sequence as well as 
  training, validation and test splits.
 
@@ -77,6 +80,8 @@ Here, the `<input-dir>` can be the same as the one used for antibiotic resistanc
 ## Strain clustering
 
 ## Checkpoints
+We provide trained model checkpoints for antibiotic resistance prediction on the CRyPTIC _Mycobacterium tuberculosis_ dataset
+and gene expression prediction on the _Pseudomonas aeruginosa_ dataset. The checkpoints can be found in `files/checkpoints/`.
 
 ## Citations
 If you find GeneBac useful in your work, please cite our paper:

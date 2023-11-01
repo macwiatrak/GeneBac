@@ -56,8 +56,8 @@ def run(
     num_workers: int = None,
     use_drug_specific_genes: Literal[
         "cryptic",
-        "PA_GWAS_top_3",
-        "PA_GWAS_top_5",
+        "PA_small",
+        "PA_medium",
     ] = "cryptic",
 ):
     if not os.path.exists(output_dir):
