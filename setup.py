@@ -2,6 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="deep_bac",
+    version="0.1.0",
     packages=find_packages(),
     package_data={
         "gene_set_discovery": ["py.typed", "**/*.json", "**/*.yaml"],
@@ -27,6 +28,7 @@ setup(
         "tensorboardX~=2.5.1",
         "torch~=1.13.1",
         "torchmetrics~=0.11.0",
+        "torch_geometric~=2.4.0",
         "tqdm~=4.64.1",
         "transformers~=4.25.1",
         "typed-argument-parser~=1.7.2",
