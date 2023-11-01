@@ -2,7 +2,6 @@ from typing import Literal
 
 from tap import Tap
 
-# INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
 INPUT_DIR = "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data/"
 
 
@@ -14,7 +13,7 @@ class DeepGeneBacArgumentParser(Tap):
     input_dir: str = INPUT_DIR
     output_dir: str = "/tmp/cryptic-model-output/"
     # model arguments
-    batch_size: int = 1
+    batch_size: int = 16
     gene_encoder_type: Literal[
         "gene_bac",
         "MD-CNN",
@@ -35,12 +34,12 @@ class DeepGeneBacArgumentParser(Tap):
     reverse_complement_prob: float = 0.0
     num_workers: int = None
     # trainer arguments
-    max_epochs: int = 100
-    early_stopping_patience: int = 100
+    max_epochs: int = 500
+    early_stopping_patience: int = 50
     test: bool = False
     test_after_train: bool = False
     ckpt_path: str = None
-    random_state: int = 42
+    random_state: int = 30
     warmup_proportion: float = 0.1
     gradient_clip_val: float = 1.0
     accumulate_grad_batches: int = 1
