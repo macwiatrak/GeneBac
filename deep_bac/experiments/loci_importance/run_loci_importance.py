@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Literal
+from typing import Literal, List
 
 import torch
 from captum.attr import DeepLift
@@ -15,15 +15,24 @@ from deep_bac.modelling.metrics import (
     PA_DRUG_TO_LABEL_IDX,
 )
 from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
-from deep_bac.utils import get_selected_genes
+from deep_bac.utils import get_selected_genes, load_trained_pheno_model
 
 logging.basicConfig(level=logging.INFO)
 
 
-def merge_itrs(*itrs):
-    for itr in itrs:
-        for v in itr:
-            yield v
+def get_drug_loci_imp(importances: List[torch.Tensor], normalise=False):
+    mean_arr = []
+    for drug_imp in importances:
+        drug_imp = drug_imp[drug_imp.sum(dim=1) != 0]
+        mean_drug_imp = drug_imp.mean(dim=0)
+
+        if normalise:
+            mean_drug_imp = (
+                mean_drug_imp - mean_drug_imp.min()
+            ) / mean_drug_imp.max()
+
+        mean_arr.append(mean_drug_imp)
+    return torch.stack(mean_arr)
 
 
 def run(
@@ -39,6 +48,7 @@ def run(
         "PA_small",
         "PA_medium",
     ] = "cryptic",
+    compute_agg_importance: bool = True,
 ):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -51,11 +61,10 @@ def run(
     config = torch.load(ckpt_path, map_location="cpu")["hyper_parameters"][
         "config"
     ]
-    # config.input_dir = (
-    #     "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
-    #     # "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
-    # )
-    model = DeepBacGenePheno.load_from_checkpoint(ckpt_path, config=config)
+    model = load_trained_pheno_model(
+        ckpt_path=ckpt_path,
+        gene_interactions_file_dir=input_dir,
+    )
     model.to(device)
     model.eval()
 
@@ -86,15 +95,14 @@ def run(
 
     deep_lift = DeepLift(model)
 
+    agg_drug_loci_imps = []
     for drug, drug_idx in PA_DRUG_TO_LABEL_IDX.items():
         drug_loci_importance_abs_sum = []
-        drug_loci_importance_sum = []
         # skip PAS drug as we have too few samples anyway
         if drug == "PAS":
             continue
 
-        dataloader = merge_itrs(data.train_dataloader, data.test_dataloader)
-        for idx, batch in enumerate(tqdm(dataloader)):
+        for idx, batch in enumerate(tqdm(data.test_dataloader)):
             labels = batch.labels[:, drug_idx].cpu()
             label_mask = torch.where(
                 labels != -100.0, torch.ones_like(labels), 0
@@ -110,23 +118,21 @@ def run(
                 .cpu()
             )
 
-            attrs_sum = attrs.sum(dim=-2).sum(dim=-1)
-            attrs_sum = attrs_sum * label_mask
-            drug_loci_importance_sum.append(attrs_sum)
-
             attrs_abs_sum = attrs.abs().sum(dim=-2).sum(dim=-1)
             attrs_abs_sum = attrs_abs_sum * label_mask
             drug_loci_importance_abs_sum.append(attrs_abs_sum)
 
+        drug_loci_importance_abs_sum = torch.cat(drug_loci_importance_abs_sum)
         torch.save(
-            torch.cat(drug_loci_importance_sum),
-            os.path.join(output_dir, f"{drug}_loci_importance_sum.pt"),
-        )
-        torch.save(
-            torch.cat(drug_loci_importance_abs_sum),
+            drug_loci_importance_abs_sum,
             os.path.join(output_dir, f"{drug}_loci_importance_abs_sum.pt"),
         )
         logging.info(f"Finished processing and saving data for drug: {drug}")
+        if compute_agg_importance:
+            agg_drug_loci_imps.append(drug_loci_importance_abs_sum)
+
+    agg_mean_loci_imps = get_drug_loci_imp(agg_drug_loci_imps, normalise=True)
+    torch.save(agg_mean_loci_imps, "agg_mean_loci_importance.pt")
 
 
 class ArgumentParser(Tap):
@@ -134,13 +140,9 @@ class ArgumentParser(Tap):
         super().__init__(underscores_to_dashes=True)
 
     # file paths for loading data
-    input_dir: str = (
-        "/Users/maciejwiatrak/Desktop/bacterial_genomics/pseudomonas/mic/"
-    )
-    ckpt_path: str = (
-        "/Users/maciejwiatrak/Downloads/epoch=497-train_r2=0.4628.ckpt"
-    )
-    output_dir: str = "/tmp/loci-importance-pa/"
+    input_dir: str
+    ckpt_path: str
+    output_dir: str
     shift_max: int = 0
     pad_value: float = 0.25
     reverse_complement_prob: float = 0.0

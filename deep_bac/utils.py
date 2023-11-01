@@ -199,7 +199,7 @@ def fetch_gene_encoder_weights(ckpt_path: str) -> Dict[str, torch.Tensor]:
 
 def load_trained_pheno_model(
     ckpt_path: str,
-    input_dir: str,
+    gene_interactions_file_dir: str = "files/gene_interactions/mtb/",
 ) -> DeepBacGenePheno:
     """This is a function which fixes the issue
     with loading a trained model with different path
@@ -207,6 +207,6 @@ def load_trained_pheno_model(
     config = torch.load(ckpt_path, map_location="cpu")["hyper_parameters"][
         "config"
     ]
-    config.input_dir = input_dir
+    config.input_dir = gene_interactions_file_dir
     model = DeepBacGenePheno.load_from_checkpoint(ckpt_path, config=config)
     return model

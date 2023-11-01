@@ -100,7 +100,7 @@ def run(
     if test:
         model = load_trained_pheno_model(
             ckpt_path=ckpt_path,
-            input_dir=input_dir,
+            gene_interactions_file_dir=input_dir,
         )
 
         # get thresholds only if the problem is binary
