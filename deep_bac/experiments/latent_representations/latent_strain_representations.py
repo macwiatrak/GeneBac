@@ -12,7 +12,7 @@ from tqdm import tqdm
 from deep_bac.argparser import DeepGeneBacArgumentParser
 from deep_bac.data_preprocessing.data_reader import get_gene_pheno_data
 from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
-from deep_bac.utils import get_selected_genes
+from deep_bac.utils import get_selected_genes, load_trained_pheno_model
 
 logging.basicConfig(level=logging.INFO)
 
@@ -24,6 +24,7 @@ def collect_strain_reprs(model: DeepBacGenePheno, dataloader: DataLoader):
             logits, strain_embeddings = model(
                 batch.input_tensor.to(model.device),
                 batch.tss_indexes.to(model.device),
+                return_strain_reprs=True,
             )
             out["strain_id"] += batch.strain_ids  # one list
             out["logits"] += [
@@ -44,9 +45,8 @@ def run(
     ckpt_path: str,
     input_dir: str,
     output_dir: str,
-    use_drug_idx: int = None,
     max_gene_length: int = 2560,
-    shift_max: int = 3,
+    shift_max: int = 0,
     pad_value: float = 0.25,
     reverse_complement_prob: float = 0.0,
     num_workers: int = None,
@@ -60,7 +60,10 @@ def run(
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Using device {device}")
-    model = DeepBacGenePheno.load_from_checkpoint(ckpt_path).to(device)
+    model = load_trained_pheno_model(
+        ckpt_path=ckpt_path,
+        gene_interactions_file_dir=input_dir,
+    )
     model.to(device)
     model.eval()
 
@@ -78,11 +81,11 @@ def run(
             input_dir, "phenotype_labels_with_binary_labels.parquet"
         ),
         train_val_test_split_indices_file_path=os.path.join(
-            input_dir, "train_val_test_split_unq_ids.json"
+            input_dir,
+            "train_test_cv_split_unq_ids.json",
         ),
         max_gene_length=max_gene_length,
         regression=model.config.regression,
-        use_drug_idx=use_drug_idx,
         batch_size=batch_size,
         shift_max=shift_max,
         pad_value=pad_value,
@@ -92,12 +95,6 @@ def run(
         test=test,
     )
     logging.info("Finished loading data")
-
-    val_df = collect_strain_reprs(model, data.val_dataloader)
-    val_df.to_parquet(
-        os.path.join(output_dir, "val_strain_representations.parquet")
-    )
-    logging.info("Finished saving val data")
 
     if test:
         test_df = collect_strain_reprs(model, data.test_dataloader)
@@ -123,9 +120,7 @@ def main(args):
         pad_value=args.pad_value,
         reverse_complement_prob=args.reverse_complement_prob,
         num_workers=args.num_workers,
-        test=args.test,
         ckpt_path=args.ckpt_path,
-        use_drug_idx=args.use_drug_idx,
         use_drug_specific_genes=args.use_drug_specific_genes,
         batch_size=args.batch_size,
     )

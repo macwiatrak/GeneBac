@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 
 import numpy as np
 import pytorch_lightning as pl
@@ -54,7 +54,8 @@ class DeepBacGenePheno(pl.LightningModule):
         self,
         batch_genes_tensor: torch.Tensor,
         tss_indexes: torch.Tensor = None,
-    ) -> torch.Tensor:
+        return_strain_reprs: bool = False,
+    ) -> Optional[torch.Tensor]:
         # x: (batch_size, n_genes, in_channels, seq_length)
         batch_size, n_genes, n_channels, seq_length = batch_genes_tensor.shape
 
@@ -87,6 +88,8 @@ class DeepBacGenePheno(pl.LightningModule):
             self.dropout(self.activation_fn(gene_encodings))
         )
         logits = self.decoder(strain_encodings)
+        if return_strain_reprs:
+            return logits, strain_encodings
         return logits
 
     def training_step(

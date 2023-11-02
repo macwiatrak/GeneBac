@@ -8,7 +8,27 @@ GeneBac can also be used for other tasks, including variant effect scoring, gene
 
 This repository contains the training and code for the GeneBac model described in "[Sequence-based modelling of bacterial genomes enables accurate antibiotic resistance prediction](input_text)".
 
-## Installation
+<details open><summary><b>Table of contents</b></summary>
+
+- [Installation](#installation)
+- [Antibiotic Resistance Prediction](#abr)
+  - [Training](#abr-training)
+  - [Evaluation](#abr-evaluation)
+- [Variant Effect Scoring](#variant-effect-scoring)
+  - [Computing variant effect size for a single variant](#variant-effect-scoring-single-var)
+  - [Computing variant effect size for a batch of variants](#variant-effect-scoring-batch-vars)
+- [Gene Expression Prediction](#gene-expression-prediction)
+  - [Training](#gene-expression-prediction-training)
+  - [Evaluation](#gene-expression-prediction-evaluation)
+- [Resistant Genes Identification](#resistant-genes-identification)
+- [Strain Clustering](#strain-clustering)
+- [Checkpoints](#checkpoints)
+- [Citations](#citations)
+- [License](#license)
+</details>
+
+
+## Installation <a name="installation"></a>
 
 GeneBac is implemented in Python `3.9`. To setup with the repo with all dependencies, clone the repository locally and create
 an environment, for example with `virtualenwrapper` or `conda`. To install the dependencies, navigate to the directory 
@@ -17,7 +37,9 @@ of the repository and run:
 pip install .
 ```
 
-## Antibiotic resistance prediction
+## Antibiotic resistance prediction <a name="abr"></a>
+
+### Training <a name="abr-training"></a>
 To train the GeneBac model for antibiotic resistance prediction, run:
 ```bash
 python deep_bac/train_gene_pheno.py \
@@ -32,6 +54,7 @@ We provide a processed [CRyPTIC _Mycobacterium Tuberculosis_](http://ftp.ebi.ac.
 
 All the training were done with CUDA 10.2 on a single V100 or A100 GPU and takes less then 12 hours to train.
 
+### Evaluation <a name="abr-evaluation"></a>
 To evaluate the GeneBac model for antibiotic resistance prediction, run:
 ```bash
 python deep_bac/train_gene_pheno.py \ 
@@ -42,9 +65,10 @@ python deep_bac/train_gene_pheno.py \
   --ckpt-path <path_to_the_trained_model_checkpoint>
 ```
 
-## Variant effect scoring
-To compute variant effect scores for a single variant, run:
+## Variant effect scoring <a name="variant-effect-scoring"></a>
 
+### Computing variant effect size for a single variant <a name="variant-effect-scoring-single-var"></a>
+To compute variant effect scores for a single variant, run:
 ```bash
 import ...
 
@@ -64,13 +88,18 @@ variant_effect_size = compute_variant_effect_size(
     end_idx=<end_idx>
 )
 ```
+
+### Computing variant effect size for a batch of variants <a name="variant-effect-scoring-batch-vars"></a>
 It is also possible to compute variant effect scores for a batch of variants. 
 To do it you firstly need to create a file with variants. An example file is provided in `files/variants.tsv`.
 Then, run:
 ```bash
 python deep_bac/experiments/variant_scoring/run_ism.py ...
 ```
-## Gene Expression prediction
+## Gene Expression prediction <a name="gene-expression-prediction"></a>
+
+### Training <a name="gene-expression-prediction-training"></a>
+
 To train the GeneBac model for gene expression prediction, run:
 ```bash
 python deep_bac/train_gene_expr.py \
@@ -86,6 +115,7 @@ on [Google drive](https://drive.google.com/file/d/1ZAzapi9C07E81spqxZBCEjATIJevE
 The folder contains processed DNA sequences with variants integrated into the sequence as well as 
  training, validation and test splits.
 
+### Evaluation <a name="gene-expression-prediction-evaluation"></a>
 To evaluate the model run:
 ```bash
 python deep_bac/train_gene_expr.py \
@@ -93,31 +123,41 @@ python deep_bac/train_gene_expr.py \
   --output-dir <output_dir> \
   --batch-size 256 \
   --monitor-metric val_r2 \
-  --ckpt-path <ckpt_path_to_the_trained_model> \
+  --ckpt-path <path_to_the_trained_model_checkpoint> \
   --test
 ```
 
-## Resistant genes identification
+## Resistant genes identification <a name="resistant-genes-identification"></a>
 GeneBac can also be used to identify genes that are associated with antibiotic resistance to particular drugs.
 We compute the association using the [DeepLift](https://arxiv.org/abs/1704.02685) algorithm. To compute the gene-drug scores
 on a test set using a trained model, run:
 ```bash
 python deep_bac/experiments/loci_importance/run_loci_importance.py \
-  --input-dir /Users/maciejwiatrak/Downloads/input_data_antibiotic_resistance_prediction_mtb_cryptic/  \
-  --output-dir /tmp/ \
-  --ckpt-path /Users/maciejwiatrak/Downloads/epoch=297-train_r2=0.4732.ckpt
+  --input-dir <input_dir>  \
+  --output-dir <output_dir> \
+  --ckpt-path <path_to_the_trained_model_checkpoint>
 ```
 Here, the `<input-dir>` can be the same as the one used for antibiotic resistance prediction.
-## Strain clustering
 
-## Checkpoints
+## Strain clustering <a name="strain-clustering"></a>
+To cluster strains, we compute the strain embeddings using a trained GeneBac model.
+The embeddings can be then used for visualisation in two dimensions using a [tSNE](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html) 
+algorithm. To get the embeddings, run:
+```bash
+python deep_bac/experiments/latent_representations/latent_strain_representations.py
+  --input-dir <input_dir> \
+  --output-dir <output_dir> \
+  --ckpt-path <path_to_the_trained_model_checkpoint>
+```
+
+## Checkpoints <a name="checkpoints"></a>
 We provide trained model checkpoints for antibiotic resistance prediction on the CRyPTIC _Mycobacterium tuberculosis_ dataset
 and gene expression prediction on the _Pseudomonas aeruginosa_ dataset. The checkpoints can be found in `files/checkpoints/`.
 
-## Citations
+## Citations <a name="citations"></a>
 If you find GeneBac useful in your work, please cite our paper:
 ```bibtex
 ```
 
-## License
+## License <a name="license"></a>
 GeneBac is licensed under the [MIT License](https://opensource.org/license/mit/).
