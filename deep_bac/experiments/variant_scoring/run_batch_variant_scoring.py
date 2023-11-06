@@ -11,13 +11,13 @@ from deep_bac.experiments.variant_scoring.variant_scoring import (
     batch_samples_w_variant,
 )
 from deep_bac.modelling.metrics import MTB_DRUG_TO_LABEL_IDX
-from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
+from deep_bac.utils import load_trained_pheno_model
 
 
 def run(
     ckpt_path: str,
     output_dir: str,
-    variant_df_path: str,
+    variants_file_path: str,
     reference_gene_data_df_path: str,
     shift_max: int = 0,
     pad_value: float = 0.25,
@@ -27,15 +27,14 @@ def run(
         os.makedirs(output_dir)
 
     reference_gene_data_df = pd.read_parquet(
-        reference_gene_data_df_path
+        reference_gene_data_df_path,
     ).set_index("gene")
     config = torch.load(ckpt_path, map_location="cpu")["hyper_parameters"][
         "config"
     ]
-    config.input_dir = (
-        "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/data"
+    model = load_trained_pheno_model(
+        ckpt_path=ckpt_path,
     )
-    model = DeepBacGenePheno.load_from_checkpoint(ckpt_path, config=config)
     model.eval()
 
     gene_to_idx = model.config.gene_to_idx
@@ -62,17 +61,17 @@ def run(
         )
 
     # get variant scores
-    variant_df = pd.read_parquet(variant_df_path)
+    variants_df = pd.read_parquet(variants_file_path)
     # batch data
     batches = batch_samples_w_variant(
-        variant_df=variant_df,
+        variant_df=variants_df,
         genes=list(gene_to_idx.keys()),
         reference_gene_data_df=reference_gene_data_df,
         max_gene_length=config.max_gene_length,
         shift_max=shift_max,
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
-        batch_size=64,  # config.batch_size,
+        batch_size=config.batch_size,
     )
 
     var_scores = []
@@ -85,18 +84,18 @@ def run(
             var_scores.append(scores - ref_scores)
 
     var_scores = [item.numpy() for item in torch.cat(var_scores, dim=0)]
-    variant_df["var_scores"] = var_scores
-    variant_df["var_score"] = variant_df.apply(
+    variants_df["var_scores"] = var_scores
+    variants_df["var_score"] = variants_df.apply(
         lambda row: row["var_scores"][MTB_DRUG_TO_LABEL_IDX[row["drug"]]],
         axis=1,
     )
     # drop redundant column
-    variant_df = variant_df.drop(columns=["var_scores"])
+    variants_df = variants_df.drop(columns=["var_scores"])
 
-    variant_df.to_parquet(
+    variants_df.to_parquet(
         os.path.join(
             output_dir,
-            "variants_who_cat_with_scores_genebac_regression.parquet",
+            "variants_scores.parquet",
         )
     )
 
@@ -106,16 +105,10 @@ class VariantScoringArgumentParser(Tap):
         super().__init__(underscores_to_dashes=True)
 
     # file paths for loading data
-    ckpt_path: str = "/Users/maciejwiatrak/Downloads/epoch=248-train_r2=0.4890_20810503 (1).ckpt"
-    output_dir: str = "/tmp/ism-sample/"
-    variant_df_path: str = (
-        "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
-        "data/who_cat_mutations_dna_seqs_100prom.parquet"
-    )
-    reference_gene_data_df_path: str = (
-        "/Users/maciejwiatrak/Desktop/bacterial_genomics/cryptic/"
-        "data/reference_gene_data.parquet"
-    )
+    ckpt_path: str
+    output_dir: str
+    reference_gene_data_df_path: str = "files/reference_gene_data_mtb.parquet"
+    variants_file_path: str = "files/example_variants.parquet"
     shift_max: int = 0
     pad_value: float = 0.25
     reverse_complement_prob: float = 0.0
@@ -127,7 +120,7 @@ def main(args):
     run(
         ckpt_path=args.ckpt_path,
         output_dir=args.output_dir,
-        variant_df_path=args.variant_df_path,
+        variants_file_path=args.variants_file_path,
         reference_gene_data_df_path=args.reference_gene_data_df_path,
         shift_max=args.shift_max,
         pad_value=args.pad_value,

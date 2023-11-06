@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from deep_bac.data_preprocessing.data_types import BacInputSample
 from deep_bac.data_preprocessing.dataset import transform_dna_seq
-from deep_bac.experiments.variant_scoring.run_variant_scoring_who_cat import (
+from deep_bac.experiments.variant_scoring.run_batch_variant_scoring import (
     VariantScoringArgumentParser,
 )
 from deep_bac.experiments.variant_scoring.variant_scoring import get_ref_batch

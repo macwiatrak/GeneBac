@@ -91,11 +91,18 @@ variant_effect_size = compute_variant_effect_size(
 
 ### Computing variant effect size for a batch of variants <a name="variant-effect-scoring-batch-vars"></a>
 It is also possible to compute variant effect scores for a batch of variants. 
-To do it you firstly need to create a file with variants. An example file is provided in `files/variants.tsv`.
+To do it you firstly need to create a file with variants. An example file is provided in 
+`files/example_variants.parquet`.
 Then, run:
 ```bash
-python deep_bac/experiments/variant_scoring/run_ism.py ...
+python deep_bac/experiments/variant_scoring/run_batch_variant_scoring.py \
+  --output-dir <output_dir> \
+  --ckpt-path <path_to_the_trained_model_checkpoint> \
+  --variants-file-path <path_to_the_variants_file_in_parquet_format>
 ```
+One can use the trained MTB model checkpoint provided in `files/checkpoints/` and the example variants file provided in `files/example_variants.parquet`
+to compute the variant effect scores for the variants in the example file.
+
 ## Gene Expression prediction <a name="gene-expression-prediction"></a>
 
 ### Training <a name="gene-expression-prediction-training"></a>
