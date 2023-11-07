@@ -11,7 +11,7 @@ class DeepGeneBacConfig:
         "gene_bac",
         "MD-CNN",
     ] = "gene_bac"
-    graph_model_type: Literal["transformer", "dense", "GAT", "GCN"] = "GAT"
+    graph_model_type: Literal["transformer", "GAT", "GCN"] = "GAT"
     regression: bool = False
     lr: float = 0.001
     batch_size: int = 1

@@ -71,16 +71,6 @@ def get_genes_to_strain_model(
             n_heads=config.n_heads,
         )
 
-    if config.graph_model_type == "dense":
-        return nn.Sequential(
-            Flatten(),
-            DenseLayer(
-                in_features=config.n_gene_bottleneck_layer * config.n_genes,
-                out_features=config.n_gene_bottleneck_layer,
-                layer_norm=True,
-            ),
-        )
-
     if config.graph_model_type == "GAT" or config.graph_model_type == "GCN":
         edge_indices, edge_features = get_edge_data(
             edge_file_path=os.path.join(
