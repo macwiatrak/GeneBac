@@ -209,4 +209,5 @@ def load_trained_pheno_model(
     ]
     config.input_dir = gene_interactions_file_dir
     model = DeepBacGenePheno.load_from_checkpoint(ckpt_path, config=config)
+    model.eval()
     return model

@@ -66,7 +66,6 @@ def run(
         gene_interactions_file_dir=input_dir,
     )
     model.to(device)
-    model.eval()
 
     data = get_gene_pheno_data(
         input_df_file_path=os.path.join(

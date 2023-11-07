@@ -65,7 +65,6 @@ def run(
         gene_interactions_file_dir=input_dir,
     )
     model.to(device)
-    model.eval()
 
     selected_genes = get_selected_genes(use_drug_specific_genes)
     logging.info(f"Selected genes: {selected_genes}")

@@ -4,7 +4,7 @@ import torch
 from pytorch_lightning.utilities.seed import seed_everything
 
 from deep_bac.experiments.variant_scoring.perform_ism import perform_ism
-from deep_bac.experiments.variant_scoring.run_variant_scoring_who_cat import (
+from deep_bac.experiments.variant_scoring.run_batch_variant_scoring import (
     VariantScoringArgumentParser,
 )
 from deep_bac.utils import DRUG_SPECIFIC_GENES_DICT
