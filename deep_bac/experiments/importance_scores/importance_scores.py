@@ -65,7 +65,7 @@ def compute_importance_scores(
 def load_trained_model(ckpt_path: str) -> DeepBacGeneExpr:
     config = DeepGeneBacConfig(
         gene_encoder_type="gene_bac",
-        graph_model_type="dense",
+        graph_model_type="GAT",
         n_gene_bottleneck_layer=64,
         n_output=1,
         random_state=42,

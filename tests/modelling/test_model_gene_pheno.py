@@ -29,7 +29,7 @@ def test_model_gene_pheno_steps():
 
     config = DeepGeneBacConfig(
         gene_encoder_type="gene_bac",
-        graph_model_type="dense",
+        graph_model_type="GAT",
         regression=True,
         n_gene_bottleneck_layer=n_bottleneck_layer,
         n_init_filters=n_filters,
@@ -73,7 +73,7 @@ def test_model_gene_pheno_train_fake_data(tmpdir):
 
     config = DeepGeneBacConfig(
         gene_encoder_type="gene_bac",
-        graph_model_type="dense",
+        graph_model_type="GAT",
         lr=0.001,
         batch_size=batch_size,
         regression=regression,
@@ -145,7 +145,7 @@ def test_model_gene_pheno_train_real_data(tmpdir):
 
     config = DeepGeneBacConfig(
         gene_encoder_type="gene_bac",
-        graph_model_type="dense",  # try GAT as well
+        graph_model_type="GAT",
         pos_encoder_type="fixed",
         lr=0.001,
         batch_size=batch_size,
@@ -207,7 +207,7 @@ def test_model_gene_pheno_test_drug_thresh_real_data(tmpdir):
 
     config = DeepGeneBacConfig(
         gene_encoder_type="gene_bac",
-        graph_model_type="dense",
+        graph_model_type="GAT",
         pos_encoder_type="fixed",
         lr=0.001,
         batch_size=batch_size,

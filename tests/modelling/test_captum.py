@@ -79,7 +79,7 @@ def test_model_gene_reg_captum():
 
     config = DeepGeneBacConfig(
         gene_encoder_type="gene_bac",
-        graph_model_type="dense",
+        graph_model_type="GAT",
         regression=False,
         n_gene_bottleneck_layer=n_bottleneck_layer,
         n_output=n_output,
