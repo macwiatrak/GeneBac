@@ -22,6 +22,7 @@ def run(
     shift_max: int = 0,
     pad_value: float = 0.25,
     reverse_complement_prob: float = 0.0,
+    prom_seq_len: int = 100,
 ):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -72,6 +73,7 @@ def run(
         pad_value=pad_value,
         reverse_complement_prob=reverse_complement_prob,
         batch_size=config.batch_size,
+        prom_seq_len=prom_seq_len,
     )
 
     var_scores = []
