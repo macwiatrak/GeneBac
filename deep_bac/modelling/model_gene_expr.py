@@ -49,9 +49,6 @@ class DeepBacGeneExpr(pl.LightningModule):
     def forward(
         self, batch_genes_tensor: torch.Tensor, tss_indexes: torch.Tensor = None
     ) -> Tuple[torch.Tensor, torch.Tensor]:
-        if self.config.gene_encoder_type == "simple_cnn":
-            logits = self.gene_encoder(batch_genes_tensor)
-            return logits.view(-1)
         # encode each gene
         gene_encodings = self.activation_fn(
             self.gene_encoder(batch_genes_tensor)

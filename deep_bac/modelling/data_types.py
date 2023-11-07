@@ -10,10 +10,8 @@ class DeepGeneBacConfig:
     gene_encoder_type: Literal[
         "gene_bac",
         "MD-CNN",
-        "xpresso",
-        "simple_cnn",
     ] = "gene_bac"
-    graph_model_type: Literal["transformer", "dense", "GAT", "GCN"] = "GAT"
+    graph_model_type: Literal["transformer", "GAT", "GCN"] = "GAT"
     regression: bool = False
     lr: float = 0.001
     batch_size: int = 1
