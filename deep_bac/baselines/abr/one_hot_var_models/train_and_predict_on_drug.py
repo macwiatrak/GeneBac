@@ -119,8 +119,6 @@ def main():
         ),
         params={
             "alpha": [0.5, 1.0],
-            # "C": [1.0],
-            # "C": [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0],
         },
         max_iter=100,
         penalty="elasticnet",

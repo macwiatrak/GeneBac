@@ -108,10 +108,7 @@ def main():
                 INPUT_DIR, "phenotype_labels_with_binary_labels.parquet"
             )
         ),
-        params={
-            # "C": [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0],
-            # "class_weight": [None, "balanced"],
-        },
+        params={},
         penalty=None,
         max_iter=100,
         random_state=42,

@@ -7,11 +7,8 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from deep_bac.baselines.abr.md_cnn import MDCNN
-from deep_bac.baselines.expression.simple_cnn import SimpleCNN
 from deep_bac.modelling.data_types import DeepGeneBacConfig
 from deep_bac.modelling.metrics import compute_drug_thresholds
-from deep_bac.modelling.modules.conv_transformer import ConvTransformerEncoder
-from deep_bac.modelling.modules.enformer_like_encoder import EnformerLikeEncoder
 from deep_bac.modelling.modules.gnn import GNNModel, get_edge_data
 from deep_bac.modelling.modules.graph_transformer import GraphTransformer
 from deep_bac.modelling.modules.layers import DenseLayer
@@ -44,21 +41,9 @@ def remove_ignore_index(
 
 def get_gene_encoder(config: DeepGeneBacConfig):
     """Get the gene encoder"""
-    if config.gene_encoder_type == "conv_transformer":
-        return ConvTransformerEncoder(
-            n_bottleneck_layer=config.n_gene_bottleneck_layer,
-            n_filters=config.n_init_filters,
-            n_transformer_heads=config.n_heads,
-        )
 
     if config.gene_encoder_type == "gene_bac":
         return GeneBacEncoder(
-            n_filters_init=config.n_init_filters,
-            n_bottleneck_layer=config.n_gene_bottleneck_layer,
-        )
-
-    if config.gene_encoder_type == "enformer_like":
-        return EnformerLikeEncoder(
             n_filters_init=config.n_init_filters,
             n_bottleneck_layer=config.n_gene_bottleneck_layer,
         )
@@ -68,9 +53,6 @@ def get_gene_encoder(config: DeepGeneBacConfig):
             seq_length=config.n_genes * config.max_gene_length,
             n_output=config.n_output,
         )
-
-    if config.gene_encoder_type == "simple_cnn":
-        return SimpleCNN()
 
     raise ValueError(f"Unknown gene encoder type: {config.gene_encoder_type}")
 
