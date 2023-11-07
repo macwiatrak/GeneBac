@@ -204,6 +204,7 @@ def compute_variant_effect_size(
             torch.sigmoid(scores) if not model.config.regression else scores
         )
         scores -= ref_scores
+    scores = scores.squeeze(0).cpu().numpy()
 
     if drug is not None:
         if drug not in MTB_DRUG_TO_LABEL_IDX:
@@ -213,5 +214,5 @@ def compute_variant_effect_size(
             )
 
         drug_idx = MTB_DRUG_TO_LABEL_IDX[drug]
-        scores = scores[:, drug_idx]
+        scores = scores[drug_idx]
     return scores

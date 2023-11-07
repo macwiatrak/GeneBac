@@ -24,10 +24,10 @@ def main():
         model=model,
         reference_gene_data_df=ref_gene_data_df,
         gene="rpoB",
-        variant="a",
-        start_idx=100,
-        end_idx=101,
-        drug=None,  # if None, will return all drug scores
+        variant="g",
+        start_idx=1332,
+        end_idx=1333,
+        drug="RIF",  # if None, will return all drug scores
     )
 
 
