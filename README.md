@@ -112,6 +112,13 @@ python deep_bac/experiments/variant_scoring/run_batch_variant_scoring.py \
 One can use the trained MTB model checkpoint provided in `files/checkpoints/` and the example variants file provided in `files/example_variants.parquet`
 to compute the variant effect scores for the variants in the example file.
 
+We also provide a set of variants with variant effect size computed using trained GeneBac model on 
+_CRyPTIC Mycobacterium Tuberculosis_ dataset for:
+- variants present in [WHO Mycobacterium Tuberculosis Catalogue](https://www.who.int/publications-detail-redirect/9789240028173)
+- SNP variants exceeding a threshold of `0.1` variant effect size using _In Silico Mutagenesis_ (ISM) method
+- 
+in `files/variant_effect_scores/`.
+
 ## Gene Expression prediction <a name="gene-expression-prediction"></a>
 
 ### Training <a name="gene-expression-prediction-training"></a>
