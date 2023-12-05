@@ -20,6 +20,7 @@ from deep_bac.modelling.metrics import (
     REGRESSION_METRICS,
     PA_DRUG_TO_LABEL_IDX,
     PA_DRUG_TO_DRUG_CLASS,
+    MTB_DRUG_TO_DRUG_CLASS,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -66,9 +67,10 @@ def run(
     params = get_tuning_params(penalty, regression)
 
     output_metrics = []
+    test_preds_arr = []
     for drug, drug_idx in drug_to_idx.items():
         logging.info(f"Tuning and predicting for {drug} drug")
-        test_metrics = train_and_predict(
+        test_metrics, test_preds = train_and_predict(
             drug_idx=drug_idx,
             train_test_split_unq_ids_file_path=train_test_split_unq_ids_file_path,
             variant_matrix_input_dir=variant_matrix_input_dir,
@@ -82,13 +84,14 @@ def run(
         )
         logging.info(f"Test metrics for {drug} drug: {test_metrics}")
         output_metrics.append(test_metrics)
+        test_preds_arr.append(test_preds)
 
     output_dfs = [
         dict_metrics_to_df(
             test_metrics,
             drug,
             split="test",
-            drug_to_drug_class=PA_DRUG_TO_DRUG_CLASS,
+            drug_to_drug_class=MTB_DRUG_TO_DRUG_CLASS,  # PA_DRUG_TO_DRUG_CLASS,
         )
         for test_metrics, drug in zip(output_metrics, drug_to_idx.keys())
     ]
@@ -105,11 +108,14 @@ def run(
     }
     logging.info(f"Average test metrics: {avg_metrics}")
 
+    test_preds = np.stack(test_preds_arr, axis=1)
+    np.save(f"{output_dir}/test_preds_{penalty}_{random_state}.npy", test_preds)
+
 
 def main(args):
     run(
         output_dir=args.output_dir,
-        drug_to_idx=PA_DRUG_TO_LABEL_IDX,  # MTB_DRUG_TO_IDX,
+        drug_to_idx=MTB_DRUG_TO_IDX,  # PA_DRUG_TO_LABEL_IDX,
         train_test_split_unq_ids_file_path=args.train_test_split_file_path,
         variant_matrix_input_dir=args.variant_matrix_input_dir,
         df_unq_ids_labels_file_path=args.df_unq_ids_labels_file_path,

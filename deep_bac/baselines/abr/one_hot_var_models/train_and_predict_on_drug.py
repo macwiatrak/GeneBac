@@ -1,7 +1,8 @@
 import logging
 import os
-from typing import Dict, List, Literal
+from typing import Dict, List, Literal, Tuple, Any
 
+import numpy as np
 import pandas as pd
 import torch
 from pytorch_lightning.utilities.seed import seed_everything
@@ -31,7 +32,7 @@ def train_and_predict(
     random_state: int = 42,
     exclude_vars_not_in_train: bool = False,
     regression: bool = False,
-) -> Dict[str, float]:
+) -> Tuple[Dict[str, float], Any]:
     seed_everything(random_state)
     data_matrices = get_var_matrix_data(
         drug_idx=drug_idx,
@@ -102,7 +103,11 @@ def train_and_predict(
     metrics = {k: v.item() for k, v in metrics.items()}
     # add best params to save them
     metrics.update(best_params)
-    return metrics
+
+    # process the preds to have same number of samples across drugs
+    preds = np.ones(data_matrices.total_n_test_samples) * -100.0
+    preds[data_matrices.test_drug_indices] = test_pred
+    return metrics, preds
 
 
 def main():

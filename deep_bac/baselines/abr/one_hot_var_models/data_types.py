@@ -10,3 +10,5 @@ class DataVarMatrices:
     test_var_matrix: np.ndarray
     train_labels: np.ndarray
     test_labels: np.ndarray
+    test_drug_indices: np.ndarray = None
+    total_n_test_samples: int = None

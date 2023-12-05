@@ -83,6 +83,8 @@ def get_drug_var_matrices(
         test_var_matrix=test_var_matrix,
         train_labels=train_labels,
         test_labels=test_labels,
+        test_drug_indices=test_drug_indices,
+        total_n_test_samples=data.test_labels.shape[0],
     )
 
 
