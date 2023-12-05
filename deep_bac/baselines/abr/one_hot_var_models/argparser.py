@@ -16,14 +16,13 @@ class OneHotModelArgumentParser(Tap):
         INPUT_DIR, "phenotype_labels_with_binary_labels.parquet"
     )
     train_test_split_file_path: str = os.path.join(
-        INPUT_DIR,
-        "train_test_split_unq_ids_ablated_lineage3.json",  # "train_test_cv_split_unq_ids.json"
+        INPUT_DIR, "train_test_cv_split_unq_ids.json"
     )
     variant_matrix_input_dir: str = os.path.join(INPUT_DIR, "one-hot")
     output_dir: str = "/tmp/regression/"  # os.path.join(INPUT_DIR, "one-hot", "results", "binary")
     # model hyperparameters
     max_iter: int = 500
-    penalty: Literal["l1", "l2", "elasticnet"] = "l1"
+    penalty: Literal["l1", "l2", "elasticnet"] = "elasticnet"
     random_state: int = 42
     exclude_vars_not_in_train: bool = True
     regression: bool = True
