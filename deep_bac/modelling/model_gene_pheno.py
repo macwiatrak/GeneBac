@@ -84,9 +84,12 @@ class DeepBacGenePheno(pl.LightningModule):
         if tss_indexes is not None:
             gene_encodings = self.pos_encoder(gene_encodings, tss_indexes)
         # pass the genes through the graph encoder
-        strain_encodings = self.graph_model(
-            self.dropout(self.activation_fn(gene_encodings))
-        )
+        # strain_encodings = self.graph_model(
+        #     self.dropout(self.activation_fn(gene_encodings))
+        # )
+        strain_encodings = self.dropout(
+            self.activation_fn(gene_encodings)
+        ).mean(dim=1)
         logits = self.decoder(strain_encodings)
         if return_strain_reprs:
             return logits, strain_encodings
