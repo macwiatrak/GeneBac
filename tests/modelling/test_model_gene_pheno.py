@@ -84,6 +84,7 @@ def test_model_gene_pheno_train_fake_data(tmpdir):
         n_graph_layers=2,
         n_heads=2,
         max_gene_length=seq_length,
+        input_dir="../test_data/",
     )
 
     dataloader = get_test_gene_reg_dataloader(
@@ -115,7 +116,7 @@ def test_model_gene_pheno_train_fake_data(tmpdir):
 
 def test_model_gene_pheno_train_real_data(tmpdir):
     n_classes = 14
-    regression = False
+    regression = True
     n_bottleneck_layer = 64
     n_filters = 256
     max_epochs = 10
@@ -127,7 +128,7 @@ def test_model_gene_pheno_train_real_data(tmpdir):
         "../test_data/reference_gene_data.parquet"
     )
 
-    dataloader, gene_to_idx = get_gene_pheno_dataloader(
+    dataloader, _ = get_gene_pheno_dataloader(
         batch_size=batch_size,
         bac_genes_df_file_path="../test_data/sample_agg_variants.parquet",
         reference_gene_data_df=reference_gene_data_df,
@@ -142,6 +143,7 @@ def test_model_gene_pheno_train_real_data(tmpdir):
         num_workers=0,
         pin_memory=False,
     )
+    gene_to_idx = {gene: idx for idx, gene in enumerate(selected_genes)}
 
     config = DeepGeneBacConfig(
         gene_encoder_type="gene_bac",
