@@ -2,7 +2,6 @@ import logging
 import os
 from typing import Optional, Literal
 
-import torch
 from pytorch_lightning.utilities.seed import seed_everything
 
 from deep_bac.argparser import DeepGeneBacArgumentParser
@@ -12,7 +11,6 @@ from deep_bac.modelling.model_gene_pheno import DeepBacGenePheno
 from deep_bac.modelling.trainer import get_trainer
 from deep_bac.modelling.utils import (
     get_drug_thresholds,
-    GENE_INTERACTIONS_FILE_PATH,
 )
 from deep_bac.utils import (
     get_selected_genes,
