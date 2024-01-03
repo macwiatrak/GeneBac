@@ -183,8 +183,8 @@ If you find GeneBac useful in your work, please cite our paper:
   author = {Wiatrak, Maciej and Weimann, Aaron and Dinan, Adam M and Brbić, Maria and Floto, R. Andres},
   title={Sequence-based modelling of bacterial genomes enables accurate antibiotic resistance prediction},
   year={2024},
-  doi={10.1101/2020.12.15.422761},
-  url={https://www.biorxiv.org/content/10.1101/2020.12.15.422761v1},
+  doi={10.1101/2024.01.03.574022},
+  url={https://www.biorxiv.org/content/10.1101/2024.01.03.574022v1},
   journal={bioRxiv}
 }
 ```
