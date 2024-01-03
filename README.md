@@ -65,7 +65,7 @@ python deep_bac/train_gene_pheno.py \
   --ckpt-path <path_to_the_trained_model_checkpoint>
 ```
 
-## Variant effect scoring <a name="variant-effect-scoring"></a>
+## Variant effect scoring (In Silico Mutagenesis) <a name="variant-effect-scoring"></a>
 
 ### Computing variant effect size for a single variant <a name="variant-effect-scoring-single-var"></a>
 To compute variant effect scores for a single variant, run:
@@ -116,7 +116,6 @@ We also provide a set of variants with variant effect size computed using traine
 _CRyPTIC Mycobacterium Tuberculosis_ dataset for:
 - variants present in [WHO Mycobacterium Tuberculosis Catalogue](https://www.who.int/publications-detail-redirect/9789240028173)
 - SNP variants exceeding a threshold of `0.1` variant effect size using _In Silico Mutagenesis_ (ISM) method
-- 
 in `files/variant_effect_scores/`.
 
 ## Gene Expression prediction <a name="gene-expression-prediction"></a>
